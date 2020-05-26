@@ -1,0 +1,18 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+  <br>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">{{ product.ingredient_name }}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Price: {{product.ingredient_price}} pln/kg</h6>
+      <p class="card-text">Calory value : {{ product.ingredient_calval}} cal/100g<br>
+      Below we will try to display some nutrional values with chart.js, hopefully by the end of the month
+      </p>
+      <a href="#" class="card-link">Add to you mix</a>
+      <a href="#" class="card-link">do smth else</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

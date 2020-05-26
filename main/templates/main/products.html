@@ -1,0 +1,26 @@
+{% extends 'main/base.html' %}
+
+
+{% block content %}
+<br>
+{% load static %}
+    {% for prod in products %}
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row no-gutters">
+            <div class="col-md-4">
+              <img src="{% static prod.ingredient_image_src %}" class="card-img" alt="oatflakes">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">{{prod.ingredient_name}}</h5>
+                <p class="card-text">Calory value : {{ prod.ingredient_calval}} cal/100g<br>
+                Short description of this ingredient</p>
+                <p class="card-text"><small class="text-muted">Price: {{prod.ingredient_price}} pln/kg</small></p>
+                  <a href="#"><button type="button" class="btn btn-outline-success">Add to you mix</button></a>
+                  <a href="{{prod.ingredient_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+{% endblock %}

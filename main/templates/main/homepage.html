@@ -1,0 +1,21 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+    <h1>{{ greeting }}</h1>
+
+
+
+
+<button type="button" class="btn btn-primary show-toast">Show Toast</button>
+
+<script>
+    $(document).ready(function(){
+        $(".show-toast").click(function(){
+            $('.toast').toast('show');
+        });
+    });
+
+</script>
+
+
+{% endblock %}
