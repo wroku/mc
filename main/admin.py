@@ -3,6 +3,7 @@ from .models import Ingredient, Mix, Percentage
 from django.db import models
 # Register your models here.
 
+
 class IngredientAdmin(admin.ModelAdmin):
 
     fieldsets = [
@@ -12,5 +13,16 @@ class IngredientAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(Mix)
+class PercentageInline(admin.TabularInline):
+    model = Percentage
+    extra = 2
+
+
+class MixAdmin(admin.ModelAdmin):
+
+    fields = ('user', 'mix_name')
+    inlines = (PercentageInline,)
+
+
+admin.site.register(Mix, MixAdmin)
 admin.site.register(Ingredient, IngredientAdmin)

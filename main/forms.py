@@ -30,4 +30,5 @@ class NewUserForm(UserCreationForm):
 
 '''class MixForm(modelForm):
     mix_name = forms.CharField()
-    ingredients ='''
+    ingredients =
+'''
