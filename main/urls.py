@@ -27,4 +27,6 @@ urlpatterns = [
     path('logout/', views.logout_request, name='logout'),
     path('register/', views.register, name='register'),
     path('account/', views.account_details, name='account'),
+    path('api/data/', views.get_data, name='api-data'),
+    path('chartpage/', views.ChartView.as_view(), name='chart-page'),
 ]

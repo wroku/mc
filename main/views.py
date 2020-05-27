@@ -1,12 +1,27 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Ingredient
 from .forms import ContactForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm
+from django.views.generic import View
 # Create your views here.
+
+
+class ChartView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'main/chart.html', {})
+
+
+def get_data(request, *args, **kwargs):
+    data = {
+        'pushups': 150,
+        'pullups': 66,
+        'squats': 48
+    }
+    return JsonResponse(data)
 
 
 def homepage(request):
