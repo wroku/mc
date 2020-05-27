@@ -8,7 +8,8 @@ class IngredientAdmin(admin.ModelAdmin):
 
     fieldsets = [
         ('Name/category', {'fields': ['ingredient_name', 'ingredient_category']}),
-        ('Important Values', {'fields': ['ingredient_price', 'ingredient_calval']}),
+        ('Important Values', {'fields': ['ingredient_price', 'ingredient_calval',
+                                         'total_carbs', 'total_fat', 'total_proteins']}),
         ('Underlying magic', {'fields': ['ingredient_slug', "ingredient_image_src"]}),
     ]
 
