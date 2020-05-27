@@ -1,6 +1,7 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
+
 <div class="container">
   <br>
   <div class="card" style="width: 18rem;">
@@ -9,10 +10,51 @@
       <h6 class="card-subtitle mb-2 text-muted">Price: {{product.ingredient_price}} pln/kg</h6>
       <p class="card-text">Calory value : {{ product.ingredient_calval}} cal/100g<br>
       Below we will try to display some nutrional values with chart.js, hopefully by the end of the month
+        <canvas id="myChart" width="400" height="400"></canvas>
       </p>
       <a href="#" class="card-link">Add to you mix</a>
       <a href="#" class="card-link">do smth else</a>
     </div>
   </div>
 </div>
+<script>
+var ctx = document.getElementById('myChart').getContext('2d');
+var myChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Carbs', 'Fats', 'Proteins'],
+        datasets: [{
+            label: 'g/100g',
+            data: [{{product.total_carbs}}, {{product.total_fat}}, {{product.total_proteins}}],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+</script>
 {% endblock %}

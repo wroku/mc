@@ -4,16 +4,42 @@
     {% block jquery %}
 
     var endpoint = '/api/data/'
+    var defaultData = []
+    var labels = [];
     $.ajax({
          method: "GET",
          url: endpoint,
          success: function(data){
-            console.log(data)
-         },
+            labels = data.labels
+            defaultData = data.default
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'how many times',
+                    data: defaultData,
+                    }]
+                },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                                beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                })
+            },
          error: function(error_data){
             console.log(error_data)
          }
     })
+
+
+
 
     {% endblock %}
 </script>
@@ -23,6 +49,7 @@
 <div class="row">
     <div class="col-sm-12" >
         <h1>Hi chart</h1>
+        <canvas id="myChart" width="400" height="400"></canvas>
     </div>
 </div>
 

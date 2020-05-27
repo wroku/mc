@@ -16,10 +16,12 @@ class ChartView(View):
 
 
 def get_data(request, *args, **kwargs):
+    qs = Ingredient.objects
+    labels = ['pushups', 'pullups', 'squats']
+    default_items = [150, 66, 48]
     data = {
-        'pushups': 150,
-        'pullups': 66,
-        'squats': 48
+        'labels': labels,
+        'default': default_items,
     }
     return JsonResponse(data)
 
