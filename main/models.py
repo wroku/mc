@@ -7,39 +7,51 @@ from django.conf import settings
 User = settings.AUTH_USER_MODEL
 
 
+class FoodCategory(models.Model):
+    category_name = models.CharField(max_length=255, primary_key=True)
+    category_slug = models.CharField(max_length=255, unique=True)
+    category_image_src = models.CharField(max_length=255, default=f'main/REPLACE.jpg')
+    category_description = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name_plural = 'Categories'
+
+    def __str__(self):
+        return self.category_name
+
+
 class Ingredient(models.Model):
-    FOOD_CATEGORIES = (
-        ('FR', 'Fruits'),
-        ('NU', 'Nuts'),
-        ('FL', 'Flakes'),
-        ('SE', 'Seeds'),
-        ('OT', 'Other'),
-    )
-    ingredient_name = models.CharField(max_length=200, primary_key=True)
-    ingredient_price = models.IntegerField()
+
+    ingredient_name = models.CharField(max_length=255, primary_key=True)
+    ingredient_category = models.ForeignKey(FoodCategory, null=True, blank=True, on_delete=models.SET_NULL)
+
+    ingredient_price = models.DecimalField(max_digits=7, decimal_places=2)
     ingredient_calval = models.IntegerField()
     total_carbs = models.FloatField(default=10)
     total_fat = models.FloatField()
     total_proteins = models.FloatField()
-    ingredient_category = models.CharField(max_length=2, choices=FOOD_CATEGORIES)
+
     ingredient_image_src = models.CharField(max_length=255, default=f'main/REPLACE.jpg')
-    ingredient_slug = models.CharField(max_length=200, unique=True)
+    ingredient_slug = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.ingredient_name
 
 
-class Mix(models.Model):
+class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
-    mix_name = models.CharField(max_length=200)
+    recipe_name = models.CharField(max_length=255)
     ingredients = models.ManyToManyField(Ingredient, through='Percentage')
+    required_spices = models.TextField()
+    directions = models.TextField()
+    #TODO add imagefield
 
     def __str__(self):
-        return self.mix_name
+        return self.recipe_name
 
 
 class Percentage(models.Model):
-    mix = models.ForeignKey(Mix, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     percentage = models.FloatField(default=5)
     #def percentage?

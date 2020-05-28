@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Ingredient, Mix, Percentage
+from .models import Ingredient, Recipe, Percentage
 from django.db import models
 # Register your models here.
 
@@ -19,11 +19,11 @@ class PercentageInline(admin.TabularInline):
     extra = 2
 
 
-class MixAdmin(admin.ModelAdmin):
+class RecipeAdmin(admin.ModelAdmin):
 
-    fields = ('user', 'mix_name')
+    fields = ('user', 'recipe_name', 'required_spices', 'directions')
     inlines = (PercentageInline,)
 
 
-admin.site.register(Mix, MixAdmin)
+admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)

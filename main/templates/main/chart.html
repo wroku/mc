@@ -45,12 +45,30 @@
 </script>
 
 {% block content %}
-
+<div class="container">
 <div class="row">
     <div class="col-sm-12" >
         <h1>Hi chart</h1>
         <canvas id="myChart" width="400" height="400"></canvas>
+        <canvas id="myCanvas" width="200px" height="200px" style="border:1px solid #000"></canvas>
+        <script>
+            const canvas = document.getElementById("myCanvas");
+            const context = canvas.getContext("2d");
+
+
+            function blob(x, y, size, color){
+                context.beginPath();
+                context.arc(x, y, size, 0, 2*Math.PI);
+                context.fillStyle = color;
+                context.fill();
+                context.stroke();
+            }
+
+            blob(25, 25, 20, "red");
+            blob(60, 40, 20, "green");
+            blob(170, 110, 40, "blue");
+        </script>
     </div>
 </div>
-
+</div>
 {% endblock %}
