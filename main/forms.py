@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.forms import ModelForm, Textarea
+from .models import Recipe, Quantity, Ingredient
 
 
 class ContactForm(forms.Form):
@@ -28,3 +30,10 @@ class NewUserForm(UserCreationForm):
             user.save()
         return user
 
+
+'''class RecipeForm(ModelForm):
+    class Meta:
+        model = Recipe
+        fields = ['user', 'recipe_name', 'required_spices', 'directions'],
+        widgets = {'directions': Textarea(attrs={'cols': 80, 'rows': 20})},
+        #TODO separate directions and add custom validator'''

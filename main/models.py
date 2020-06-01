@@ -41,7 +41,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
     recipe_name = models.CharField(max_length=255)
-    ingredients = models.ManyToManyField(Ingredient, through='Percentage')
+    ingredients = models.ManyToManyField(Ingredient, through='Quantity')
     required_spices = models.TextField()
     directions = models.TextField()
     #TODO add imagefield
@@ -50,8 +50,8 @@ class Recipe(models.Model):
         return self.recipe_name
 
 
-class Percentage(models.Model):
+class Quantity(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    percentage = models.FloatField(default=5)
+    quantity = models.FloatField(default=5)
     #def percentage?
