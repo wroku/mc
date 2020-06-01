@@ -1,0 +1,21 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+    <div class="col-6 mx-auto">
+
+    {% if title %}
+        <h1>{{ title }}</h1>
+    {% endif %}
+
+    <br>
+
+    <form method="POST" action="."> {% csrf_token %}
+
+            {{ form.as_p }}
+        <br>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+    </div>
+
+{% endblock %}

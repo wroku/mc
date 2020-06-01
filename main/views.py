@@ -1,11 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import Ingredient
-from .forms import ContactForm
+from .forms import ContactForm, RecipeForm, NewUserForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm
 from django.views.generic import View
 # Create your views here.
 
@@ -29,12 +28,6 @@ def get_data(request, *args, **kwargs):
 def homepage(request):
     greeting = 'We will mix here in a while'
     return render(request, 'main/homepage.html', {'greeting': greeting})
-
-
-def mixed(request):
-    mixed = 'here we will have some tasty muesli'
-    return render(request, 'main/mixed.html', {'mixedmuesli': mixed})
-
 
 def products(request):
     return render(request, 'main/products.html', {'products': Ingredient.objects.all})
@@ -64,6 +57,18 @@ def contact_page(request):
         'form': form
     }
     return render(request, 'main/contact_form.html', context)
+
+
+def recipe_page(request):
+    form = RecipeForm(request.POST or None)
+    if form.is_valid():
+        print(form.cleaned_data)
+        form = RecipeForm()
+    context = {
+        'title': 'Lets get to it',
+        'form': form
+    }
+    return render(request, 'main/addrecipe.html', context)
 
 
 def register(request):

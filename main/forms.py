@@ -31,6 +31,19 @@ class NewUserForm(UserCreationForm):
         return user
 
 
+class RecipeForm(forms.Form):
+    name = forms.CharField(label='Recipe title', max_length=100,
+                           widget=forms.TextInput(attrs={'class': 'form-control'}))
+    spices = forms.CharField(label='List of required spices', max_length=255,
+                             widget=forms.TextInput(attrs={'class': 'form-control'}))
+    ingredients = forms.ModelMultipleChoiceField(queryset=Ingredient.objects.all(),
+                                                 widget=forms.CheckboxSelectMultiple)
+    directions = forms.CharField(label='Provide detailed directions', max_length=100,
+                                 widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '10'}))
+
+
+
+
 '''class RecipeForm(ModelForm):
     class Meta:
         model = Recipe

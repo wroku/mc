@@ -19,7 +19,7 @@ from . import views
 app_name = 'main'
 urlpatterns = [
     path('', views.homepage, name='homepage'),
-    path('mixed/', views.mixed, name='mixed'),
+    path('add-recipe/', views.recipe_page, name='addrecipe'),
     path('contact-us/', views.contact_page, name='contact-page'),
     path('products/', views.products, name='products'),
     path('products/<str:slug>/', views.detailed_product_page, name='details'),
