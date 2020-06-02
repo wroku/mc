@@ -1,7 +1,7 @@
 
 {% if messages %}
         {% for message in messages %}
-        <div style="position: absolute; top: 4rem; right: 1rem;">
+        <div style="position: absolute; top: 4rem; right: 1rem; z-index: 1;">
                 <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
                   <div class="toast-header">
                     <strong class="mr-auto">{{message.tags}}</strong>
@@ -10,7 +10,7 @@
                     </button>
                   </div>
                   <div class="toast-body">
-                    lol {{ message }}
+                    {{ message }}
                   </div>
                 </div>
         </div>

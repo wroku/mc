@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.views.generic import View
 # Create your views here.
 
+collect_ing = []
+
 
 class ChartView(View):
     def get(self, request, *args, **kwargs):
@@ -29,8 +31,20 @@ def homepage(request):
     greeting = 'We will mix here in a while'
     return render(request, 'main/homepage.html', {'greeting': greeting})
 
+
 def products(request):
-    return render(request, 'main/products.html', {'products': Ingredient.objects.all})
+    if request.method == 'POST':
+        current_ing = request.POST.get('ingredient')
+        if request.POST.get('add') == 'added':
+            if current_ing not in collect_ing:
+                collect_ing.append(current_ing)
+                messages.success(request, f'{current_ing} added to your recipe.')
+            else:
+                messages.info(request, f'{current_ing} are already on ingredient list.')
+        elif request.POST.get('delete') == 'deleted':
+            collect_ing.remove(current_ing)
+            messages.info(request, f'{current_ing} removed form your recipe. ')
+    return render(request, 'main/products.html', {'products': Ingredient.objects.all, 'added': collect_ing})
 
 
 def detailed_product_page(request, slug):
@@ -66,7 +80,8 @@ def recipe_page(request):
         form = RecipeForm()
     context = {
         'title': 'Lets get to it',
-        'form': form
+        'form': form,
+        'added': collect_ing
     }
     return render(request, 'main/addrecipe.html', context)
 
