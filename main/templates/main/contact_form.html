@@ -2,19 +2,16 @@
 
 {% block content %}
 
-    <div class="col-6 mx-auto">
+    <div class="col-6 mx-auto mt-3">
 
     {% if title %}
         <h1>{{ title }}</h1>
     {% endif %}
 
-    <br>
-
     <form method="POST" action="."> {% csrf_token %}
 
             {{ form }}
-        <br>
-        <button type="submit" class="btn btn-primary">Send</button>
+        <button type="submit" class="btn btn-primary mt-3">Send</button>
     </form>
     </div>
 

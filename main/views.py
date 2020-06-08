@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import Ingredient
-from .forms import ContactForm, RecipeForm, NewUserForm
+from .forms import ContactForm, RecipeForm, NewUserForm, recipeIngFormset
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -75,12 +75,15 @@ def contact_page(request):
 
 def recipe_page(request):
     form = RecipeForm(request.POST or None)
+    formset = recipeIngFormset(request.POST or None, initial=[{'ingredient': x} for x in collect_ing])
     if form.is_valid():
         print(form.cleaned_data)
         form = RecipeForm()
+
     context = {
         'title': 'Lets get to it',
         'form': form,
+        'formset': formset,
         'added': collect_ing
     }
     return render(request, 'main/addrecipe.html', context)
@@ -130,3 +133,6 @@ def logout_request(request):
     logout(request)
     messages.info(request, 'Logged out succesfully!')
     return redirect('main:homepage')
+
+
+

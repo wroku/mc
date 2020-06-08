@@ -2,17 +2,13 @@
 
 {% block content %}
 
-    <div class="container">
-    <br>
-    <form method="POST" action=".">
-        {% csrf_token %}
-
-        {{ form.as_p }}
-        <br>
-        <button type="submit" class="btn btn-primary">Register</button>
-    </form>
+    <div class="col-6 mx-auto mt-3">
+        <form method="POST" action=".">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary mb-3">Register</button>
+        </form>
+            If you already have an account, <a href="/login"><strong>login </strong></a> instead.
     </div>
-
-If you already have an account, <a href="/login"><strong>login</strong></a> instead.
 
 {% endblock %}

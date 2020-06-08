@@ -5,7 +5,7 @@
 <br>
 {% load static %}
     {% for prod in products %}
-        <div class="card mb-3" style="max-width: 540px;">
+        <div class="card mb-3 mr-3" style="max-width: 540px;">
           <div class="row no-gutters">
             <div class="col-md-4">
               <img src="{% static prod.ingredient_image_src %}" class="card-img" alt="oatflakes">
@@ -16,21 +16,23 @@
                 <p class="card-text">Calory value : {{ prod.ingredient_calval}} cal/100g<br>
                 Short description of this ingredient</p>
                 <p class="card-text"><small class="text-muted">Price: {{prod.ingredient_price}} pln/kg</small></p>
+                <div class="container">
                   <div class="row">
                       {% if prod.ingredient_name not in added %}
                       <form action="." method="post">{% csrf_token %}
-                      <button type="submit" class="btn btn-outline-success" name="add" value="added">Add to your recipe</button>
-                      <input type="hidden" name='ingredient' value="{{prod.ingredient_name}}">
+                          <button type="submit" class="btn btn-outline-success mr-2" name="add" value="added">Add to your recipe</button>
+                          <input type="hidden" name='ingredient' value="{{prod.ingredient_name}}">
                       </form>
                       {% else %}
                       <form action="." method="post">{% csrf_token %}
-                      <button type="submit" class="btn btn-outline-danger" name="delete" value="deleted">Delete from recipe</button>
-                      <input type="hidden" name='ingredient' value="{{prod.ingredient_name}}">
+                          <button type="submit" class="btn btn-outline-danger mr-2" name="delete" value="deleted">Delete from recipe</button>
+                          <input type="hidden" name='ingredient' value="{{prod.ingredient_name}}">
                       </form>
                       {% endif %}
-                  <a href="{{prod.ingredient_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                          <a href="{{prod.ingredient_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
                   </div>
               </div>
+                  </div>
             </div>
           </div>
         </div>

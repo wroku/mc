@@ -3,6 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import ModelForm, Textarea
 from .models import Recipe, Quantity, Ingredient
+from tinymce.widgets import TinyMCE
+from django.forms import formset_factory
 
 
 class ContactForm(forms.Form):
@@ -38,9 +40,17 @@ class RecipeForm(forms.Form):
                              widget=forms.TextInput(attrs={'class': 'form-control'}))
     ingredients = forms.ModelMultipleChoiceField(queryset=Ingredient.objects.all(),
                                                  widget=forms.CheckboxSelectMultiple)
-    directions = forms.CharField(label='Provide detailed directions', max_length=100,
-                                 widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '10'}))
+    directions = forms.CharField(label='Provide detailed directions', max_length=10000,
+                                 widget=TinyMCE())
+                                 #forms.Textarea(attrs={'class': 'form-control', 'rows': '10'}))
 
+
+class RecipeIngredient(forms.Form):
+    ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
+    quantity = forms.FloatField(label='How much of these?')
+
+
+recipeIngFormset = formset_factory(RecipeIngredient, extra=2)
 
 
 
