@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import ModelForm, Textarea
-from .models import Recipe, Quantity, Ingredient
+from .models import Recipe, Ingredient
 from tinymce.widgets import TinyMCE
 from django.forms import formset_factory
 
@@ -34,15 +34,17 @@ class NewUserForm(UserCreationForm):
 
 
 class RecipeForm(forms.Form):
-    name = forms.CharField(label='Recipe title', max_length=100,
-                           widget=forms.TextInput(attrs={'class': 'form-control'}))
-    spices = forms.CharField(label='List of required spices', max_length=255,
-                             widget=forms.TextInput(attrs={'class': 'form-control'}))
-    ingredients = forms.ModelMultipleChoiceField(queryset=Ingredient.objects.all(),
-                                                 widget=forms.CheckboxSelectMultiple)
+    recipe_name = forms.CharField(label='Recipe title', max_length=100,
+                                  widget=forms.TextInput(attrs={'class': 'form-control'}))
     directions = forms.CharField(label='Provide detailed directions', max_length=10000,
                                  widget=TinyMCE())
-                                 #forms.Textarea(attrs={'class': 'form-control', 'rows': '10'}))
+
+    def clean_recipe_name(self, *args, **kwargs):
+        recipe_name = self.cleaned_data.get('recipe_name')
+        qs = Recipe.objects.filter(recipe_name=recipe_name)
+        if qs.exists():
+            raise forms.ValidationError('This title has already been used. Please type another one.')
+        return recipe_name
 
 
 class RecipeIngredient(forms.Form):
@@ -50,7 +52,7 @@ class RecipeIngredient(forms.Form):
     quantity = forms.FloatField(label='How much of these?')
 
 
-recipeIngFormset = formset_factory(RecipeIngredient, extra=2)
+RecipeIngFormset = formset_factory(RecipeIngredient, extra=2)
 
 
 

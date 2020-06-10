@@ -21,7 +21,7 @@ class QuantityInline(admin.TabularInline):
 
 class RecipeAdmin(admin.ModelAdmin):
 
-    fields = ('user', 'recipe_name', 'required_spices', 'directions')
+    fields = ('user', 'recipe_name', 'directions')
     inlines = (QuantityInline,)
 
 

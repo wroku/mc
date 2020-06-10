@@ -40,9 +40,8 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
-    recipe_name = models.CharField(max_length=255)
+    recipe_name = models.CharField(primary_key=True, unique=True, max_length=255)
     ingredients = models.ManyToManyField(Ingredient, through='Quantity')
-    required_spices = models.TextField()
     directions = models.TextField()
     #TODO add imagefield
 

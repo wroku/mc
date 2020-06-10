@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
-from .models import Ingredient
-from .forms import ContactForm, RecipeForm, NewUserForm, recipeIngFormset
+from .models import Ingredient, Recipe, Quantity
+from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -9,22 +9,6 @@ from django.views.generic import View
 # Create your views here.
 
 collect_ing = []
-
-
-class ChartView(View):
-    def get(self, request, *args, **kwargs):
-        return render(request, 'main/chart.html', {})
-
-
-def get_data(request, *args, **kwargs):
-    qs = Ingredient.objects
-    labels = ['pushups', 'pullups', 'squats']
-    default_items = [150, 66, 48]
-    data = {
-        'labels': labels,
-        'default': default_items,
-    }
-    return JsonResponse(data)
 
 
 def homepage(request):
@@ -75,13 +59,25 @@ def contact_page(request):
 
 def recipe_page(request):
     form = RecipeForm(request.POST or None)
-    formset = recipeIngFormset(request.POST or None, initial=[{'ingredient': x} for x in collect_ing])
-    if form.is_valid():
-        print(form.cleaned_data)
-        form = RecipeForm()
+    formset = RecipeIngFormset(request.POST or None, initial=[{'ingredient': x} for x in collect_ing])
+    if request.method == 'POST':
+        if form.is_valid() and formset.is_valid():
+            recipe = Recipe.objects.create(**form.cleaned_data)
+            recipe.save()
+            for fieldset in formset.cleaned_data:
+                if fieldset != {}:
+                    f1 = Quantity.objects.create(recipe=recipe,
+                                                 ingredient=fieldset['ingredient'],
+                                                 quantity=fieldset['quantity'])
+                    f1.save()
+            form = RecipeForm()
+            formset = RecipeIngFormset()
 
+        else:
+            messages.error(request, f"Invalid data!")
+            print(formset.errors)
     context = {
-        'title': 'Lets get to it',
+        'title': 'Recipe',
         'form': form,
         'formset': formset,
         'added': collect_ing
@@ -134,5 +130,20 @@ def logout_request(request):
     messages.info(request, 'Logged out succesfully!')
     return redirect('main:homepage')
 
+
+class ChartView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'main/chart.html', {})
+
+
+def get_data(request, *args, **kwargs):
+    qs = Ingredient.objects
+    labels = ['pushups', 'pullups', 'squats']
+    default_items = [150, 66, 48]
+    data = {
+        'labels': labels,
+        'default': default_items,
+    }
+    return JsonResponse(data)
 
 

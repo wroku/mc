@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
     'tinymce',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
