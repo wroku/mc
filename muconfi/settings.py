@@ -72,8 +72,10 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'tinymce',
     'widget_tweaks',
+    'crispy_forms',
+    'main.templatetags',
 ]
-
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

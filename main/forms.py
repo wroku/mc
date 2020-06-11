@@ -5,6 +5,7 @@ from django.forms import ModelForm, Textarea
 from .models import Recipe, Ingredient
 from tinymce.widgets import TinyMCE
 from django.forms import formset_factory
+from crispy_forms.helper import FormHelper
 
 
 class ContactForm(forms.Form):
@@ -48,11 +49,18 @@ class RecipeForm(forms.Form):
 
 
 class RecipeIngredient(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(RecipeIngredient, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        '''collect_ing = request.session['collect_ing']'''
+
     ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
     quantity = forms.FloatField(label='How much of these?')
 
 
-RecipeIngFormset = formset_factory(RecipeIngredient, extra=2)
+RecipeIngFormset = formset_factory(RecipeIngredient, extra=1)
 
 
 
@@ -61,4 +69,6 @@ RecipeIngFormset = formset_factory(RecipeIngredient, extra=2)
         model = Recipe
         fields = ['user', 'recipe_name', 'required_spices', 'directions'],
         widgets = {'directions': Textarea(attrs={'cols': 80, 'rows': 20})},
-        #TODO separate directions and add custom validator'''
+        #TODO separate directions and add custom validator
+        exclude(id_in=collect_ing)
+        '''

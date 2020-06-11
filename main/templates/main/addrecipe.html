@@ -1,5 +1,8 @@
 {% extends 'main/base.html' %}
+
 {% load widget_tweaks %}
+{% load crispy_forms_tags %}
+{% load custom_tags %}
 
 {% block content %}
 
@@ -11,7 +14,7 @@
 
     <br>
 
-    <form method="POST" action="."> {% csrf_token %}
+    <form method="POST" action=""> {% csrf_token %}
 
             {% if form.non_field_errors %}
                 <div class="alert alert-danger" role="alert">
@@ -44,12 +47,31 @@
             <div class="alert alert-info" role="alert">
                 Add ingredients by browsing <a href="/products" class="alert-link">food cards</a> or use multiple choice menu below.
             </div>
+
             {{ formset.management_form }}
             {% for form in formset %}
-            <div class="fieldWrapper my-3">
-                {{ form.ingredient }} {{form.quantity.label_tag}} {{form.quantity}}
+            <div class="row form-row spacer">
+                <div class="col-3">
+                    {{form.ingredient|as_crispy_field}}
+                </div>
+                <div class="col-6">
+                    <div class="input-group">
+                        {{form.quantity}}
+                        {% if form.ingredient.value in added %}
+                            <div class="input-group-append">
+                                <button class="btn btn-danger remove-form-row">-</button>
+                            </div>
+                        {% else %}
+                            <div class="input-group-append">
+                                <button class="btn btn-success add-form-row">+</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             {% endfor %}
+
+
 
             <div class="fieldWrapper">
                 <h4>{{ form.directions.label_tag }}</h4>
@@ -59,5 +81,6 @@
         <button type="submit" class="btn btn-primary my-3">Add</button>
     </form>
     </div>
+
 
 {% endblock %}

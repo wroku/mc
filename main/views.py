@@ -6,6 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.views.generic import View
+
 # Create your views here.
 
 collect_ing = []
@@ -17,18 +18,21 @@ def homepage(request):
 
 
 def products(request):
+
     if request.method == 'POST':
         current_ing = request.POST.get('ingredient')
         if request.POST.get('add') == 'added':
-            if current_ing not in collect_ing:
-                collect_ing.append(current_ing)
+            if current_ing not in request.session['collect_ing']:
+                request.session['collect_ing'].append(current_ing)
+                request.session.modified = True
                 messages.success(request, f'{current_ing} added to your recipe.')
             else:
                 messages.info(request, f'{current_ing} are already on ingredient list.')
         elif request.POST.get('delete') == 'deleted':
-            collect_ing.remove(current_ing)
+            request.session['collect_ing'].remove(current_ing)
+            request.session.modified = True
             messages.info(request, f'{current_ing} removed form your recipe. ')
-    return render(request, 'main/products.html', {'products': Ingredient.objects.all, 'added': collect_ing})
+    return render(request, 'main/products.html', {'products': Ingredient.objects.all, 'added': request.session['collect_ing']})
 
 
 def detailed_product_page(request, slug):
@@ -59,7 +63,7 @@ def contact_page(request):
 
 def recipe_page(request):
     form = RecipeForm(request.POST or None)
-    formset = RecipeIngFormset(request.POST or None, initial=[{'ingredient': x} for x in collect_ing])
+    formset = RecipeIngFormset(request.POST or None, initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
             recipe = Recipe.objects.create(**form.cleaned_data)
@@ -72,7 +76,7 @@ def recipe_page(request):
                     f1.save()
             form = RecipeForm()
             formset = RecipeIngFormset()
-
+            messages.info(request, f"Success")
         else:
             messages.error(request, f"Invalid data!")
             print(formset.errors)
