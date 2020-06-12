@@ -9,8 +9,6 @@ from django.views.generic import View
 
 # Create your views here.
 
-collect_ing = []
-
 
 def homepage(request):
     greeting = 'We will mix here in a while'
@@ -18,7 +16,8 @@ def homepage(request):
 
 
 def products(request):
-
+    if 'collect_ing' not in request.session:
+        request.session['collect_ing'] = []
     if request.method == 'POST':
         current_ing = request.POST.get('ingredient')
         if request.POST.get('add') == 'added':
@@ -62,8 +61,11 @@ def contact_page(request):
 
 
 def recipe_page(request):
+    if 'collect_ing' not in request.session:
+        request.session['collect_ing'] = []
     form = RecipeForm(request.POST or None)
-    formset = RecipeIngFormset(request.POST or None, initial=[{'ingredient': x} for x in request.session['collect_ing']])
+    formset = RecipeIngFormset(request.POST or None, form_kwargs={'collect_ing': request.session['collect_ing']},
+                               initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
             recipe = Recipe.objects.create(**form.cleaned_data)
@@ -75,7 +77,7 @@ def recipe_page(request):
                                                  quantity=fieldset['quantity'])
                     f1.save()
             form = RecipeForm()
-            formset = RecipeIngFormset()
+            formset = RecipeIngFormset(form_kwargs={'collect_ing': request.session['collect_ing']})
             messages.info(request, f"Success")
         else:
             messages.error(request, f"Invalid data!")
@@ -84,7 +86,7 @@ def recipe_page(request):
         'title': 'Recipe',
         'form': form,
         'formset': formset,
-        'added': collect_ing
+        'added': request.session['collect_ing']
     }
     return render(request, 'main/addrecipe.html', context)
 
