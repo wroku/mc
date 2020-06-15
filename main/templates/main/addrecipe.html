@@ -82,7 +82,7 @@
                                 </div>
                             {% else %}
                                 <div class="input-group-append">
-                                    <button class="btn btn-success add-form-row">+</button>
+                                    <button  class="btn btn-success add-form-row">+</button>
                                 </div>
                             {% endif %}
                         {% endif %}
@@ -96,7 +96,18 @@
 
             <div class="fieldWrapper">
                 <h4>{{ form.directions.label_tag }}</h4>
-                {{ form.directions }}
+                {% if form.is_bound %}
+                    {% if form.directions.errors %}
+                        {% for error in form.directions.errors%}
+                            <div class="alert alert-danger my-2" role="alert">
+                                {{ error }}
+                            </div>
+                            {{ form.directions }}
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                    {{ form.directions }}
+                {% endif%}
             </div>
 
         <button type="submit" class="btn btn-primary my-3">Create</button>
@@ -104,16 +115,48 @@
         <p><b>Results:</b> <span id="results"></span></p>
     </div>
     <script>
-      function showValues() {
+      function updateSession() {
         var fields = $( ":input" ).serializeArray();
         $( "#results" ).empty();
+        let updateING = '';
         jQuery.each( fields, function( i, field ) {
-            if(i>5)
-                $( "#results" ).append( i + " " + field.value + " " );
+            if(i>5 && i!=(fields.length-1) && field.value!='' && isNaN(field.value)){
+                $( "#results" ).append(field.value + " " );
+                updateING = updateING + "#" + field.value;
+                console.log(updateING);
+            }
         });
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                // if not safe, set csrftoken
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+        $.ajax({
+            headers: {'X-CSRFToken': csrftoken},
+            type: "POST",
+            url: '/updateSS/',
+            data: {'ingredients': updateING},
+            success: function(data){
+                                    console.log(data)
+                                    },
+            error: function(error_data){
+                                        console.log(error_data)
+                                        console.log('WTF?')
+                                        }
+        })
       }
-      $( "select" ).change( showValues );
-      showValues();
+      $( "select" ).change( updateSession );
+      $(document).on('click', '.remove-form-row', updateSession);
+      updateSession();
     </script>
 
 {% endblock %}

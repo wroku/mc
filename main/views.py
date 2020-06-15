@@ -1,11 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from .models import Ingredient, Recipe, Quantity
 from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.views.generic import View
+from django.template import RequestContext
 
 # Create your views here.
 
@@ -16,7 +17,7 @@ def homepage(request):
 
 
 def products(request):
-    if 'collect_ing' not in request.session:
+    if 'collect_ing' not in request.session or request.session['collect_ing'] == '':
         request.session['collect_ing'] = []
     if request.method == 'POST':
         current_ing = request.POST.get('ingredient')
@@ -63,7 +64,7 @@ def contact_page(request):
 def recipe_page(request):
     if 'collect_ing' not in request.session:
         request.session['collect_ing'] = []
-    form = RecipeForm(request.POST or None)
+    form = RecipeForm(request.POST or None, collect_ing = request.session['collect_ing'])
     formset = RecipeIngFormset(request.POST or None, form_kwargs={'collect_ing': request.session['collect_ing']},
                                initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
@@ -76,6 +77,8 @@ def recipe_page(request):
                                                  ingredient=fieldset['ingredient'],
                                                  quantity=fieldset['quantity'])
                     f1.save()
+            request.session['collect_ing'] = []
+            request.session.modified = True
             form = RecipeForm()
             formset = RecipeIngFormset(form_kwargs={'collect_ing': request.session['collect_ing']})
             messages.info(request, f"Success")
@@ -89,6 +92,22 @@ def recipe_page(request):
         'added': request.session['collect_ing']
     }
     return render(request, 'main/addrecipe.html', context)
+
+
+def update_session(request):
+
+    if not request.is_ajax() or not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    if request.method == 'POST':
+        updateING = request.POST.get('ingredients', [])
+        print(updateING)
+        if updateING:
+            updateING = updateING.strip('#').split('#')
+            updateING = list(dict.fromkeys(updateING))
+        request.session['collect_ing'] = updateING
+        request.session.modified = True
+        return HttpResponse('ok')
 
 
 def register(request):

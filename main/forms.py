@@ -8,6 +8,7 @@ from django.forms import formset_factory
 from crispy_forms.helper import FormHelper
 from django.forms import BaseFormSet
 
+
 class ContactForm(forms.Form):
     full_name = forms.CharField(label='Your name', max_length=100,
                                 widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -35,6 +36,11 @@ class NewUserForm(UserCreationForm):
 
 
 class RecipeForm(forms.Form):
+
+    def __init__(self, *args, collect_ing, **kwargs):
+        super(RecipeForm, self).__init__(*args, **kwargs)
+        self.collect_ing = collect_ing
+
     recipe_name = forms.CharField(label='Recipe title', max_length=100,
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
     directions = forms.CharField(label='Provide detailed directions', max_length=10000,
@@ -46,6 +52,17 @@ class RecipeForm(forms.Form):
         if qs.exists():
             raise forms.ValidationError('This title has already been used. Please type another one.')
         return recipe_name
+
+    def clean_directions(self, *args, **kwargs):
+        directions = self.cleaned_data.get('directions')
+        missing = ''
+        print('HERE WE GO' + directions + "DO WE HAVE IT HERE?", self.collect_ing)
+        for ing in self.collect_ing:
+            if ing.lower()[:-1] not in directions.lower():
+                missing += ing + ', '
+        if missing != '':
+            raise forms.ValidationError(f'Please, provide preparation method for {missing[:-2]}.')
+        return directions
 
 
 class RecipeIngredient(forms.Form):
@@ -67,8 +84,6 @@ class RecipeIngredient(forms.Form):
         if not quantity > 0:
             raise forms.ValidationError('Enter valid quantity of this ingredient expressed in grams.')
         return quantity
-
-#class RecipeIngFormset(BaseFormSet):
 
 
 RecipeIngFormset = formset_factory(RecipeIngredient, extra=1)

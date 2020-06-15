@@ -29,5 +29,6 @@ urlpatterns = [
     path('account/', views.account_details, name='account'),
 
     path('api/data/', views.get_data, name='api-data'),
+    path('updateSS/', views.update_session, name='updateSS'),
     path('chartpage/', views.ChartView.as_view(), name='chart-page'),
 ]
