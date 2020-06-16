@@ -14,7 +14,7 @@
 
     <br>
 
-    <form method="POST" action=""> {% csrf_token %}
+    <form method="POST" action="" enctype="multipart/form-data"> {% csrf_token %}
 
             {% if form.non_field_errors %}
                 <div class="alert alert-danger" role="alert">
@@ -42,6 +42,16 @@
                 {% endif %}
             </div>
 
+
+            <div class="fieldWrapper mb-2">
+                <h4>{{ form.recipe_image.label_tag }}</h4>
+                {{ form.recipe_image|as_crispy_field}}
+            </div>
+
+            <div class="fieldWrapper mb-2">
+                <h4>{{ form.preparation_time.label_tag }}</h4>
+                {{ form.preparation_time }}
+            </div>
 
             <h4>List of ingredients:</h4>
             <div class="alert alert-info" role="alert">

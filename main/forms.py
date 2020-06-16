@@ -7,6 +7,7 @@ from tinymce.widgets import TinyMCE
 from django.forms import formset_factory
 from crispy_forms.helper import FormHelper
 from django.forms import BaseFormSet
+from PIL import Image
 
 
 class ContactForm(forms.Form):
@@ -21,11 +22,16 @@ class ContactForm(forms.Form):
 
 
 class NewUserForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+
+
+    def __init__(self, *args, **kwargs):
+        super(NewUserForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'password2')
+        fields = ('username', 'email')
 
     def save(self, commit=True):
         user = super(NewUserForm, self).save(commit=False)
@@ -34,15 +40,20 @@ class NewUserForm(UserCreationForm):
             user.save()
         return user
 
+    email = forms.EmailField(required=True)
 
 class RecipeForm(forms.Form):
 
     def __init__(self, *args, collect_ing, **kwargs):
         super(RecipeForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
         self.collect_ing = collect_ing
 
     recipe_name = forms.CharField(label='Recipe title', max_length=100,
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
+    recipe_image = forms.ImageField(label='Image:')
+    preparation_time = forms.IntegerField(label='Enter preparation time in minutes:')
     directions = forms.CharField(label='Provide detailed directions', max_length=10000,
                                  widget=TinyMCE())
 

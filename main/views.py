@@ -42,6 +42,13 @@ def detailed_product_page(request, slug):
     return render(request, template_name, context)
 
 
+def detailed_recipe_page(request, slug):
+    obj = get_object_or_404(Recipe, recipe_slug=slug)
+    template_name = 'main/recipe_details.html'
+    context = {'recipe': obj}
+    return render(request, template_name, context)
+
+
 def account_details(request):
     if request.user.is_authenticated:
         return render(request, 'main/account_details.html' )
@@ -64,12 +71,13 @@ def contact_page(request):
 def recipe_page(request):
     if 'collect_ing' not in request.session:
         request.session['collect_ing'] = []
-    form = RecipeForm(request.POST or None, collect_ing = request.session['collect_ing'])
+    form = RecipeForm(request.POST or None, request.FILES or None, collect_ing=request.session['collect_ing'])
     formset = RecipeIngFormset(request.POST or None, form_kwargs={'collect_ing': request.session['collect_ing']},
                                initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
             recipe = Recipe.objects.create(**form.cleaned_data)
+            recipe.user = request.user
             recipe.save()
             for fieldset in formset.cleaned_data:
                 if fieldset != {}:
@@ -79,7 +87,7 @@ def recipe_page(request):
                     f1.save()
             request.session['collect_ing'] = []
             request.session.modified = True
-            form = RecipeForm()
+            form = RecipeForm(collect_ing=request.session['collect_ing'])
             formset = RecipeIngFormset(form_kwargs={'collect_ing': request.session['collect_ing']})
             messages.info(request, f"Success")
         else:

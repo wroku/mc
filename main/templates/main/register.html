@@ -1,11 +1,16 @@
 {% extends 'main/base.html' %}
-
+{% load crispy_forms_tags %}
 {% block content %}
 
     <div class="col-6 mx-auto mt-3">
         <form method="POST" action=".">
             {% csrf_token %}
-            {{ form.as_p }}
+            {% for field in form %}
+                <div class="fieldWrapper mb-2">
+                    {{field.label_tag}}
+                    {{field|as_crispy_field}}
+                </div>
+            {% endfor %}
             <button type="submit" class="btn btn-primary mb-3">Register</button>
         </form>
             If you already have an account, <a href="/login"><strong>login </strong></a> instead.

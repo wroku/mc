@@ -22,7 +22,8 @@ urlpatterns = [
     path('add-recipe/', views.recipe_page, name='addrecipe'),
     path('contact-us/', views.contact_page, name='contact-page'),
     path('products/', views.products, name='products'),
-    path('products/<str:slug>/', views.detailed_product_page, name='details'),
+    path('products/<str:slug>/', views.detailed_product_page, name='product-details'),
+    path('recipes/<str:slug>/', views.detailed_recipe_page, name='recipe-details'),
     path('login/', views.login_request, name='login'),
     path('logout/', views.logout_request, name='logout'),
     path('register/', views.register, name='register'),
@@ -32,3 +33,5 @@ urlpatterns = [
     path('updateSS/', views.update_session, name='updateSS'),
     path('chartpage/', views.ChartView.as_view(), name='chart-page'),
 ]
+
+

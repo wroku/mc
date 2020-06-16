@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
   <div class="container">
-    <a class="navbar-brand" href="#">Meal Configurator</a>
+    <a class="navbar-brand" href="/recipes/kromka">Meal Configurator</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -34,7 +34,7 @@
         {% if user.is_authenticated %}
 
           <li class="nav-item">
-            <a class="nav-link" href="/account">{{user.username}}</a>
+            <a class="btn btn-danger" href="/account">{{user.username}}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/logout">Logout</a>
@@ -43,10 +43,11 @@
         {% else %}
 
           <li class="nav-item">
-            <a class="nav-link" href="/login">Login</a>
+            <a class="btn btn-danger" href="/register">Join</a>
           </li>
+
           <li class="nav-item">
-            <a class="nav-link" href="/register">Register</a>
+            <a class="nav-link" href="/login">Login</a>
           </li>
 
         {% endif %}

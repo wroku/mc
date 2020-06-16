@@ -1,0 +1,15 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+<div class="col-8 mx-auto">
+    <img src="{{recipe.recipe_image.url}}" class="img-fluid" >
+    <h1>{{recipe.recipe_name}}</h1><small> {{recipe.recipe_posted}}</small>
+
+    {{recipe.directions|safe}}
+
+
+
+</div>
+
+{% endblock %}
