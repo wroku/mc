@@ -53,7 +53,7 @@ def upload_location(recipe, filename):
 
 class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
-    recipe_posted = models.DateField('date published', default=datetime.now())
+    recipe_posted = models.DateTimeField('date published', auto_now_add=True)
     recipe_name = models.CharField(primary_key=True, unique=True, max_length=255)
     recipe_slug = models.SlugField(null=True, blank=True, unique=True)
 
@@ -71,6 +71,7 @@ class Recipe(models.Model):
     servings = models.IntegerField(default=2)
     # Data replication, I will leave it here for now
     calories_per_serving = models.IntegerField(blank=True, null=True)
+    price_per_serving = models.DecimalField(max_digits=7, decimal_places=2)
 
     def __str__(self):
         return self.recipe_name
@@ -81,11 +82,13 @@ def pre_save_recipe_receiver(sender, instance, *args, **kwargs):
     # Don't have to check if slug exists because recipe_name is unique
     instance.recipe_slug = slug
     qs = instance.quantities.all()
-    cps = 0
+    cps, pps = 0, 0
     for q in qs:
         ing = Ingredient.objects.get(ingredient_name=q.ingredient)
         cps += q.quantity * ing.ingredient_calval
-    instance.calories_per_serving = int(cps)
+        pps += q.quantity * ing.ingredient_price
+    instance.calories_per_serving = int(cps/instance.servings)
+    instance.price_per_serving = pps/instance.servings
 
 
 pre_save.connect(pre_save_recipe_receiver, sender=Recipe)

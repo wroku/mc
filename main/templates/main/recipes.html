@@ -1,0 +1,26 @@
+{% extends 'main/base.html' %}
+
+
+{% block content %}
+{% load static %}
+    {% for recipe in recipes %}
+    <div class="col-mb-5">
+        <div class="card mb-3 mr-3" style="max-width: 540px;">
+          <div class="row no-gutters">
+            <div class="col-md-4">
+              <img src="{{recipe.recipe_image.url}}" class="card-img">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">{{recipe.recipe_name}}</h5>
+                <p class="card-text">Calory value : {{ recipe.calories_per_serving}} cal/serving</p>
+                <p class="card-text"><small class="text-muted">Price: {{prod.ingredient_price}} pln/kg</small></p>
+                  <a href="{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endfor %}
+
+{% endblock %}

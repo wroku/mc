@@ -14,6 +14,29 @@
             </li>
         {% endfor %}
     </ul>
+    <br>
+    <ul class="list-group">
+        <li class="list-group-item text-center"><strong>Additional Info</strong></li>
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-sm-7">Calories per serving:</div>
+                <div class="col-sm-5">{{recipe.calories_per_serving}} cal</div>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-sm-7">Price per serving:</div>
+                <div class="col-sm-5">{{recipe.price_per_serving}} pln</div>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-sm-7">Preparation time:</div>
+                <div class="col-sm-5">{{recipe.preparation_time}} minutes</div>
+            </div>
+        </li>
+
+    </ul>
 </div>
 
 <div class="col-8 ">

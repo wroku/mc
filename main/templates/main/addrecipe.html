@@ -3,13 +3,14 @@
 {% load widget_tweaks %}
 {% load crispy_forms_tags %}
 {% load custom_tags %}
+{% load static %}
 
 {% block content %}
 
     <div class="col-8 mx-auto">
-
+    <img src="{% static 'main/recipee.jpg' %}" class="img-fluid">
     {% if title %}
-        <h1>{{ title }}</h1>
+        <h1 class="text-center mt-1">{{ title }}</h1>
     {% endif %}
 
     <br>
@@ -45,14 +46,29 @@
 
             <div class="fieldWrapper mb-2">
 
-                <h4>{{ form.recipe_image.label_tag }}</h4>
+                <h4>Image and additional info:</h4>
                 {{ form.recipe_image|as_crispy_field}}
             </div>
 
             <div class="fieldWrapper mb-2">
-                <h4>{{ form.preparation_time.label_tag }}</h4>
-                {{ form.preparation_time|as_crispy_field}}
+                <div class="row">
+                    <div class="col">
+                    {{ form.preparation_time|as_crispy_field}}</div>
+
+
+                    <div class="col">
+                        <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Servings:</span>
+
+                        </div>
+                        <input type="text" class="form-control" placeholder="Leave blank for 2-people meal"  aria-describedby="basic-addon1">
+                    </div>
+
+                </div>
             </div>
+
+
 
             <h4>List of ingredients:</h4>
             <div class="alert alert-info" role="alert">

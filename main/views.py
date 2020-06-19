@@ -66,6 +66,11 @@ def detailed_product_page(request, slug):
                'added': request.session['collect_ing']}
     return render(request, template_name, context)
 
+def recipes(request):
+    return render(request,
+                  'main/recipes.html',
+                  {'recipes': Recipe.objects.all})
+
 
 def detailed_recipe_page(request, slug):
     obj = get_object_or_404(Recipe, recipe_slug=slug)

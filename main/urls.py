@@ -22,6 +22,7 @@ urlpatterns = [
     path('add-recipe/', views.recipe_page, name='addrecipe'),
     path('contact-us/', views.contact_page, name='contact-page'),
     path('products/', views.products, name='products'),
+    path('recipes/', views.recipes, name='recipes'),
     path('products/<str:slug>/', views.detailed_product_page, name='product-details'),
     path('recipes/<str:slug>/', views.detailed_recipe_page, name='recipe-details'),
     path('recipes/<str:slug>/edit', views.edit_recipe, name='recipe-details'),

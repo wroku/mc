@@ -53,8 +53,11 @@ class RecipeForm(forms.Form):
     recipe_name = forms.CharField(label='Recipe title', max_length=100,
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
     recipe_image = forms.ImageField(label='Image:')
-    preparation_time = forms.IntegerField(label='Preparation time:')
-    directions = forms.CharField(label='Provide detailed directions', max_length=10000,
+    preparation_time = forms.IntegerField(label='Preparation time:',
+                                          widget=forms.NumberInput(attrs={'placeholder': 'Preparation time [min]'}))
+    servings = forms.ChoiceField(label='Number of servings:',
+                                 choices=((1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6)))
+    directions = forms.CharField(label='Detailed directions', max_length=10000,
                                  widget=TinyMCE())
 
     def clean_recipe_name(self, *args, **kwargs):
