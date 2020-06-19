@@ -29,23 +29,49 @@ def products(request):
             else:
                 messages.info(request, f'{current_ing} are already on ingredient list.')
         elif request.POST.get('delete') == 'deleted':
-            request.session['collect_ing'].remove(current_ing)
-            request.session.modified = True
-            messages.info(request, f'{current_ing} removed form your recipe. ')
+            if current_ing in request.session['collect_ing']:
+                request.session['collect_ing'].remove(current_ing)
+                request.session.modified = True
+                messages.info(request, f'{current_ing} removed form your recipe. ')
+            else:
+                messages.info(request, f'{current_ing} is not on ingredient list.')
     return render(request, 'main/products.html', {'products': Ingredient.objects.all, 'added': request.session['collect_ing']})
 
 
 def detailed_product_page(request, slug):
+    if 'collect_ing' not in request.session or request.session['collect_ing'] == '':
+        request.session['collect_ing'] = []
+
     obj = get_object_or_404(Ingredient, ingredient_slug=slug)
+    current_ing = obj.ingredient_name
+
+    if request.method == 'POST':
+        if request.POST.get('add') == 'added':
+            if current_ing not in request.session['collect_ing']:
+                request.session['collect_ing'].append(current_ing)
+                request.session.modified = True
+                messages.success(request, f'{current_ing} added to your recipe.')
+            else:
+                messages.info(request, f'{current_ing} are already on ingredient list.')
+        elif request.POST.get('delete') == 'deleted':
+            if current_ing in request.session['collect_ing']:
+                request.session['collect_ing'].remove(current_ing)
+                request.session.modified = True
+                messages.info(request, f'{current_ing} removed form your recipe. ')
+            else:
+                messages.info(request, f'{current_ing} is not on ingredient list.')
+
     template_name = 'main/product_details.html'
-    context = {'product': obj}
+    context = {'product': obj,
+               'added': request.session['collect_ing']}
     return render(request, template_name, context)
 
 
 def detailed_recipe_page(request, slug):
     obj = get_object_or_404(Recipe, recipe_slug=slug)
     template_name = 'main/recipe_details.html'
-    context = {'recipe': obj}
+    context = {'recipe': obj,
+               'quantities': obj.quantities.all()}
     return render(request, template_name, context)
 
 
@@ -71,20 +97,22 @@ def contact_page(request):
 def recipe_page(request):
     if 'collect_ing' not in request.session:
         request.session['collect_ing'] = []
-    form = RecipeForm(request.POST or None, request.FILES or None, collect_ing=request.session['collect_ing'])
-    formset = RecipeIngFormset(request.POST or None, form_kwargs={'collect_ing': request.session['collect_ing']},
+    form = RecipeForm(request.POST or None, request.FILES or None,
+                      collect_ing=request.session['collect_ing'])
+    formset = RecipeIngFormset(request.POST or None,
+                               form_kwargs={'collect_ing': request.session['collect_ing']},
                                initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
             recipe = Recipe.objects.create(**form.cleaned_data)
             recipe.user = request.user
-            recipe.save()
             for fieldset in formset.cleaned_data:
                 if fieldset != {}:
                     f1 = Quantity.objects.create(recipe=recipe,
                                                  ingredient=fieldset['ingredient'],
                                                  quantity=fieldset['quantity'])
                     f1.save()
+            recipe.save()
             request.session['collect_ing'] = []
             request.session.modified = True
             form = RecipeForm(collect_ing=request.session['collect_ing'])
@@ -102,11 +130,39 @@ def recipe_page(request):
     return render(request, 'main/addrecipe.html', context)
 
 
+def edit_recipe(request, slug):
+    if 'collect_ing' not in request.session:
+        request.session['collect_ing'] = []
+    instance = get_object_or_404(Recipe, recipe_slug=slug)
+    form = RecipeForm(request.POST or None, request.FILES or None,
+                      initial={'recipe_name': instance.recipe_name,
+                               'recipe_image': instance.recipe_image,
+                               'preparation_time': instance.preparation_time,
+                               'directions': instance.directions})
+
+    # qs = Quantity.objects.filter(recipe=instance.recipe_name)
+
+    qs = instance.quantities.all()
+    formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
+    formset = RecipeIngFormset(request.POST or None,
+                               form_kwargs={'collect_ing': request.session['collect_ing']},
+                               initial=formset_initial_data)
+
+    context = {
+        'recipe': instance,
+        'title': 'Edit Recipe',
+        'form': form,
+        'formset': formset,
+        'added': request.session['collect_ing']
+    }
+    return render(request, 'main/addrecipe.html', context)
+
+
 def update_session(request):
 
     if not request.is_ajax() or not request.method == 'POST':
         return HttpResponseNotAllowed(['POST'])
-
+    # TODO Maybe if editing in request.session...
     if request.method == 'POST':
         updateING = request.POST.get('ingredients', [])
         print(updateING)

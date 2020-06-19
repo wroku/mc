@@ -23,7 +23,6 @@ class ContactForm(forms.Form):
 
 class NewUserForm(UserCreationForm):
 
-
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -42,9 +41,10 @@ class NewUserForm(UserCreationForm):
 
     email = forms.EmailField(required=True)
 
+
 class RecipeForm(forms.Form):
 
-    def __init__(self, *args, collect_ing, **kwargs):
+    def __init__(self, *args, collect_ing=[], **kwargs):
         super(RecipeForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
@@ -53,7 +53,7 @@ class RecipeForm(forms.Form):
     recipe_name = forms.CharField(label='Recipe title', max_length=100,
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
     recipe_image = forms.ImageField(label='Image:')
-    preparation_time = forms.IntegerField(label='Enter preparation time in minutes:')
+    preparation_time = forms.IntegerField(label='Preparation time:')
     directions = forms.CharField(label='Provide detailed directions', max_length=10000,
                                  widget=TinyMCE())
 
@@ -98,14 +98,3 @@ class RecipeIngredient(forms.Form):
 
 
 RecipeIngFormset = formset_factory(RecipeIngredient, extra=1)
-
-
-
-'''class RecipeForm(ModelForm):
-    class Meta:
-        model = Recipe
-        fields = ['user', 'recipe_name', 'required_spices', 'directions'],
-        widgets = {'directions': Textarea(attrs={'cols': 80, 'rows': 20})},
-        #TODO separate directions and add custom validator
-        exclude(id_in=collect_ing)
-        '''

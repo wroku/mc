@@ -12,8 +12,14 @@ User = settings.AUTH_USER_MODEL
 class FoodCategory(models.Model):
     category_name = models.CharField(max_length=255, primary_key=True)
     category_slug = models.CharField(max_length=255, unique=True)
-    category_image_src = models.CharField(max_length=255, default=f'main/REPLACE.jpg')
     category_description = models.TextField(blank=True)
+    category_image = models.ImageField(upload_to='category_images',
+                                       null=True,
+                                       blank=True,
+                                       width_field='width_field',
+                                       height_field='height_field')
+    height_field = models.IntegerField(default=0)
+    width_field = models.IntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -42,7 +48,7 @@ class Ingredient(models.Model):
 
 
 def upload_location(recipe, filename):
-    return "%s/%s" %(recipe.user, filename)
+    return "%s/%s" % (recipe.user, filename)
 
 
 class Recipe(models.Model):
@@ -62,6 +68,9 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(Ingredient, through='Quantity')
     directions = models.TextField()
     preparation_time = models.IntegerField(default=45)
+    servings = models.IntegerField(default=2)
+    # Data replication, I will leave it here for now
+    calories_per_serving = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.recipe_name
@@ -69,14 +78,20 @@ class Recipe(models.Model):
 
 def pre_save_recipe_receiver(sender, instance, *args, **kwargs):
     slug = slugify(instance.recipe_name)
-    # Dont have to check if slug exists becouse recipe_name is unique
+    # Don't have to check if slug exists because recipe_name is unique
     instance.recipe_slug = slug
+    qs = instance.quantities.all()
+    cps = 0
+    for q in qs:
+        ing = Ingredient.objects.get(ingredient_name=q.ingredient)
+        cps += q.quantity * ing.ingredient_calval
+    instance.calories_per_serving = int(cps)
 
 
 pre_save.connect(pre_save_recipe_receiver, sender=Recipe)
 
 
 class Quantity(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.FloatField(default=5)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='quantities')
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,)
+    quantity = models.IntegerField(default=5)

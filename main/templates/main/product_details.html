@@ -1,23 +1,63 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
+{% load static %}
 
-<div class="container">
   <br>
-  <div class="card" style="width: 18rem;">
+  <div class="card mx-auto" style="width: 50rem;">
     <div class="card-body">
-      <h5 class="card-title">{{ product.ingredient_name }}</h5>
-      <h6 class="card-subtitle mb-2 text-muted">Price: {{product.ingredient_price}} pln/kg</h6>
-      <p class="card-text">Calory value : {{ product.ingredient_calval}} cal/100g<br>
-      Below we will try to display some nutrional values with chart.js, hopefully by the end of the month
-        <canvas id="myChart" width="400" height="400"></canvas>
-      </p>
-      <a href="#" class="card-link">Add to you mix</a>
 
-      <a href="#" class="card-link">do smth else</a>
+      <div class="row">
+        <div class="col-md-5">
+          <img src="{% static product.ingredient_image_src %}" class="img-fluid">
+           <div class="collapse multi-collapse mt-1" id="multiCollapseExample1">
+            <div class="card card-body">
+              HERE WE WILL HAVE SOME RECIPES QUERYSET
+            </div>
+          </div>
+        </div>
+        <div class="col-md-7">
+
+          <div class="row">
+
+            <div class="col">
+              <h5 class="card-title">{{ product.ingredient_name }}</h5>
+            </div>
+            <div class="col">
+              {% if product.ingredient_name not in added %}
+                <form action="." method="post">{% csrf_token %}
+                  <button type="submit" class="btn btn-outline-success m-1" name="add" value="added">Add to your recipe</button>
+                </form>
+              {% else %}
+                <form action="." method="post">{% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger m-1" name="delete" value="deleted">Delete from recipe</button>
+                </form>
+                {% endif %}
+            </div>
+
+          </div>
+
+          <h6 class="card-subtitle mb-2 text-muted">Price: {{product.ingredient_price}} pln/kg</h6>
+          <p class="card-text">Calory value : {{ product.ingredient_calval}} cal/100g<br>
+          Below we will try to display some nutrional values with chart.js, hopefully by the end of the month
+          </p>
+
+              <button class="btn btn-info mx-1 my-5" type="button" data-toggle="collapse" data-target="#multiCollapseExample1" aria-expanded="false" aria-controls="multiCollapseExample2">Browse recipies</button>
+
+              <button class="btn btn-info mx-3 my-5" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Nutrional value</button>
+
+          <div class="collapse multi-collapse" id="multiCollapseExample2">
+            <div class="card card-body">
+              <canvas id="myChart" width="10" height="10"></canvas>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+
 <script>
 var ctx = document.getElementById('myChart').getContext('2d');
 var myChart = new Chart(ctx, {

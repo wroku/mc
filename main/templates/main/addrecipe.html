@@ -44,13 +44,14 @@
 
 
             <div class="fieldWrapper mb-2">
+
                 <h4>{{ form.recipe_image.label_tag }}</h4>
                 {{ form.recipe_image|as_crispy_field}}
             </div>
 
             <div class="fieldWrapper mb-2">
                 <h4>{{ form.preparation_time.label_tag }}</h4>
-                {{ form.preparation_time }}
+                {{ form.preparation_time|as_crispy_field}}
             </div>
 
             <h4>List of ingredients:</h4>
