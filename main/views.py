@@ -42,8 +42,8 @@ def detailed_product_page(request, slug):
     if 'collect_ing' not in request.session or request.session['collect_ing'] == '':
         request.session['collect_ing'] = []
 
-    obj = get_object_or_404(Ingredient, ingredient_slug=slug)
-    current_ing = obj.ingredient_name
+    obj = get_object_or_404(Ingredient, slug=slug)
+    current_ing = obj.name
 
     if request.method == 'POST':
         if request.POST.get('add') == 'added':
@@ -65,6 +65,7 @@ def detailed_product_page(request, slug):
     context = {'product': obj,
                'added': request.session['collect_ing']}
     return render(request, template_name, context)
+
 
 def recipes(request):
     return render(request,

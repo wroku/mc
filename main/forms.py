@@ -88,7 +88,7 @@ class RecipeIngredient(forms.Form):
         self.collect_ing = collect_ing
 
         if not self.initial:
-            self.fields['ingredient'] = forms.ModelChoiceField(queryset=Ingredient.objects.all().exclude(ingredient_name__in=self.collect_ing))
+            self.fields['ingredient'] = forms.ModelChoiceField(queryset=Ingredient.objects.all().exclude(name__in=self.collect_ing))
 
     ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
     quantity = forms.FloatField(label='How much of these?')

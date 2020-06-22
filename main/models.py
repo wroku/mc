@@ -10,14 +10,14 @@ User = settings.AUTH_USER_MODEL
 
 
 class FoodCategory(models.Model):
-    category_name = models.CharField(max_length=255, primary_key=True)
-    category_slug = models.CharField(max_length=255, unique=True)
-    category_description = models.TextField(blank=True)
-    category_image = models.ImageField(upload_to='category_images',
-                                       null=True,
-                                       blank=True,
-                                       width_field='width_field',
-                                       height_field='height_field')
+    name = models.CharField(max_length=255, primary_key=True)
+    slug = models.SlugField(null=True, blank=True, unique=True)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='category_images',
+                              null=True,
+                              blank=True,
+                              width_field='width_field',
+                              height_field='height_field')
     height_field = models.IntegerField(default=0)
     width_field = models.IntegerField(default=0)
 
@@ -25,30 +25,47 @@ class FoodCategory(models.Model):
         verbose_name_plural = 'Categories'
 
     def __str__(self):
-        return self.category_name
+        return self.name
 
 
 class Ingredient(models.Model):
 
-    ingredient_name = models.CharField(max_length=255, primary_key=True)
-    ingredient_category = models.ForeignKey(FoodCategory, null=True, blank=True, on_delete=models.SET_NULL)
+    name = models.CharField(max_length=255, primary_key=True)
+    category = models.ForeignKey(FoodCategory, null=True, blank=True, on_delete=models.SET_NULL)
 
-    ingredient_price = models.DecimalField(max_digits=7, decimal_places=2)
-    ingredient_calval = models.IntegerField()
-    total_carbs = models.FloatField(default=10)
+    price = models.DecimalField(max_digits=7, decimal_places=2)
+    calval = models.IntegerField()
+    total_carbs = models.FloatField()
     total_fat = models.FloatField()
     total_proteins = models.FloatField()
 
+    image = models.ImageField(upload_to='ingredient_images',
+                              null=True,
+                              blank=True,
+                              width_field='width_field',
+                              height_field='height_field')
+    height_field = models.IntegerField(default=0)
+    width_field = models.IntegerField(default=0)
+
     ingredient_image_src = models.CharField(max_length=255, default=f'main/REPLACE.jpg')
-    ingredient_slug = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(null=True, blank=True, unique=True)
     # TODO Change slug to slugfield and set prepopulate
 
     def __str__(self):
-        return self.ingredient_name
+        return self.name
 
 
 def upload_location(recipe, filename):
     return "%s/%s" % (recipe.user, filename)
+
+
+def pre_save_slugifier(sender, instance, *args, **kwargs):
+    slug = slugify(instance.name)
+    instance.slug = slug
+
+
+pre_save.connect(pre_save_slugifier, sender=FoodCategory)
+pre_save.connect(pre_save_slugifier, sender=Ingredient)
 
 
 class Recipe(models.Model):

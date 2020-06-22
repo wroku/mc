@@ -7,13 +7,16 @@ from django.db import models
 class IngredientAdmin(admin.ModelAdmin):
 
     fieldsets = [
-        ('Name/category', {'fields': ['ingredient_name', 'ingredient_category']}),
-        ('Important Values', {'fields': ['ingredient_price', 'ingredient_calval',
+        ('Name/category', {'fields': ['name', 'category']}),
+        ('Important Values', {'fields': ['price', 'calval', 'image',
                                          'total_carbs', 'total_fat', 'total_proteins']}),
-        ('Underlying magic', {'fields': ['ingredient_slug', "ingredient_image_src"]}),
+        ('Underlying magic', {'fields': ['slug', "ingredient_image_src"]}),
     ]
+
+
 class FoodCategoryAdmin(admin.ModelAdmin):
-    fields = ('category_name', 'category_slug', 'category_image_src', 'category_description')
+    fields = ('name', 'slug', 'image', 'description')
+
 
 class QuantityInline(admin.TabularInline):
     model = Quantity
@@ -24,7 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     prepopulated_fields = {'recipe_slug': ('recipe_name',)}
     fields = ('user', 'recipe_name', 'recipe_image', 'height_field', 'width_field', 'recipe_slug', 'preparation_time',
-              'calories_per_serving' ,'directions')
+              'calories_per_serving', 'directions')
     inlines = (QuantityInline,)
 
 

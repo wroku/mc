@@ -13,23 +13,23 @@
             </div>
             <div class="col-md-8">
               <div class="card-body">
-                <h5 class="card-title">{{prod.ingredient_name}}</h5>
-                <p class="card-text">Calory value : {{ prod.ingredient_calval}} cal/100g</p>
-                <p class="card-text"><small class="text-muted">Price: {{prod.ingredient_price}} pln/kg</small></p>
+                <h5 class="card-title">{{prod.name}}</h5>
+                <p class="card-text">Calory value : {{ prod.calval}} cal/100g</p>
+                <p class="card-text"><small class="text-muted">Price: {{prod.price}} pln/kg</small></p>
                 <div class="container">
                   <div class="row">
-                      {% if prod.ingredient_name not in added %}
+                      {% if prod.name not in added %}
                       <form action="." method="post">{% csrf_token %}
                           <button type="submit" class="btn btn-outline-success mr-2" name="add" value="added">Add to your recipe</button>
-                          <input type="hidden" name='ingredient' value="{{prod.ingredient_name}}">
+                          <input type="hidden" name='ingredient' value="{{prod.name}}">
                       </form>
                       {% else %}
                       <form action="." method="post">{% csrf_token %}
                           <button type="submit" class="btn btn-outline-danger mr-2" name="delete" value="deleted">Delete from recipe</button>
-                          <input type="hidden" name='ingredient' value="{{prod.ingredient_name}}">
+                          <input type="hidden" name='ingredient' value="{{prod.name}}">
                       </form>
                       {% endif %}
-                          <a href="{{prod.ingredient_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                          <a href="{{prod.slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
                   </div>
               </div>
                   </div>
@@ -38,5 +38,10 @@
         </div>
         </div>
     {% endfor %}
-
+    <div style="position:fixed; bottom:0; right:0; width:300px; border: 3px solid #73AD21;">
+        Here we will have some nice image of ingredient list:<br/>
+        {% for ing in added %}
+            </br><strong>{{ing}}</strong>
+        {% endfor %}
+    </div>
 {% endblock %}

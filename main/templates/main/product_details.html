@@ -21,10 +21,10 @@
           <div class="row">
 
             <div class="col">
-              <h5 class="card-title">{{ product.ingredient_name }}</h5>
+              <h5 class="card-title">{{ product.name }}</h5>
             </div>
             <div class="col">
-              {% if product.ingredient_name not in added %}
+              {% if product.name not in added %}
                 <form action="." method="post">{% csrf_token %}
                   <button type="submit" class="btn btn-outline-success m-1" name="add" value="added">Add to your recipe</button>
                 </form>
@@ -37,8 +37,8 @@
 
           </div>
 
-          <h6 class="card-subtitle mb-2 text-muted">Price: {{product.ingredient_price}} pln/kg</h6>
-          <p class="card-text">Calory value : {{ product.ingredient_calval}} cal/100g<br>
+          <h6 class="card-subtitle mb-2 text-muted">Price: {{product.price}} pln/kg</h6>
+          <p class="card-text">Calory value : {{ product.calval}} cal/100g<br>
           Below we will try to display some nutrional values with chart.js, hopefully by the end of the month
           </p>
 
