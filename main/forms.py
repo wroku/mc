@@ -44,11 +44,12 @@ class NewUserForm(UserCreationForm):
 
 class RecipeForm(forms.Form):
 
-    def __init__(self, *args, collect_ing=[], **kwargs):
+    def __init__(self, *args, editing='', collect_ing=[], **kwargs):
         super(RecipeForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
         self.collect_ing = collect_ing
+        self.editing = editing
 
     recipe_name = forms.CharField(label='Recipe title', max_length=100,
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -62,15 +63,23 @@ class RecipeForm(forms.Form):
 
     def clean_recipe_name(self, *args, **kwargs):
         recipe_name = self.cleaned_data.get('recipe_name')
+        if self.editing == recipe_name:
+            return recipe_name
         qs = Recipe.objects.filter(recipe_name=recipe_name)
         if qs.exists():
             raise forms.ValidationError('This title has already been used. Please type another one.')
         return recipe_name
 
+    def clean_preparation_time(self, *args, **kwargs):
+        preparation_time = self.cleaned_data.get('preparation_time')
+        if not 500 > preparation_time > 0:
+            raise forms.ValidationError('Enter valid preparation_time for this recipe expressed in minutes.')
+        return preparation_time
+
     def clean_directions(self, *args, **kwargs):
         directions = self.cleaned_data.get('directions')
         missing = ''
-        print('HERE WE GO' + directions + "DO WE HAVE IT HERE?", self.collect_ing)
+        # print('HERE WE GO' + directions + "DO WE HAVE IT HERE?", self.collect_ing)
         for ing in self.collect_ing:
             if ing.lower()[:-1] not in directions.lower():
                 missing += ing + ', '

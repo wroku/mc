@@ -6,6 +6,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.views.generic import View
+from django.forms import formset_factory
+from .forms import RecipeIngredient
 from django.template import RequestContext
 
 # Create your views here.
@@ -141,18 +143,56 @@ def edit_recipe(request, slug):
         request.session['collect_ing'] = []
     instance = get_object_or_404(Recipe, recipe_slug=slug)
     form = RecipeForm(request.POST or None, request.FILES or None,
+                      editing=instance.recipe_name,
                       initial={'recipe_name': instance.recipe_name,
                                'recipe_image': instance.recipe_image,
                                'preparation_time': instance.preparation_time,
                                'directions': instance.directions})
 
     # qs = Quantity.objects.filter(recipe=instance.recipe_name)
-
     qs = instance.quantities.all()
     formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
-    formset = RecipeIngFormset(request.POST or None,
-                               form_kwargs={'collect_ing': request.session['collect_ing']},
-                               initial=formset_initial_data)
+    # Somewhat hacky but I could not find how to pass extra kwarg to formset factory
+    RecipeIngFormset_E = formset_factory(RecipeIngredient, extra=0)
+    formset = RecipeIngFormset_E(request.POST or None,
+                                 form_kwargs={'collect_ing': request.session['collect_ing']},
+                                 initial=formset_initial_data)
+    if request.method == 'POST':
+        if form.is_valid() and formset.is_valid():
+            for key, value in form.cleaned_data.items():
+                setattr(instance, key, value)
+
+            print('FORMDATA:')
+            print(form.cleaned_data)
+            print('FORMSETDATA:')
+            print(formset.cleaned_data)
+
+            # maybe clean {}s from cleaned data if you cant write custom formset validation?
+            index = 0
+            for fieldset, qt in zip(formset.cleaned_data, qs):
+                for key, value in fieldset.items():
+                    setattr(qt, key, value)
+                qt.save()
+                index += 1
+            if len(formset.cleaned_data) > len(qs):
+                for fieldset in formset.cleaned_data[index:]:
+                    if fieldset != {}:
+                        nq = Quantity.objects.create(recipe=instance,
+                                                     ingredient=fieldset['ingredient'],
+                                                     quantity=fieldset['quantity'])
+            elif len(qs) > len(formset.cleaned_data):
+                for qt in qs[index:]:
+                    del qt
+
+            instance.save()
+            request.session['collect_ing'] = []
+            request.session.modified = True
+            form = RecipeForm(collect_ing=request.session['collect_ing'])
+            formset = RecipeIngFormset(form_kwargs={'collect_ing': request.session['collect_ing']})
+            messages.info(request, f"Success")
+        else:
+            messages.error(request, f"Invalid data!")
+            print(formset.errors)
 
     context = {
         'recipe': instance,

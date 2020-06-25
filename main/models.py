@@ -3,9 +3,10 @@ from django.conf import settings
 from datetime import datetime
 from django.db.models.signals import pre_save
 from django.utils.text import slugify
+from decimal import *
 
 # Create your models here.
-
+getcontext().prec = 2
 User = settings.AUTH_USER_MODEL
 
 
@@ -101,11 +102,11 @@ def pre_save_recipe_receiver(sender, instance, *args, **kwargs):
     qs = instance.quantities.all()
     cps, pps = 0, 0
     for q in qs:
-        ing = Ingredient.objects.get(ingredient_name=q.ingredient)
-        cps += q.quantity * ing.ingredient_calval
-        pps += q.quantity * ing.ingredient_price
-    instance.calories_per_serving = int(cps/instance.servings)
-    instance.price_per_serving = pps/instance.servings
+        ing = Ingredient.objects.get(name=q.ingredient)
+        cps += q.quantity * ing.calval
+        pps += q.quantity * ing.price
+    instance.calories_per_serving = int(cps/int(instance.servings))
+    instance.price_per_serving = round(pps/int(instance.servings), 2)
 
 
 pre_save.connect(pre_save_recipe_receiver, sender=Recipe)

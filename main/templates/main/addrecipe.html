@@ -11,7 +11,7 @@
 
     <img src="{% static 'main/recipee.jpg' %}" class="img-fluid">
     {% if title %}
-        <h1 style="position: absolute; top:0; right:0; left:0; bottom:0; margin:auto;" class="text-center mt-1">{{ title }}</h1>
+        <h1 style="position: absolute; top:0; right:0; left:0; margin:auto;"class="text-center mt-1">{{ title }}</h1>
     {% endif %}
 
     <br>
@@ -46,24 +46,24 @@
 
 
             <div class="fieldWrapper mb-2">
-
                 <h4>Image and additional info:</h4>
                 {{ form.recipe_image|as_crispy_field}}
             </div>
 
             <div class="fieldWrapper mb-2">
                 <div class="row">
-                    <div class="col">
-                    {{ form.preparation_time|as_crispy_field}}</div>
 
+                    <div class="col">
+                        {{ form.preparation_time|as_crispy_field}}
+                    </div>
 
                     <div class="col">
                         <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Servings:</span>
-
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Servings:</span>
+                            </div>
+                            {{ form.servings|as_crispy_field}}
                         </div>
-                        <input type="text" class="form-control" placeholder="Leave blank for 2-people meal"  aria-describedby="basic-addon1">
                     </div>
 
                 </div>
@@ -132,6 +132,8 @@
                             </div>
                             {{ form.directions }}
                         {% endfor %}
+                    {% else %}
+                        {{ form.directions }}
                     {% endif %}
                 {% else %}
                     {{ form.directions }}
