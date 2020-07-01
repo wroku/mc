@@ -103,9 +103,9 @@ def pre_save_recipe_receiver(sender, instance, *args, **kwargs):
     cps, pps = 0, 0
     for q in qs:
         ing = Ingredient.objects.get(name=q.ingredient)
-        cps += q.quantity * ing.calval
-        pps += q.quantity * ing.price
-    instance.calories_per_serving = int(cps/int(instance.servings))
+        cps += q.quantity/1000 * ing.calval
+        pps += (q.quantity * ing.price)/1000
+    instance.calories_per_serving = round(cps/int(instance.servings))
     instance.price_per_serving = round(pps/int(instance.servings), 2)
 
 

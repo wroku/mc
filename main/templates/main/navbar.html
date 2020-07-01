@@ -18,13 +18,12 @@
             Categories
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="#">Fruits</a>
-            <a class="dropdown-item" href="#">Nuts</a>
-            <a class="dropdown-item" href="#">Flakes</a>
-            <a class="dropdown-item" href="#">Seeds</a>
-            <a class="dropdown-item" href="#">Other</a>
-            <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/products">All ingredients</a>
+            <div class="dropdown-divider"></div>
+            {% for category in foodcategories %}
+              <a class="dropdown-item" href="{{category.slug}}">{{category.name}}</a>
+            {% endfor %}
+            <a class="dropdown-item" href="#">Other</a>
           </div>
         </li>
         <li class="nav-item">

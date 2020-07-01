@@ -111,6 +111,8 @@ def recipe_page(request):
                                form_kwargs={'collect_ing': request.session['collect_ing']},
                                initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
+        print('Here we GO:')
+        print(request.session['collect_ing'])
         if form.is_valid() and formset.is_valid():
             recipe = Recipe.objects.create(**form.cleaned_data)
             recipe.user = request.user
@@ -139,8 +141,8 @@ def recipe_page(request):
 
 
 def edit_recipe(request, slug):
-    if 'collect_ing' not in request.session:
-        request.session['collect_ing'] = []
+
+    request.session['collect_ing'] = []
     instance = get_object_or_404(Recipe, recipe_slug=slug)
     form = RecipeForm(request.POST or None, request.FILES or None,
                       editing=instance.recipe_name,
@@ -149,15 +151,19 @@ def edit_recipe(request, slug):
                                'preparation_time': instance.preparation_time,
                                'directions': instance.directions})
 
-    # qs = Quantity.objects.filter(recipe=instance.recipe_name)
+    #qs = Quantity.objects.filter(recipe=instance.recipe_name)
     qs = instance.quantities.all()
     formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
-    # Somewhat hacky but I could not find how to pass extra kwarg to formset factory
-    RecipeIngFormset_E = formset_factory(RecipeIngredient, extra=0)
-    formset = RecipeIngFormset_E(request.POST or None,
-                                 form_kwargs={'collect_ing': request.session['collect_ing']},
-                                 initial=formset_initial_data)
+    for obj in qs[:len(qs)-1]:
+       request.session['collect_ing'].append(str(obj.ingredient))
+    # Somewhat hacky but I couldn't find how to pass extra kwarg to formset factory + and-or trick from diving in python
+    RecipeEditIngFormset = formset_factory(RecipeIngredient, extra=(formset_initial_data and [0] or [1])[0])
+    formset = RecipeEditIngFormset(request.POST or None,
+                                   form_kwargs={'collect_ing': request.session['collect_ing']},
+                                   initial=formset_initial_data)
     if request.method == 'POST':
+        print('Here we GO:')
+        print(request.session['collect_ing'])
         if form.is_valid() and formset.is_valid():
             for key, value in form.cleaned_data.items():
                 setattr(instance, key, value)
@@ -167,6 +173,8 @@ def edit_recipe(request, slug):
             print('FORMSETDATA:')
             print(formset.cleaned_data)
 
+            print(len(qs))
+            print(len(formset.cleaned_data))
             # maybe clean {}s from cleaned data if you cant write custom formset validation?
             index = 0
             for fieldset, qt in zip(formset.cleaned_data, qs):
@@ -180,9 +188,10 @@ def edit_recipe(request, slug):
                         nq = Quantity.objects.create(recipe=instance,
                                                      ingredient=fieldset['ingredient'],
                                                      quantity=fieldset['quantity'])
+
             elif len(qs) > len(formset.cleaned_data):
                 for qt in qs[index:]:
-                    del qt
+                    qt.delete()
 
             instance.save()
             request.session['collect_ing'] = []

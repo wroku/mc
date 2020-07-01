@@ -95,16 +95,19 @@ class RecipeIngredient(forms.Form):
         self.helper = FormHelper()
         self.helper.form_show_labels = False
         self.collect_ing = collect_ing
-
+        # this shit has taken 1.5h of my life and still not resolved
+        # TODO UNDERDSTAND WHY... it works when posting, but not when editing
         if not self.initial:
-            self.fields['ingredient'] = forms.ModelChoiceField(queryset=Ingredient.objects.all().exclude(name__in=self.collect_ing))
+            print('FUCK OFF')
+            print(self.collect_ing)
+            self.fields['ingredient'].queryset = Ingredient.objects.all().exclude(name__in=self.collect_ing)
 
     ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
     quantity = forms.FloatField(label='How much of these?')
 
     def clean_quantity(self, *args, **kwargs):
         quantity = self.cleaned_data.get('quantity')
-        if not quantity > 0:
+        if not quantity or quantity <= 0:
             raise forms.ValidationError('Enter valid quantity of this ingredient expressed in grams.')
         return quantity
 

@@ -14,7 +14,7 @@
               <div class="card-body">
                 <h5 class="card-title">{{recipe.recipe_name}}</h5>
                 <p class="card-text">Calory value : {{ recipe.calories_per_serving}} cal/serving</p>
-                <p class="card-text"><small class="text-muted">Price: {{prod.ingredient_price}} pln/kg</small></p>
+                <p class="card-text"><small class="text-muted">Price: {{recipe.price_per_serving}} pln/serving</small></p>
                   <a href="{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
                   <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
               </div>
