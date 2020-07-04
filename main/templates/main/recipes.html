@@ -3,8 +3,19 @@
 
 {% block content %}
 {% load static %}
+{% if query %}
+
+    <div class='row title-row my-5'>
+        <div class='col-12 py-0 mx-auto'>
+            <h3 class='my-0 py-0'>{{ count }} results for <b>{{ query }}</b></h3>
+        </div>
+    </div>
+
+{% endif %}
+<div class="row">
     {% for recipe in recipes %}
-    <div class="col-mb-5">
+
+    <div class="col-mb-5 mx-auto">
         <div class="card mb-3 mr-3" style="max-width: 540px;">
           <div class="row no-gutters">
             <div class="col-md-4">
@@ -23,5 +34,5 @@
         </div>
     </div>
     {% endfor %}
-
+</div>
 {% endblock %}

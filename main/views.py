@@ -7,8 +7,10 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.views.generic import View
 from django.forms import formset_factory
-from .forms import RecipeIngredient
+from .forms import RecipeIngredient, BaseRecipeIngFormSet
 from django.template import RequestContext
+from itertools import chain
+from django.views.generic import ListView
 
 # Create your views here.
 
@@ -16,6 +18,28 @@ from django.template import RequestContext
 def homepage(request):
     greeting = 'We will mix here in a while'
     return render(request, 'main/homepage.html', {'greeting': greeting})
+
+
+def search(request):
+
+    count = 0
+    query = request.GET.get('q', None)
+    recipes_qs = Recipe.objects.none()  # just an empty queryset as default
+
+    if query is not None:
+        qs = Recipe.objects.search(query)
+        qs = sorted(qs,
+                    key=lambda instance: instance.recipe_posted,
+                    reverse=True)
+        count = len(qs)  # since qs is actually a list
+        recipes_qs = qs
+
+    template_name = 'main/recipes.html'
+    context = {'count': count or 0,
+               'query': query,
+               'recipes': recipes_qs}
+
+    return render(request, template_name, context)
 
 
 def products(request):
@@ -155,9 +179,11 @@ def edit_recipe(request, slug):
     qs = instance.quantities.all()
     formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
     for obj in qs[:len(qs)-1]:
-       request.session['collect_ing'].append(str(obj.ingredient))
+        request.session['collect_ing'].append(str(obj.ingredient))
     # Somewhat hacky but I couldn't find how to pass extra kwarg to formset factory + and-or trick from diving in python
-    RecipeEditIngFormset = formset_factory(RecipeIngredient, extra=(formset_initial_data and [0] or [1])[0])
+    RecipeEditIngFormset = formset_factory(RecipeIngredient,
+                                           formset=BaseRecipeIngFormSet,
+                                           extra=(formset_initial_data and [0] or [1])[0])
     formset = RecipeEditIngFormset(request.POST or None,
                                    form_kwargs={'collect_ing': request.session['collect_ing']},
                                    initial=formset_initial_data)
@@ -168,13 +194,6 @@ def edit_recipe(request, slug):
             for key, value in form.cleaned_data.items():
                 setattr(instance, key, value)
 
-            print('FORMDATA:')
-            print(form.cleaned_data)
-            print('FORMSETDATA:')
-            print(formset.cleaned_data)
-
-            print(len(qs))
-            print(len(formset.cleaned_data))
             # maybe clean {}s from cleaned data if you cant write custom formset validation?
             index = 0
             for fieldset, qt in zip(formset.cleaned_data, qs):

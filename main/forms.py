@@ -113,3 +113,22 @@ class RecipeIngredient(forms.Form):
 
 
 RecipeIngFormset = formset_factory(RecipeIngredient, extra=1)
+
+# For validating duplicate ingredients when editing (excluding from qs doesnt work yet)
+class BaseRecipeIngFormSet(BaseFormSet):
+    def clean(self):
+        """Checks that no two recipe ingredients have the same name."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        ings = []
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            title = form.cleaned_data.get('title')
+            if title in ings:
+                raise forms.ValidationError("Ingredients in a set must have distinct names.")
+            ings.append(title)
+
+
+RecipeIngFormset = formset_factory(RecipeIngredient, formset=BaseRecipeIngFormSet, extra=1)

@@ -4,6 +4,7 @@ from datetime import datetime
 from django.db.models.signals import pre_save
 from django.utils.text import slugify
 from decimal import *
+from django.db.models import Q
 
 # Create your models here.
 getcontext().prec = 2
@@ -69,6 +70,18 @@ pre_save.connect(pre_save_slugifier, sender=FoodCategory)
 pre_save.connect(pre_save_slugifier, sender=Ingredient)
 
 
+class RecipeManager(models.Manager):
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookap = (Q(recipe_name__icontains=query) |
+                         Q(directions__icontains=query) |
+                         Q(recipe_slug__icontains=query)
+                         )
+            qs = qs.filter(or_lookap).distinct()
+        return qs
+
+
 class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
     recipe_posted = models.DateTimeField('date published', auto_now_add=True)
@@ -90,6 +103,8 @@ class Recipe(models.Model):
     # Data replication, I will leave it here for now
     calories_per_serving = models.IntegerField(blank=True, null=True)
     price_per_serving = models.DecimalField(max_digits=7, decimal_places=2)
+
+    objects = RecipeManager()
 
     def __str__(self):
         return self.recipe_name

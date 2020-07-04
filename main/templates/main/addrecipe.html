@@ -77,6 +77,14 @@
             </div>
 
             {{ formset.management_form }}
+            {% if formset.non_form_errors %}
+                <div class="alert alert-danger" role="alert">
+                  {% for error in formset.non_form_errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+            {% endif %}
+
             {% for form in formset %}
             <div class="row form-row spacer">
                 <div class="col-3">
@@ -139,8 +147,11 @@
                     {{ form.directions }}
                 {% endif%}
             </div>
-
+        {%  if title == 'Edit Recipe'%}
+        <button type="submit" class="btn btn-primary my-3">Save</button>
+        {% else %}
         <button type="submit" class="btn btn-primary my-3">Create</button>
+        {% endif %}
     </form>
         <p><b>Results:</b> <span id="results"></span></p>
     </div>
