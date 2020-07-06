@@ -21,11 +21,9 @@ def homepage(request):
 
 
 def search(request):
-
     count = 0
     query = request.GET.get('q', None)
     recipes_qs = Recipe.objects.none()  # just an empty queryset as default
-
     if query is not None:
         qs = Recipe.objects.search(query)
         qs = sorted(qs,
@@ -70,6 +68,7 @@ def detailed_product_page(request, slug):
 
     obj = get_object_or_404(Ingredient, slug=slug)
     current_ing = obj.name
+    recipes_containing = Recipe.objects.search_by_ing(obj)
 
     if request.method == 'POST':
         if request.POST.get('add') == 'added':
@@ -89,7 +88,8 @@ def detailed_product_page(request, slug):
 
     template_name = 'main/product_details.html'
     context = {'product': obj,
-               'added': request.session['collect_ing']}
+               'added': request.session['collect_ing'],
+               'recipes_containing': recipes_containing}
     return render(request, template_name, context)
 
 

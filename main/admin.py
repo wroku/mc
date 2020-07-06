@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Ingredient, Recipe, Quantity, FoodCategory
+from .models import Ingredient, Recipe, Quantity, FoodCategory, Comment
 from django.db import models
 # Register your models here.
 
@@ -34,3 +34,12 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(FoodCategory, FoodCategoryAdmin)
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('recipe', 'content', 'user', 'created_on', 'active')
+    list_filter = ('active', 'created_on')
+    actions = ['approve_comments']
+
+    def approve_comments(self, request, queryset):
+        queryset.update(active=True)

@@ -81,6 +81,13 @@ class RecipeManager(models.Manager):
             qs = qs.filter(or_lookap).distinct()
         return qs
 
+    def search_by_ing(self, ing=None):
+        qs = self.get_queryset()
+        if ing:
+            qs = ing.recipe_set.all()
+        return qs
+    # For searching by multiple ingredients maybe chain querysets /combine .distinct(), without next manager method
+
 
 class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
@@ -131,3 +138,11 @@ class Quantity(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='quantities')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,)
     quantity = models.IntegerField(default=5)
+
+
+class Comment(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField(max_length=2000)
+    created_on = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=False)
