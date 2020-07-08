@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/data/', views.get_data, name='api-data'),
     path('updateSS/', views.update_session, name='updateSS'),
     path('chartpage/', views.ChartView.as_view(), name='chart-page'),
+    path('access_denied/', views.access_denied, name='access_denied'),
 ]
 
 

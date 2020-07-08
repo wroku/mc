@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import ModelForm, Textarea
-from .models import Recipe, Ingredient
+from .models import Recipe, Ingredient, Comment
 from tinymce.widgets import TinyMCE
 from django.forms import formset_factory
 from crispy_forms.helper import FormHelper
@@ -19,6 +19,17 @@ class ContactForm(forms.Form):
                               widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}))
     level_of_importance = forms.IntegerField(label='Let us know how urgent is the case:', max_value=100,
                                              widget=forms.NumberInput(attrs={'type': 'range', 'class': 'form-control-range'}))
+
+
+class CommentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CommentForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+
+    class Meta:
+        model = Comment
+        fields = ('content',)
 
 
 class NewUserForm(UserCreationForm):
@@ -125,10 +136,10 @@ class BaseRecipeIngFormSet(BaseFormSet):
         for form in self.forms:
             if self.can_delete and self._should_delete_form(form):
                 continue
-            title = form.cleaned_data.get('title')
-            if title in ings:
+            ing = form.cleaned_data.get('ingredient')
+            if ing in ings:
                 raise forms.ValidationError("Ingredients in a set must have distinct names.")
-            ings.append(title)
+            ings.append(ing)
 
 
 RecipeIngFormset = formset_factory(RecipeIngredient, formset=BaseRecipeIngFormSet, extra=1)

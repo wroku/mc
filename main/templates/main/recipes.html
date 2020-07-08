@@ -27,7 +27,9 @@
                 <p class="card-text">Calory value : {{ recipe.calories_per_serving}} cal/serving</p>
                 <p class="card-text"><small class="text-muted">Price: {{recipe.price_per_serving}} pln/serving</small></p>
                   <a href="{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
-                  <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
+                  {% if currentuser == recipe.user %}
+                    <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
+                  {% endif %}
               </div>
             </div>
           </div>

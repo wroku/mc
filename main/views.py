@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from .models import Ingredient, Recipe, Quantity
-from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset
+from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -99,17 +99,40 @@ def recipes(request):
                   {'recipes': Recipe.objects.all})
 
 
+def access_denied(request):
+    return render(request,
+                  'main/access_denied.html',
+                  )
+
+
 def detailed_recipe_page(request, slug):
     obj = get_object_or_404(Recipe, recipe_slug=slug)
+
+    new_comment = None
+    # Comment posted
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.recipe = obj
+            new_comment.user = request.user
+            new_comment.save()
+    else:
+        comment_form = CommentForm()
+
     template_name = 'main/recipe_details.html'
     context = {'recipe': obj,
-               'quantities': obj.quantities.all()}
+               'quantities': obj.quantities.all(),
+               'comments': obj.comments.filter(active=True),
+               'new_comment': new_comment,
+               'comment_form': comment_form}
+
     return render(request, template_name, context)
 
 
 def account_details(request):
     if request.user.is_authenticated:
-        return render(request, 'main/account_details.html' )
+        return render(request, 'main/account_details.html')
     else:
         return redirect('main:login')
 
@@ -127,6 +150,7 @@ def contact_page(request):
 
 
 def recipe_page(request):
+    # TODO Change fs to BaseRecipeIngFormset with distinct ingredient validation and test the fuck out of it
     if 'collect_ing' not in request.session:
         request.session['collect_ing'] = []
     form = RecipeForm(request.POST or None, request.FILES or None,
@@ -149,9 +173,7 @@ def recipe_page(request):
             recipe.save()
             request.session['collect_ing'] = []
             request.session.modified = True
-            form = RecipeForm(collect_ing=request.session['collect_ing'])
-            formset = RecipeIngFormset(form_kwargs={'collect_ing': request.session['collect_ing']})
-            messages.info(request, f"Success")
+            return redirect(f'/recipes/{recipe.recipe_slug}')
         else:
             messages.error(request, f"Invalid data!")
             print(formset.errors)
@@ -165,9 +187,10 @@ def recipe_page(request):
 
 
 def edit_recipe(request, slug):
-
-    request.session['collect_ing'] = []
     instance = get_object_or_404(Recipe, recipe_slug=slug)
+    if request.user != instance.user:
+        return redirect('/access_denied')
+    request.session['collect_ing'] = []
     form = RecipeForm(request.POST or None, request.FILES or None,
                       editing=instance.recipe_name,
                       initial={'recipe_name': instance.recipe_name,
@@ -175,7 +198,7 @@ def edit_recipe(request, slug):
                                'preparation_time': instance.preparation_time,
                                'directions': instance.directions})
 
-    #qs = Quantity.objects.filter(recipe=instance.recipe_name)
+    # qs = Quantity.objects.filter(recipe=instance.recipe_name)
     qs = instance.quantities.all()
     formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
     for obj in qs[:len(qs)-1]:
@@ -217,7 +240,8 @@ def edit_recipe(request, slug):
             request.session.modified = True
             form = RecipeForm(collect_ing=request.session['collect_ing'])
             formset = RecipeIngFormset(form_kwargs={'collect_ing': request.session['collect_ing']})
-            messages.info(request, f"Success")
+            return redirect(f'/recipes/{instance.recipe_slug}')
+
         else:
             messages.error(request, f"Invalid data!")
             print(formset.errors)

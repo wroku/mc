@@ -1,8 +1,10 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
+{% load crispy_forms_tags %}
+
 <div class="row">
-<div class="col-4 ">
+<div class="col-4">
     <ul class="list-group">
         <li class="list-group-item text-center"><strong>Ingredients [for {{recipe.servings}} servings]</strong></li>
         {% for ing in quantities %}
@@ -44,7 +46,42 @@
     <h1>{{recipe.recipe_name}}</h1><small> {{recipe.recipe_posted}}</small>
 
     {{recipe.directions|safe}}
+    <br>
+    {% for comment in comments %}
+    <div class="comments" style="padding 10px;">
+        <p class="font-weight-bold">
+            {{comment.user}}
+            <span class="text-muted font-weight-normal">
+                {{comment.created_on}}
+            </span>
+        </p>
+        {{comment.content|linebreaks}}
+    </div>
+    {% endfor %}
+    <br>
+        {% if current_user %}
+            {% if new_comment %}
+            <div class="alert alert-success" role="alert">
+                Your comment is awaiting moderation.
+            </div>
+            {% else %}
+            <h4>Leave a comment</h4>
+            Share your opinions, experience, advices or let others know about tasty variations of this recipe!
+            <form method="post">
+                {% csrf_token %}
+                {{ comment_form.content|as_crispy_field }}
+                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+            </form>
+            {% endif %}
+        {% else %}
+            <h4>Leave a comment</h4>
+            <div class="alert alert-info" role="alert">
+                <strong>Comments are available for logged users only.</strong> <a href="/login"><strong>Sign in</strong></a> to share your opinion or <a href="/register"><strong>register</strong></a> if you don't have an account yet.
+            </div>
+        {%  endif %}
 
-</div>
+    </div>
+
+
 </div>
 {% endblock %}
