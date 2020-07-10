@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from .models import Ingredient, Recipe, Quantity
 from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm
 from django.contrib.auth.forms import AuthenticationForm
@@ -307,7 +307,8 @@ def login_request(request):
             if user is not None:
                 login(request, user)
                 messages.info(request, f'You are now logged as {username}')
-                return redirect('main:homepage')
+                redirect_to = request.POST.get('next', '/')
+                return HttpResponseRedirect(redirect_to)
             else:
                 messages.error(request, 'Invalid username or password')
         else:
@@ -319,9 +320,15 @@ def login_request(request):
 
 
 def logout_request(request):
-    logout(request)
-    messages.info(request, 'Logged out succesfully!')
-    return redirect('main:homepage')
+
+    redirect_to = request.GET.get('next', '/')
+    if request.user.is_authenticated:
+        logout(request)
+        messages.info(request, 'Logged out succesfully!')
+        return HttpResponseRedirect(redirect_to)
+    else:
+        messages.info(request, 'You are not logged in.')
+        return HttpResponseRedirect(redirect_to)
 
 
 class ChartView(View):

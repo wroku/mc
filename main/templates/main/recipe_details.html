@@ -64,7 +64,8 @@
     </div>
     {% endfor %}
     <br>
-        {% if current_user %}
+
+        {% if user.is_authenticated %}
             {% if new_comment %}
             <div class="alert alert-success" role="alert">
                 Your comment is awaiting moderation.
@@ -81,7 +82,7 @@
         {% else %}
             <h4>Leave a comment</h4>
             <div class="alert alert-info" role="alert">
-                <strong>Comments are available for logged users only.</strong> <a href="/login"><strong>Sign in</strong></a> to share your opinion or <a href="/register"><strong>register</strong></a> if you don't have an account yet.
+                <strong>Comments are available for logged users only.</strong> <a href="/login?next={% firstof request.path '/' %}"><strong>Sign in</strong></a> to share your opinion or <a href="/register"><strong>register</strong></a> if you don't have an account yet.
             </div>
         {%  endif %}
 
