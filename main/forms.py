@@ -6,6 +6,8 @@ from .models import Recipe, Ingredient, Comment
 from tinymce.widgets import TinyMCE
 from django.forms import formset_factory
 from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Field
+from crispy_forms.bootstrap import PrependedText
 from django.forms import BaseFormSet
 from PIL import Image
 
@@ -61,6 +63,10 @@ class RecipeForm(forms.Form):
         self.helper.form_show_labels = False
         self.collect_ing = collect_ing
         self.editing = editing
+        self.helper.layout = Layout(
+            Field(PrependedText('servings', 'Number of servings:'))
+
+        )
 
     recipe_name = forms.CharField(label='Recipe title', max_length=100,
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))

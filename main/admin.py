@@ -26,8 +26,9 @@ class QuantityInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
 
     prepopulated_fields = {'recipe_slug': ('recipe_name',)}
-    fields = ('user', 'recipe_name', 'recipe_image', 'height_field', 'width_field', 'recipe_slug', 'preparation_time',
+    fields = ('user', 'recipe_name', 'recipe_posted', 'recipe_image', 'height_field', 'width_field', 'recipe_slug', 'preparation_time',
               'calories_per_serving', 'price_per_serving', 'directions')
+    readonly_fields = ('recipe_posted',)
     inlines = (QuantityInline,)
 
 

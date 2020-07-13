@@ -2,6 +2,7 @@
 
 {% load widget_tweaks %}
 {% load crispy_forms_tags %}
+{% crispy form %}
 {% load custom_tags %}
 {% load static %}
 
@@ -9,7 +10,7 @@
 
     <div class="col-8 mx-auto">
 
-    <img src="{% static 'main/recipee.jpg' %}" class="img-fluid">
+    <img src="{% static 'main/recipee.jpg' %}" class="img-fluid mb-2">
     {% if title %}
         <h1 style="position: absolute; top:0; right:0; left:0; margin:auto;"class="text-center mt-1">{{ title }}</h1>
     {% endif %}
@@ -58,12 +59,10 @@
                     </div>
 
                     <div class="col">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">Servings:</span>
-                            </div>
-                            {{ form.servings|as_crispy_field}}
-                        </div>
+                        <!-- I would never guessed it... crispy form just replaced only this one field i need special help with -->
+                        {% crispy form %}
+
+
                     </div>
 
                 </div>

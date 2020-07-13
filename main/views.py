@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from .models import Ingredient, Recipe, Quantity
-from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm
+from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm, RecipeIngredient, BaseRecipeIngFormSet
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.views.generic import View
 from django.forms import formset_factory
-from .forms import RecipeIngredient, BaseRecipeIngFormSet
+from django.core.mail import send_mail, EmailMessage
+import os
 from django.template import RequestContext
 from itertools import chain
 from django.views.generic import ListView
@@ -94,9 +95,23 @@ def detailed_product_page(request, slug):
 
 
 def recipes(request):
+    filter_by = request.GET.get('filter', 'recipe_posted')
+    ord = request.GET.get('ord', 'desc')
+    # ugly solution in 3, 2, 1...
+    if ord == 'desc':
+        qs = Recipe.objects.order_by('-' + filter_by)
+        desc = 'checked'
+        asc = ''
+    else:
+        qs = Recipe.objects.order_by(filter_by)
+        desc = ''
+        asc = 'checked'
     return render(request,
                   'main/recipes.html',
-                  {'recipes': Recipe.objects.all})
+                  {'desc': desc,
+                   'asc': asc,
+                   'ordered_by': filter_by,
+                   'recipes': qs})
 
 
 def access_denied(request):
@@ -147,10 +162,20 @@ def contact_page(request):
     form = ContactForm(request.POST or None)
     if form.is_valid():
         print(form.cleaned_data)
+        email = EmailMessage(
+            'Message from {}, user {}, importance {}/100'.format(form.cleaned_data['full_name'],
+                                                                 request.user,
+                                                                 form.cleaned_data['level_of_importance'] ),
+            form.cleaned_data['content'],
+            form.cleaned_data['email'],
+            ['wrokuj@gmail.com'],
+            reply_to=[form.cleaned_data['email']]
+        )
+        email.send()
         form = ContactForm()
     context = {
         'title': 'Contact us',
-        'form': form
+        'form': form,
     }
     return render(request, 'main/contact_form.html', context)
 

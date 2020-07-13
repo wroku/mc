@@ -139,6 +139,9 @@ class Quantity(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,)
     quantity = models.IntegerField(default=5)
 
+    class Meta:
+        verbose_name_plural = 'Quantities'
+
 
 class Comment(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')
