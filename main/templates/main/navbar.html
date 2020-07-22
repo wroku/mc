@@ -13,18 +13,8 @@
         <li class="nav-item">
           <a class="nav-link" href="/add-recipe" tabindex="-1">Add recipe</a>
         </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Categories
-          </a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="/products">All ingredients</a>
-            <div class="dropdown-divider"></div>
-            {% for category in foodcategories %}
-              <a class="dropdown-item" href="{{category.slug}}">{{category.name}}</a>
-            {% endfor %}
-            <a class="dropdown-item" href="#">Other</a>
-          </div>
+        <li class="nav-item">
+          <a class="nav-link" href="/products">Ingredients</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/contact-us">Contact us</a>

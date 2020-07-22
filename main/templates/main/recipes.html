@@ -47,15 +47,16 @@
 </form>
 
 <div class="row">
+    <div class="card-columns" style="column-count:2;">
     {% for recipe in recipes %}
 
     <div class="col-mb-5 mx-auto">
-        <div class="card mb-3 mr-3" style="max-width: 540px;">
+        <div class="card mb-3 mr-3">
           <div class="row no-gutters">
-            <div class="col-md-4">
+            <div class="col-md-6 my-auto">
               <img src="{{recipe.recipe_image.url}}" class="card-img">
             </div>
-            <div class="col-md-8">
+            <div class="col-md-6">
               <div class="card-body">
                 <h5 class="card-title">{{recipe.recipe_name}}</h5><small> {{recipe.recipe_posted}}</small>
                 <p class="card-text">Calory value : {{ recipe.calories_per_serving}} cal/serving</p>
@@ -70,6 +71,7 @@
         </div>
     </div>
     {% endfor %}
+        </div>
 </div>
 <script>
     let currently_picked = '{{ordered_by}}';

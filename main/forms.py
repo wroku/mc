@@ -61,11 +61,11 @@ class RecipeForm(forms.Form):
         super(RecipeForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
+        self.helper.form_tag = False
         self.collect_ing = collect_ing
         self.editing = editing
         self.helper.layout = Layout(
             Field(PrependedText('servings', 'Number of servings:'))
-
         )
 
     recipe_name = forms.CharField(label='Recipe title', max_length=100,
@@ -117,7 +117,7 @@ class RecipeIngredient(forms.Form):
         if not self.initial:
             print('FUCK OFF')
             print(self.collect_ing)
-            self.fields['ingredient'].queryset = Ingredient.objects.all().exclude(name__in=self.collect_ing)
+            # self.fields['ingredient'].queryset = Ingredient.objects.all().exclude(name__in=self.collect_ing)
 
     ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
     quantity = forms.FloatField(label='How much of these?')

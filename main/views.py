@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
-from .models import Ingredient, Recipe, Quantity
+from .models import Ingredient, Recipe, Quantity, Comment
 from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm, RecipeIngredient, BaseRecipeIngFormSet
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
@@ -153,7 +153,9 @@ def detailed_recipe_page(request, slug):
 
 def account_details(request):
     if request.user.is_authenticated:
-        return render(request, 'main/account_details.html')
+        context = {'recipes': Recipe.objects.filter(user=request.user),
+                   'comments': Comment.objects.filter(user=request.user)}
+        return render(request, 'main/account_details.html', context)
     else:
         return redirect('main:login')
 
@@ -288,7 +290,6 @@ def edit_recipe(request, slug):
 
 
 def update_session(request):
-
     if not request.is_ajax() or not request.method == 'POST':
         return HttpResponseNotAllowed(['POST'])
     # TODO Maybe if editing in request.session...
@@ -301,6 +302,15 @@ def update_session(request):
         request.session['collect_ing'] = updateING
         request.session.modified = True
         return HttpResponse('ok')
+# id_form-2-ingredient
+
+
+def update_options(request):
+    if not request.is_ajax() or not request.method == 'GET':
+        return HttpResponseNotAllowed(['GET'])
+    if request.method == 'GET':
+        ings = Ingredient.objects.exclude(name__in=request.session['collect_ing'])
+    return render(request, 'main/new_row_options.html', {'ingredients': ings})
 
 
 def register(request):

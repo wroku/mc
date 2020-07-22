@@ -62,7 +62,6 @@
                         <!-- I would never guessed it... crispy form just replaced only this one field i need special help with -->
                         {% crispy form %}
 
-
                     </div>
 
                 </div>
@@ -146,18 +145,22 @@
                     {{ form.directions }}
                 {% endif%}
             </div>
-        {%  if title == 'Edit Recipe'%}
         <button type="submit" class="btn btn-primary my-3">Save</button>
+        <!--{%  if title == 'Edit Recipe'%}
+
         {% else %}
         <button type="submit" class="btn btn-primary my-3">Create</button>
-        {% endif %}
+       {% endif %}-->
     </form>
         <p><b>Results:</b> <span id="results"></span></p>
+        <p><b>Serialized:</b> <span id="ser"></span></p>
     </div>
     <script>
       function updateSession() {
         var fields = $( ":input" ).serializeArray();
         $( "#results" ).empty();
+        $( "#ser" ).empty();
+        $( "#ser" ).append(fields);
         let updateING = '';
         jQuery.each( fields, function( i, field ) {
             if(i>5 && i!=(fields.length-1) && field.value!='' && isNaN(field.value)){
@@ -197,6 +200,46 @@
       $( "select" ).change( updateSession );
       $(document).on('click', '.remove-form-row', updateSession);
       updateSession();
+
+      function updateOptionss(){
+        $.get('/updateOP/', function(data){
+                                    $('select:last').html(data)
+                                    } );
+      }
+
+
+      function updateOptions(){
+      var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                // if not safe, set csrftoken
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+        $.ajax({
+            headers: {'X-CSRFToken': csrftoken},
+            type: "GET",
+            url: '/updateOP/',
+            data: {},
+            success: function(data){
+                                    $('select:last').html(data)
+                                    console.log(data)
+                                    },
+            error: function(error_data){
+                                        console.log(error_data)
+                                        console.log('WTF?')
+                                        }
+        })
+      }
+      $(document).on('click', '.add-form-row', updateOptions);
+      $(document).on('click', '.remove-form-row', updateOptions);
     </script>
 
 {% endblock %}
