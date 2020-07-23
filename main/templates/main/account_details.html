@@ -1,25 +1,39 @@
 {% extends "main/base.html" %}
-
+{% load custom_tags %}
 {% block content %}
 <div class="col-8 mx-auto">
     <h1 class="text-center my-5">Summary of your activity</h1>
     <div class="row">
         <div class="col">
             <div class="mb-3"><strong>Your recipes</strong></div>
-            <ul>
-            {% for recipe in recipes %}
-            <li><a href="/recipes/{{recipe.recipe_slug}}">{{recipe.recipe_name}}</a></li>
-            {% endfor %}
-            </ul>
+                {% if recipes %}
+                    <ul>
+                    {% for recipe in recipes %}
+                    <li><a href="/recipes/{{recipe.recipe_slug}}">{{recipe.recipe_name}}</a></li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        You haven't posted any recipe yet. <a href="/add-recipe">Add one!</a>
+                    </div>
+                {% endif %}
             </div>
         <div class="col">
             <div class="mb-3"><strong>Your comments</strong></div>
-            {% for comment in comments %}
-            <!-- create custom template tag to retrieve recipe slug for multi-word recipe tittles -->
-            <li><a href="/recipes/{{comment.recipe}}"><span class="text-muted">{{comment.created_on}} </span></a><br>
-                {{comment.content|truncatewords:15}}
-            </li>
-            {% endfor %}
+                {% if comments %}
+                    <ul>
+                        {% for comment in comments %}
+                        <li>
+                            <a href="/recipes/{{comment.recipe|instance_slug}}"><span class="text-muted">{{comment.created_on}}</span></a><br>
+                            {{comment.content|truncatewords:15}}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        You haven't commented anything yet. <a href="/recipes">Browse recipes</a> and share your opinions.
+                    </div>
+                {% endif %}
         </div>
     </div>
 </div>

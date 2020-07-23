@@ -88,6 +88,10 @@ class RecipeManager(models.Manager):
         return qs
     # For searching by multiple ingredients maybe chain querysets /combine .distinct(), without next manager method
 
+    def search_by_ings(self, ings=[]):
+        qs = self.get_queryset()
+
+
 
 class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)

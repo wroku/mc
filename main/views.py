@@ -33,11 +33,35 @@ def search(request):
         count = len(qs)  # since qs is actually a list
         recipes_qs = qs
 
+    filter_by = request.GET.get('filter', 'recipe_posted')
+    ord = request.GET.get('ord', 'desc')
+    # ugly solution in 3, 2, 1...
+    if ord == 'desc':
+        recipes_qs = sorted(qs,
+                            key=lambda instance: getattr(instance, filter_by),
+                            reverse=True)
+        desc = 'checked'
+        asc = ''
+    else:
+        recipes_qs = sorted(qs,
+                            key=lambda instance: getattr(instance, filter_by),)
+        desc = ''
+        asc = 'checked'
+
     template_name = 'main/recipes.html'
-    context = {'count': count or 0,
+    context = {'desc': desc,
+               'asc': asc,
+               'ordered_by': filter_by,
+               'count': count or 0,
                'query': query,
                'recipes': recipes_qs}
 
+    return render(request, template_name, context)
+
+
+def recipes_containing(request):
+    template_name = 'main/recipes_containing'
+    context = {}
     return render(request, template_name, context)
 
 
