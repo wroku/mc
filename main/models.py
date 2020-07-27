@@ -92,7 +92,6 @@ class RecipeManager(models.Manager):
         qs = self.get_queryset()
 
 
-
 class Recipe(models.Model):
     user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
     recipe_posted = models.DateTimeField('date published', auto_now_add=True)

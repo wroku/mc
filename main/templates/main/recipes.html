@@ -59,11 +59,20 @@
             <div class="col-md-6">
               <div class="card-body">
                 <h5 class="card-title">{{recipe.recipe_name}}</h5><small> {{recipe.recipe_posted}}</small>
-                <p class="card-text">Calory value : {{ recipe.calories_per_serving}} cal/serving</p>
+                <p class="card-text">Caloric value : {{ recipe.calories_per_serving}} cal/serving</p>
                 <p class="card-text"><small class="text-muted">Price: {{recipe.price_per_serving}} pln/serving</small></p>
-                  <a href="/recipes/{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
-                  {% if currentuser == recipe.user %}
-                    <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
+                  {% if recipe.height_field|add:100  >  recipe.width_field %}
+                  <div class="container" style="position:absolute; bottom:20px;">
+                      <a href="/recipes/{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                      {% if currentuser == recipe.user %}
+                      <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
+                      {% endif %}
+                  </div>
+                  {% else %}
+                      <a href="/recipes/{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                      {% if currentuser == recipe.user %}
+                      <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
+                      {% endif %}
                   {% endif %}
               </div>
             </div>

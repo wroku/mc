@@ -82,7 +82,7 @@ class RecipeForm(forms.Form):
         recipe_name = self.cleaned_data.get('recipe_name')
         if self.editing == recipe_name:
             return recipe_name
-        qs = Recipe.objects.filter(recipe_name=recipe_name)
+        qs = Recipe.objects.filter(recipe_name__iexact=recipe_name)
         if qs.exists():
             raise forms.ValidationError('This title has already been used. Please type another one.')
         return recipe_name

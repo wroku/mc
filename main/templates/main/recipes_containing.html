@@ -1,0 +1,72 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+
+{% for data, query, counter in recipes %}
+{% if query %}
+<strong>{{counter}}</strong> results for recipes containing
+    {% for ing in query %}
+        {% if not forloop.last %}
+            <strong>{{ing}}, </strong>
+        {% else %}
+            <strong>{{ing}} </strong>
+        {% endif %}
+    {% endfor %}
+    <br>
+
+        <div class="row">
+
+            <div class="col">
+                {% for recipe, missing in data %}
+                <div class="card my-3">
+                  <div class="row no-gutters">
+                    <div class="col-md-4 my-auto">
+                        <img src="{{recipe.recipe_image.url}}" class="card-img">
+                    </div>
+                    <div class="col-md-8">
+                      <div class="card-body">
+                          <div class="row">
+                              <div class="col">
+                                <h5 class="card-title">{{recipe.recipe_name}}</h5><small> {{recipe.recipe_posted}}</small>
+                                <p class="card-text">Caloric value : {{ recipe.calories_per_serving}} cal/serving</p>
+                                <p class="card-text"><small class="text-muted">Price: {{recipe.price_per_serving}} pln/serving</small></p>
+                                  <a href="/recipes/{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                                  {% if currentuser == recipe.user %}
+                                    <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
+                                  {% endif %}
+                              </div>
+                              <div class="col">
+                                  {% if missing %}
+                                      This recipe contains also:
+                                      {% for ingredient in missing %}
+                                      <div class="alert alert-danger" role="alert">
+                                          {{ ingredient }}
+                                      </div>
+                                      {% endfor %}
+                                  {% else %}
+                                      <div class="alert alert-primary" role="alert">
+                                          You have all needed ingredients.
+                                      </div>
+                                  {% endif %}
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+{% else %}
+    <div class="jumbotron">
+        <h1 class="display-4">Search page</h1>
+        <p class="lead">By using this feature you can find best available recipes to combine particular ingredients into one tasty meal!  </p>
+        <hr class="my-4">
+        <p>Pick foods you want to cook with and use search button below ingredients list.</p><br>
+        <a class="btn btn-secondary btn-lg" href="/products" role="button">Choose ingredients</a>
+    </div>
+{% endif %}
+{% endfor %}
+{% endblock %}

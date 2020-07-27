@@ -19,7 +19,7 @@ from . import views
 app_name = 'main'
 urlpatterns = [
     path('', views.homepage, name='homepage'),
-    path('add-recipe/', views.recipe_page, name='addrecipe'),
+    path('add-recipe/', views.recipe_page, name='add-recipe'),
     path('contact-us/', views.contact_page, name='contact-page'),
     path('products/', views.products, name='products'),
     path('recipes/', views.recipes, name='recipes'),
@@ -31,6 +31,8 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('account/', views.account_details, name='account'),
     path('search/', views.search, name='search'),
+    path('search-by-ingredients/<str:query>/', views.recipes_containing, name='search-by-ingredients'),
+    path('search-by-ingredients/', views.recipes_containing, name='search-by-ingredients'),
     path('api/data/', views.get_data, name='api-data'),
     path('updateSS/', views.update_session, name='updateSS'),
     path('updateOP/', views.update_options, name='updateOP'),

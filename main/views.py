@@ -59,9 +59,40 @@ def search(request):
     return render(request, template_name, context)
 
 
-def recipes_containing(request):
-    template_name = 'main/recipes_containing'
-    context = {}
+def recipes_containing(request, query=[]):
+    results = []
+
+    if query:
+        query = [Ingredient.objects.get(name=name) for name in query.split('&')]
+
+    def search(subquery):
+        partial_matches = []
+        for ing in subquery:
+            partial_matches.append(Recipe.objects.search_by_ing(ing))
+        if partial_matches:
+            recipes_qs = partial_matches[0].intersection(*partial_matches[1:])
+        else:
+            recipes_qs = Recipe.objects.none()
+
+        missING = []
+        for recipe in recipes_qs:
+            missing = []
+            for quantity in recipe.quantities.all():
+                if quantity.ingredient not in subquery:
+                    missing.append(quantity.ingredient)
+            missING.append(missing)
+        return [list(zip(recipes_qs, missING)), subquery, len(recipes_qs)]
+
+    results.append(search(query))
+    if results[0][2] < 5 and len(query) >= 2:
+        for i in range(1, len(query)+1):
+            results.append(search(query[:len(query) - i] + query[len(query) + 1 - i:]))
+
+    template_name = 'main/recipes_containing.html'
+    context = {'ingredients': Ingredient.objects.all(),
+               'recipes': results,
+               }
+
     return render(request, template_name, context)
 
 
@@ -74,16 +105,17 @@ def products(request):
             if current_ing not in request.session['collect_ing']:
                 request.session['collect_ing'].append(current_ing)
                 request.session.modified = True
-                messages.success(request, f'{current_ing} added to your recipe.')
             else:
-                messages.info(request, f'{current_ing} are already on ingredient list.')
+                messages.info(request, f'{current_ing} is already on ingredient list.')
         elif request.POST.get('delete') == 'deleted':
             if current_ing in request.session['collect_ing']:
                 request.session['collect_ing'].remove(current_ing)
                 request.session.modified = True
-                messages.info(request, f'{current_ing} removed form your recipe. ')
             else:
                 messages.info(request, f'{current_ing} is not on ingredient list.')
+        elif request.POST.get('clear') == 'cleared':
+            request.session['collect_ing'] = []
+            request.session.modified = True
     return render(request, 'main/products.html', {'products': Ingredient.objects.all, 'added': request.session['collect_ing']})
 
 
