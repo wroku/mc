@@ -5,6 +5,7 @@ from django.db.models.signals import pre_save
 from django.utils.text import slugify
 from decimal import *
 from django.db.models import Q
+from django.urls import reverse
 
 # Create your models here.
 getcontext().prec = 2
@@ -30,8 +31,21 @@ class FoodCategory(models.Model):
         return self.name
 
 
-class Ingredient(models.Model):
+class IngredientManager(models.Manager):
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            result = qs.filter(name__icontains=query)
+            if not result:
+                for word in query.split():
+                    result = result.union(qs.filter(name__icontains=word.rstrip('s')))
+                qs = result.distinct()
+            else:
+                qs = result
+        return qs
 
+
+class Ingredient(models.Model):
     name = models.CharField(max_length=255, primary_key=True)
     category = models.ForeignKey(FoodCategory, null=True, blank=True, on_delete=models.SET_NULL)
 
@@ -51,10 +65,14 @@ class Ingredient(models.Model):
 
     ingredient_image_src = models.CharField(max_length=255, default=f'main/REPLACE.jpg')
     slug = models.SlugField(null=True, blank=True, unique=True)
-    # TODO Change slug to slugfield and set prepopulate
+
+    objects = IngredientManager()
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('main:product-details', kwargs={'slug': self.slug})
 
 
 def upload_location(recipe, filename):
@@ -86,10 +104,6 @@ class RecipeManager(models.Manager):
         if ing:
             qs = ing.recipe_set.all()
         return qs
-    # For searching by multiple ingredients maybe chain querysets /combine .distinct(), without next manager method
-
-    def search_by_ings(self, ings=[]):
-        qs = self.get_queryset()
 
 
 class Recipe(models.Model):

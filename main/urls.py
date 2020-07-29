@@ -20,6 +20,7 @@ app_name = 'main'
 urlpatterns = [
     path('', views.homepage, name='homepage'),
     path('add-recipe/', views.recipe_page, name='add-recipe'),
+    path('products/add/', views.IngredientCreate.as_view(), name='add-ingredient'),
     path('contact-us/', views.contact_page, name='contact-page'),
     path('products/', views.products, name='products'),
     path('recipes/', views.recipes, name='recipes'),

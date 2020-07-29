@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.views.generic import View
 from django.forms import formset_factory
 from django.core.mail import send_mail, EmailMessage
+from django.views.generic.edit import CreateView
 import os
 from django.template import RequestContext
 from itertools import chain
@@ -20,6 +21,22 @@ def homepage(request):
     greeting = 'We will mix here in a while'
     return render(request, 'main/homepage.html', {'greeting': greeting})
 
+
+class IngredientCreate(CreateView):
+    model = Ingredient
+    fields = ['name', 'category', 'price', 'calval', 'image',
+              'total_carbs', 'total_fat', 'total_proteins']
+
+
+def search_for_ingredients(request):
+    count = 0
+    query = request.GET.get('q', None)
+    ingredients_qs = Ingredient.objects.none()
+    if query is not None:
+        ingredients_qs = Ingredient.object.search(query)
+        count = len(qs)
+
+    return render(request, 'main/products.html', {'count': count, 'ingredients': ingredients_qs})
 
 def search(request):
     count = 0
@@ -99,6 +116,14 @@ def recipes_containing(request, query=[]):
 def products(request):
     if 'collect_ing' not in request.session or request.session['collect_ing'] == '':
         request.session['collect_ing'] = []
+
+    count = 0
+    query = request.GET.get('q', None)
+    ingredients_qs = Ingredient.objects.none()
+    if query is not None:
+        ingredients_qs = Ingredient.objects.search(query)
+        count = len(ingredients_qs)
+        print(ingredients_qs)
     if request.method == 'POST':
         current_ing = request.POST.get('ingredient')
         if request.POST.get('add') == 'added':
@@ -116,7 +141,11 @@ def products(request):
         elif request.POST.get('clear') == 'cleared':
             request.session['collect_ing'] = []
             request.session.modified = True
-    return render(request, 'main/products.html', {'products': Ingredient.objects.all, 'added': request.session['collect_ing']})
+    return render(request, 'main/products.html', {'products': Ingredient.objects.all,
+                                                  'added': request.session['collect_ing'],
+                                                  'count': count,
+                                                  'ingredients': ingredients_qs,
+                                                  'query': query})
 
 
 def detailed_product_page(request, slug):

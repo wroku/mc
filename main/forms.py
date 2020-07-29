@@ -55,6 +55,15 @@ class NewUserForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
 
+class IngredientForm(ModelForm):
+    ''' Maybe web scraper here, using prepopulate in real time?
+    or ajax inserting stats and asking user to provide values'''
+    class Meta:
+        model = Ingredient
+        fields = ['name', 'category', 'price', 'calval', 'image',
+                  'total_carbs', 'total_fat', 'total_proteins']
+
+
 class RecipeForm(forms.Form):
 
     def __init__(self, *args, editing='', collect_ing=[], **kwargs):
@@ -96,7 +105,6 @@ class RecipeForm(forms.Form):
     def clean_directions(self, *args, **kwargs):
         directions = self.cleaned_data.get('directions')
         missing = ''
-        # print('HERE WE GO' + directions + "DO WE HAVE IT HERE?", self.collect_ing)
         for ing in self.collect_ing:
             if ing.lower()[:-1] not in directions.lower():
                 missing += ing + ', '
@@ -130,6 +138,7 @@ class RecipeIngredient(forms.Form):
 
 
 RecipeIngFormset = formset_factory(RecipeIngredient, extra=1)
+
 
 # For validating duplicate ingredients when editing (excluding from qs doesnt work yet)
 class BaseRecipeIngFormSet(BaseFormSet):

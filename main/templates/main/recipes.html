@@ -58,9 +58,10 @@
             </div>
             <div class="col-md-6">
               <div class="card-body">
-                <h5 class="card-title">{{recipe.recipe_name}}</h5><small> {{recipe.recipe_posted}}</small>
-                <p class="card-text">Caloric value : {{ recipe.calories_per_serving}} cal/serving</p>
-                <p class="card-text"><small class="text-muted">Price: {{recipe.price_per_serving}} pln/serving</small></p>
+                <h4 class="card-title">{{recipe.recipe_name}}</h4>
+                  <p>{{recipe.recipe_posted}}</p>
+                  <p class="card-text text-muted">Caloric value : <b>{{ recipe.calories_per_serving}}</b> cal/serving</p>
+                  <p class="card-text text-muted">Price : <b>{{recipe.price_per_serving}}</b> pln/serving</p>
                   {% if recipe.height_field|add:100  >  recipe.width_field %}
                   <div class="container" style="position:absolute; bottom:20px;">
                       <a href="/recipes/{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>

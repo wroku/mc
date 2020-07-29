@@ -4,137 +4,188 @@
 {% block content %}
 <br>
 {% load static %}
-<div class="row">
-  <div class="col">
-<nav>
-  <div class="nav nav-tabs nav-fill nav-justified" id="nav-tab" role="tablist">
-    <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">All</a>
-    {% for category in foodcategories %}
-      <a class="nav-item nav-link" id="nav-{{category.slug}}-tab" data-toggle="tab" href="#nav-{{category.slug}}" role="tab" aria-controls="nav-{{category}}" aria-selected="false">{{category}}</a>
-    {% endfor %}
-  </div>
-</nav>
-  </div>
-</div>
-<!--TERRIBLY WET SECTION! DRY IT ASAP! -->
 
+{% if query %}
 
-<div class="tab-content" id="nav-tabContent">
-
-  <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-    <div class="row">
-        <div class="card-columns" style="column-count:2;">
-      {% for prod in products %}
-    <div class="col-mb-5"> <!-- mx-auto looks better but breaks symmetry in last row, consider when multiple ingredients -->
-        <div class="card mb-3 ml-3" style="max-width: 540px;">
-          <div class="row no-gutters">
-
-            <div class="col-md-4 my-auto">
-              <img src="{% static prod.ingredient_image_src %}" class="card-img">
-            </div>
-
-            <div class="col-md-8">
-              <div class="card-body">
-                <h5 class="card-title">{{prod.name}}</h5>
-                <p class="card-text">Caloric value : {{ prod.calval}} cal/100g</p>
-                <p class="card-text mb-5"><small class="text-muted">Price: {{prod.price}} pln/kg</small></p>
-
-                <div class="container" style="position:absolute; bottom:20px;">
-                  <div class="row">
-                      {% if prod.name not in added %}
-                      <form action="." method="post">{% csrf_token %}
-                          <button type="submit" class="btn btn-outline-success mr-2" name="add" value="added">Add to your recipe</button>
-                          <input type="hidden" name='ingredient' value="{{prod.name}}">
-                      </form>
-                      {% else %}
-                      <form action="." method="post">{% csrf_token %}
-                          <button type="submit" class="btn btn-outline-danger mr-2" name="delete" value="deleted">Delete from recipe</button>
-                          <input type="hidden" name='ingredient' value="{{prod.name}}">
-                      </form>
-                      {% endif %}
-                          <a href="{{prod.slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
-    {% endfor %}
-        </div>
+<div class='row title-row my-5'>
+    <div class='col-12 py-0 mx-auto'>
+        <h3 class='text-center'>{{ count }} results for <b>{{ query }}</b></h3>
     </div>
-  </div>
+</div>
 
-
-
-    {% for category in foodcategories %}
-  <div class="tab-pane fade" id="nav-{{category.slug}}" role="tabpanel" aria-labelledby="nav-{{category.slug}}-tab">
-    <!-- maybe some category info here, but better dont mess with it now -->
-      <div class="card-columns" style="column-count:2;">
-      {% for prod in products %}
-        {% if prod.category == category %}
-        <div class="col-mb-5">
-            <div class="card mb-3 mx-2" style="max-width: 540px;">
+<div class="row">
+        {% for ing in ingredients %}
+        <div class="col-mb-5 mx-auto"> <!-- mx-auto looks better but breaks symmetry in last row, consider when multiple ingredients -->
+            <div class="card mb-3 ml-3" style="max-width: 540px;">
               <div class="row no-gutters">
+
                 <div class="col-md-4 my-auto">
-                  <img src="{% static prod.ingredient_image_src %}" class="card-img">
+                  <img src="{{ ing.image.url }}" class="card-img">
                 </div>
+
                 <div class="col-md-8">
                   <div class="card-body">
-                    <h5 class="card-title">{{prod.name}}</h5>
-                    <p class="card-text">Caloric value : {{ prod.calval}} cal/100g</p>
-                    <p class="card-text mb-5"><small class="text-muted">Price: {{prod.price}} pln/kg</small></p>
+                    <h5 class="card-title">{{ing.name}}</h5>
+                      <p class="card-text text-muted">Caloric value : <b>{{ ing.calval }}</b> cal/100g</p>
+                      <p class="card-text text-muted mb-5">Price : <b>{{ ing.price }}</b> pln/kg</p>
+
                     <div class="container" style="position:absolute; bottom:20px;">
                       <div class="row">
-                          {% if prod.name not in added %}
+                          {% if ing.name not in added %}
                           <form action="." method="post">{% csrf_token %}
                               <button type="submit" class="btn btn-outline-success mr-2" name="add" value="added">Add to your recipe</button>
-                              <input type="hidden" name='ingredient' value="{{prod.name}}">
+                              <input type="hidden" name='ingredient' value="{{ing.name}}">
                           </form>
                           {% else %}
                           <form action="." method="post">{% csrf_token %}
                               <button type="submit" class="btn btn-outline-danger mr-2" name="delete" value="deleted">Delete from recipe</button>
-                              <input type="hidden" name='ingredient' value="{{prod.name}}">
+                              <input type="hidden" name='ingredient' value="{{ing.name}}">
                           </form>
                           {% endif %}
-                              <a href="{{prod.slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                          <a href="{{ ing.get_absolute_url }}"><button type="button" class="btn btn-outline-info">See details</button></a>
                       </div>
+                    </div>
+
                   </div>
-                      </div>
                 </div>
               </div>
             </div>
+        </div>
+        {% endfor %}
+</div>
+
+
+{% else %}
+<div class="row">
+  <div class="col">
+    <nav>
+      <div class="nav nav-tabs nav-fill nav-justified" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">All</a>
+        {% for category in foodcategories %}
+          <a class="nav-item nav-link" id="nav-{{category.slug}}-tab" data-toggle="tab" href="#nav-{{category.slug}}" role="tab" aria-controls="nav-{{category}}" aria-selected="false">{{category}}</a>
+        {% endfor %}
+      </div>
+    </nav>
+  </div>
+</div>
+
+
+<!--TERRIBLY WET SECTION! DRY IT ASAP! -->
+
+<div class="tab-content" id="nav-tabContent">
+  <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+    <div class="row">
+        <div class="card-columns" style="column-count:2;">
+            {% for prod in products %}
+            <div class="col-mb-5"> <!-- mx-auto looks better but breaks symmetry in last row, consider when multiple ingredients -->
+                <div class="card mb-3 ml-3" style="max-width: 540px;">
+                  <div class="row no-gutters">
+
+                    <div class="col-md-4 my-auto">
+                      <img src="{{ prod.image.url }}" class="card-img">
+                    </div>
+
+                    <div class="col-md-8">
+                      <div class="card-body">
+                        <h5 class="card-title">{{prod.name}}</h5>
+                        <p class="card-text text-muted">Caloric value : <b>{{ prod.calval }}</b> cal/100g</p>
+                        <p class="card-text text-muted mb-5">Price : <b>{{ prod.price }}</b> pln/kg</p>
+                        <div class="container" style="position:absolute; bottom:20px;">
+                          <div class="row">
+                              {% if prod.name not in added %}
+                              <form action="." method="post">{% csrf_token %}
+                                  <button type="submit" class="btn btn-outline-success mr-2" name="add" value="added">Add to your recipe</button>
+                                  <input type="hidden" name='ingredient' value="{{prod.name}}">
+                              </form>
+                              {% else %}
+                              <form action="." method="post">{% csrf_token %}
+                                  <button type="submit" class="btn btn-outline-danger mr-2" name="delete" value="deleted">Delete from recipe</button>
+                                  <input type="hidden" name='ingredient' value="{{prod.name}}">
+                              </form>
+                              {% endif %}
+                              <a href="{{ prod.get_absolute_url }}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
-        {% endif %}
-      {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+  </div>
+
+  {% for category in foodcategories %}
+  <div class="tab-pane fade" id="nav-{{category.slug}}" role="tabpanel" aria-labelledby="nav-{{category.slug}}-tab">
+    <!-- maybe some category info here, but better dont mess with it now -->
+      <div class="card-columns" style="column-count:2;">
+          {% for prod in products %}
+            {% if prod.category == category %}
+            <div class="col-mb-5">
+                <div class="card mb-3 mx-2" style="max-width: 540px;">
+                  <div class="row no-gutters">
+                    <div class="col-md-4 my-auto">
+                      <img src="{{ prod.image.url }}" class="card-img">
+                    </div>
+                    <div class="col-md-8">
+                      <div class="card-body">
+                        <h5 class="card-title">{{prod.name}}</h5>
+                        <p class="card-text text-muted">Caloric value : <b>{{ prod.calval }}</b> cal/100g</p>
+                        <p class="card-text text-muted mb-5">Price : <b>{{ prod.price }}</b> pln/kg</p><div class="container" style="position:absolute; bottom:20px;">
+                          <div class="row">
+                              {% if prod.name not in added %}
+                              <form action="." method="post">{% csrf_token %}
+                                  <button type="submit" class="btn btn-outline-success mr-2" name="add" value="added">Add to your recipe</button>
+                                  <input type="hidden" name='ingredient' value="{{prod.name}}">
+                              </form>
+                              {% else %}
+                              <form action="." method="post">{% csrf_token %}
+                                  <button type="submit" class="btn btn-outline-danger mr-2" name="delete" value="deleted">Delete from recipe</button>
+                                  <input type="hidden" name='ingredient' value="{{prod.name}}">
+                              </form>
+                              {% endif %}
+                              <a href="{{prod.get_absolute_url}}"><button type="button" class="btn btn-outline-info">See details</button></a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            {% endif %}
+          {% endfor %}
       </div>
   </div>
-    {% endfor %}
+  {% endfor %}
 </div>
-</div>
+
+{% endif %}
 
 {% if added %}
 <div style="position:fixed; bottom:10px; right:10px; width:370px; border: 3px solid #4e4e52; background-color: #7c8282; z-index:100;">
     <h1 class="text-center">Ingredient list</h1><br/>
     <ul>
-  {% for ing in added %}
-    <li><strong>{{ing}}</strong></li></br>
-  {% endfor %}
+      {% for ing in added %}
+        <li><strong>{{ing}}</strong></li></br>
+      {% endfor %}
     </ul>
     <div class="row no-gutters mb-2">
         <div class="col ml-3 m-2">
-        <a href="/add-recipe"><button type="button" class="btn btn-success">Create recipe</button></a>
+            <a href="/add-recipe"><button type="button" class="btn btn-success">Create recipe</button></a>
         </div>
         <div class="col m-2">
-        <a href="/search-by-ingredients/{{added|join:'&'}}"><button type="button" class="btn btn-info">Search for recipe</button></a>
+            <a href="/search-by-ingredients/{{added|join:'&'}}"><button type="button" class="btn btn-info">Search for recipe</button></a>
         </div>
         <div class="col align-self-center m-2">
-        <form action="." method="post">{% csrf_token %}
-            <button type="submit" class="btn btn-danger" name="clear" value="cleared">Clear all</button>
-        </form>
+            <form action="." method="post">{% csrf_token %}
+                <button type="submit" class="btn btn-danger" name="clear" value="cleared">Clear all</button>
+            </form>
         </div>
     </div>
 </div>
 {% endif %}
+
+
 {% endblock %}

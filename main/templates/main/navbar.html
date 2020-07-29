@@ -41,10 +41,24 @@
 
         {% endif %}
       </ul>
+
+      {% if request.path|slice:"10" == '/products/' %}
+      <form method='GET' class="form-inline my-2 my-lg-0" action="/products">
+        <input class="form-control mr-sm-2" type="search" name="q" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" id="ING" type="submit" data-toggle="tooltip" data-placement="bottom" title="Search for ingredients!">Search</button>
+      </form>
+      <script>
+        $('#ING').tooltip({offset:'0, 10px'})
+        $('#ING').tooltip('show')
+        setTimeout( function(){$('#ING').tooltip('hide');}, 4000);
+      </script>
+      {% else %}
       <form method='GET' class="form-inline my-2 my-lg-0" action="/search">
         <input class="form-control mr-sm-2" type="search" name="q" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit" >Search</button>
       </form>
+
+      {% endif %}
     </div>
   </div>
 </nav>

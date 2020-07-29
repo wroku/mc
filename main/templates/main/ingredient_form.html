@@ -1,0 +1,21 @@
+{% extends 'main/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+{% if user.is_authenticated %}
+<div class="col-6 mx-auto mt-3">
+    <h3 class="text-center my-5">Add new ingredient</h3>
+    <form method="POST" enctype="multipart/form-data" action="."> {% csrf_token %}
+
+            {{ form|crispy }}
+
+        <button type="submit" class="btn btn-primary mt-3">Create</button>
+    </form>
+</div>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <h3 class="text-center">Only authenticated users can add new ingredients.</h3>
+    </div>
+{% endif %}
+
+{% endblock %}
