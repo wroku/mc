@@ -1,21 +1,18 @@
 {% extends "main/base.html" %}
 
 {% block content %}
-    <h1>{{ greeting }}</h1>
 
-
-
-
-<button type="button" class="btn btn-primary show-toast">Show Toast</button>
-
-<script>
-    $(document).ready(function(){
-        $(".show-toast").click(function(){
-            $('.toast').toast('show');
-        });
-    });
-
-</script>
+<div class="jumbotron mt-5">
+  <h1 class="display-4 mb-5 text-center">Meal configurator</h1>
+  <p class="lead">This site is designed to help you find an answer to the most important question of the day:
+  </p>
+    <h2 class="my-3 text-center">What's for dinner?</h2>
+  <hr class="my-4">
+  <p>You can look through recipes waiting for an inspiration to kick in or search for something specific. Order meals by caloric value, preparation time or price estimation.  </p>
+  <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+    <hr class="my-4">
+    <p>Got some food laying around and no idea to combine it into tasty dinner? Add ingredients to a list and search for recipes fitting your needs.</p>
+</div>
 
 
 {% endblock %}

@@ -51,7 +51,86 @@
         <h1>Hi chart</h1>
         <canvas id="myChart" width="400" height="400"></canvas>
         <canvas id="myCanvas" width="200px" height="200px" style="border:1px solid #000"></canvas>
+        <canvas id="yourCanvas" width="400px" height="500px" style="border:1px solid #000"></canvas>
         <script>
+        var y = 50
+        var displayArray = function(array, i, nextMin) {
+
+            const canv = document.getElementById('yourCanvas');
+            const ctx = canv.getContext("2d");
+            ctx.font = '20px serif'
+            var x = 50
+            for (elem of array){
+                ctx.fillText(elem, x, y);
+                x = x + 30;
+            }
+            if(i != array.length - 1){
+                ctx.beginPath();
+                ctx.moveTo(55 + nextMin*30, y + 2);
+                ctx.lineTo(55 + i*30, y+35);
+                ctx.stroke();
+            }
+
+            y = y + 50
+
+
+        };
+
+        var swap = function(array, firstIndex, secondIndex) {
+            var temp = array[firstIndex];
+            array[firstIndex] = array[secondIndex];
+            array[secondIndex] = temp;
+        };
+
+        var indexOfMinimum = function(array, startIndex) {
+            var minValue = array[startIndex];
+            var minIndex = startIndex;
+
+            for(var i = minIndex + 1; i < array.length; i++) {
+                if(array[i] < minValue) {
+                    minIndex = i;
+                    minValue = array[i];
+                }
+            }
+            return minIndex;
+        };
+
+        var selectionSort = function(array) {
+            var nextMin;
+            for(var i = 0 ; i < array.length; i++){
+                nextMin = indexOfMinimum(array, i);
+                displayArray(array, i, nextMin);
+                swap(array, i, nextMin);
+            }
+
+        };
+
+        var array = [2, 14, 9, 4 ,7 , 1, 9, 3 ];
+        selectionSort(array);
+
+
+
+
+        var insert = function(array, rightIndex, value) {
+        for(var j = rightIndex;
+            j >= 0 && array[j] > value;
+            j--) {
+            array[j + 1] = array[j];
+        }
+        array[j + 1] = value;
+        };
+
+        var insertionSort = function(array) {
+            for(var i = 1; i < array.length; i++){
+                insert(array, i-1, array[i]);
+            }
+
+        };
+
+
+
+
+
             const canvas = document.getElementById("myCanvas");
             const context = canvas.getContext("2d");
             const blobCount = 10;
