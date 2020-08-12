@@ -10,8 +10,12 @@ class IngredientAdmin(admin.ModelAdmin):
         ('Name/category', {'fields': ['name', 'category']}),
         ('Important Values', {'fields': ['price', 'calval', 'image',
                                          'total_carbs', 'total_fat', 'total_proteins']}),
-        ('Underlying magic', {'fields': ['slug', "ingredient_image_src"]}),
+        ('Underlying magic', {'fields': ['slug', 'accepted']}),
     ]
+    actions = ['approve_ingredients']
+
+    def approve_ingredients(self, request, queryset):
+        queryset.update(accepted=True)
 
 
 class FoodCategoryAdmin(admin.ModelAdmin):
@@ -26,15 +30,20 @@ class QuantityInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
 
     prepopulated_fields = {'recipe_slug': ('recipe_name',)}
-    fields = ('user', 'recipe_name', 'recipe_posted', 'recipe_image', 'height_field', 'width_field', 'recipe_slug', 'preparation_time',
+    fields = ('user', 'recipe_name', 'recipe_posted', 'accepted', 'recipe_image', 'height_field', 'width_field', 'recipe_slug', 'preparation_time',
               'calories_per_serving', 'price_per_serving', 'directions')
     readonly_fields = ('recipe_posted',)
     inlines = (QuantityInline,)
+    actions = ['approve_recipes']
+
+    def approve_recipes(self, request, queryset):
+        queryset.update(accepted=True)
 
 
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(FoodCategory, FoodCategoryAdmin)
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):

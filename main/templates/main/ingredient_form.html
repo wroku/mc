@@ -4,6 +4,7 @@
 
 {% if user.is_authenticated %}
 <div class="col-6 mx-auto mt-3">
+
     <h3 class="text-center my-5">Add new ingredient</h3>
     <form method="POST" enctype="multipart/form-data" action="."> {% csrf_token %}
 
@@ -13,9 +14,15 @@
     </form>
 </div>
 {% else %}
-    <div class="alert alert-danger" role="alert">
-        <h3 class="text-center">Only authenticated users can add new ingredients.</h3>
+
+<div class="col-12 ">
+    <div class="d-flex align-items-center" style="height:500px;">
+    <div class="alert alert-danger mx-auto" role="alert">
+        <h3 class="text-center ">Only authenticated users can add new ingredients.</h3>
+            <h4 class="text-center"><a href="/login?next={% firstof request.path '/' %}"><b>Login</b></a> or <a href="/register?next={% firstof request.path '/' %}"><b>register</b></a> if you don't have an account yet.</h4>
     </div>
+</div>
+</div>
 {% endif %}
 
 {% endblock %}

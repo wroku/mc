@@ -6,8 +6,12 @@
 
 {% if query %}
 
+{% if forloop.counter0 == 0 %}
+<h5 class="my-5"> *You can also look for recipes with particular title lub keywords, for this purpose use search box above. </h5>
+{% endif %}
+
 {% if forloop.counter0 == 1 %}
-<div class="alert alert-danger text-center" role="alert">
+<div class="alert alert-danger text-center mt-5" role="alert">
     <h3><strong>Recipes below do not contain one of desired ingredients.</strong></h3>
 </div>
 {% endif %}
@@ -18,14 +22,18 @@
 <div class='row title-row my-5'>
     <div class='col-12 py-0 mx-auto'>
         <h3 class='my-0 py-0'><strong>{{counter}}</strong> results for recipes containing
-    {% for ing in query %}
-        {% if not forloop.last %}
-            <strong>{{ing}}, </strong>
-        {% else %}
-            <strong>{{ing}} </strong>
-        {% endif %}
-    {% endfor %}
+        {% for ing in query %}
+            {% if not forloop.last %}
+                <strong>{{ing}}, </strong>
+            {% else %}
+                <strong>{{ing}}. </strong>
+            {% endif %}
+        {% endfor %}
+
         </h3>
+        {% if not counter %}
+        <h5 class="my-5">Please, consider <a href="/add-recipe">adding</a> new recipe if you find a way to combine this ingredients.</h5>
+        {% endif %}
     </div>
 </div>
 

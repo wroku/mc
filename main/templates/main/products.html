@@ -7,9 +7,13 @@
 
 {% if query %}
 
+
 <div class='row title-row my-5'>
     <div class='col-12 py-0 mx-auto'>
         <h3 class='text-center'>{{ count }} results for <b>{{ query }}</b></h3>
+        {% if not count %}
+        <h4 class="text-center my-5">If you can't find ingredient you need, <a href="/contact-us">contact us</a> or use <a href="/products/add">this form</a> to add one.</h4>
+        {% endif%}
     </div>
 </div>
 
@@ -164,7 +168,7 @@
 {% endif %}
 
 {% if added %}
-<div style="position:fixed; bottom:10px; right:10px; width:370px; border: 3px solid #4e4e52; background-color: #7c8282; z-index:100;">
+<div style="position:fixed; bottom:10px; right:10px; width:370px; border: 3px solid #4e4e52; background-color: #bec4c3; z-index:100;">
     <h1 class="text-center">Ingredient list</h1><br/>
     <ul>
       {% for ing in added %}

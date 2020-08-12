@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from datetime import datetime
 from django.db.models.signals import pre_save
 from django.utils.text import slugify
 from decimal import *
@@ -48,7 +47,6 @@ class IngredientManager(models.Manager):
 class Ingredient(models.Model):
     name = models.CharField(max_length=255, primary_key=True)
     category = models.ForeignKey(FoodCategory, null=True, blank=True, on_delete=models.SET_NULL)
-
     price = models.DecimalField(max_digits=7, decimal_places=2)
     calval = models.IntegerField()
     total_carbs = models.FloatField()
@@ -63,10 +61,10 @@ class Ingredient(models.Model):
     height_field = models.IntegerField(default=0)
     width_field = models.IntegerField(default=0)
 
-    ingredient_image_src = models.CharField(max_length=255, default=f'main/REPLACE.jpg')
     slug = models.SlugField(null=True, blank=True, unique=True)
-
     objects = IngredientManager()
+
+    accepted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -124,10 +122,11 @@ class Recipe(models.Model):
     directions = models.TextField()
     preparation_time = models.IntegerField(default=45)
     servings = models.IntegerField(default=2)
-    # Data replication, I will leave it here for now
+
     calories_per_serving = models.IntegerField(blank=True, null=True)
     price_per_serving = models.DecimalField(max_digits=7, decimal_places=2)
 
+    accepted = models.BooleanField(default=False)
     objects = RecipeManager()
 
     def __str__(self):

@@ -1,18 +1,25 @@
 {% extends "main/base.html" %}
 
 {% block content %}
+<!-- TODO add some screens to break this wall of text -->
 
 <div class="jumbotron mt-5">
   <h1 class="display-4 mb-5 text-center">Meal configurator</h1>
   <p class="lead">This site is designed to help you find an answer to the most important question of the day:
   </p>
-    <h2 class="my-3 text-center">What's for dinner?</h2>
+    <h2 class="my-5 text-center">What's for dinner?</h2>
   <hr class="my-4">
   <p>You can look through recipes waiting for an inspiration to kick in or search for something specific. Order meals by caloric value, preparation time or price estimation.  </p>
-  <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-    <hr class="my-4">
-    <p>Got some food laying around and no idea to combine it into tasty dinner? Add ingredients to a list and search for recipes fitting your needs.</p>
+  <a class="btn btn-primary btn-lg" href="/recipes" role="button">Recipes</a>
+  <hr class="my-4">
+  <p>Got some food laying around and no idea how to combine it into tasty dinner? Add ingredients to a list and search for recipes fitting your needs.
+    Don't forget to leave a comment with your review or suggestions afterwards!
+  </p>
+    <a class="btn btn-primary btn-lg" href="/ingredients" role="button">Ingredients</a>
+  <hr class="my-4">
+  <p>If you didn't find satisfying match and got creative on your own, please don't hesitate to save others from similar trouble. </p>
+  Just take a quick photo of your delicious meal, enter quantities of already chosen ingredients and provide basic explanation of cooking process.
+  Good looking recipe with additional nutrition info is ready to share!
 </div>
-
 
 {% endblock %}

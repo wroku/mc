@@ -3,23 +3,19 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, Http
 from .models import Ingredient, Recipe, Quantity, Comment
 from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm, RecipeIngredient, BaseRecipeIngFormSet
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.views.generic import View
 from django.forms import formset_factory
 from django.core.mail import send_mail, EmailMessage
 from django.views.generic.edit import CreateView
-import os
-from django.template import RequestContext
-from itertools import chain
-from django.views.generic import ListView
 
 # Create your views here.
 
 
 def homepage(request):
-    greeting = 'We will mix here in a while'
-    return render(request, 'main/homepage.html', {'greeting': greeting})
+    return render(request, 'main/homepage.html')
 
 
 class IngredientCreate(CreateView):
@@ -27,16 +23,6 @@ class IngredientCreate(CreateView):
     fields = ['name', 'category', 'price', 'calval', 'image',
               'total_carbs', 'total_fat', 'total_proteins']
 
-
-def search_for_ingredients(request):
-    count = 0
-    query = request.GET.get('q', None)
-    ingredients_qs = Ingredient.objects.none()
-    if query is not None:
-        ingredients_qs = Ingredient.object.search(query)
-        count = len(qs)
-
-    return render(request, 'main/products.html', {'count': count, 'ingredients': ingredients_qs})
 
 def search(request):
     count = 0
@@ -141,7 +127,7 @@ def products(request):
         elif request.POST.get('clear') == 'cleared':
             request.session['collect_ing'] = []
             request.session.modified = True
-    return render(request, 'main/products.html', {'products': Ingredient.objects.all,
+    return render(request, 'main/products.html', {'products': Ingredient.objects.filter(accepted=True),
                                                   'added': request.session['collect_ing'],
                                                   'count': count,
                                                   'ingredients': ingredients_qs,
@@ -191,6 +177,12 @@ def recipes(request):
         qs = Recipe.objects.order_by(filter_by)
         desc = ''
         asc = 'checked'
+
+    qs = qs.filter(accepted=True)
+    # Hacking around nice-looking card columns screwing up my ordering.
+    # Should work just fine with similar heights of recipe images, check it.
+    qs = qs[::2] + qs[1::2]
+
     return render(request,
                   'main/recipes.html',
                   {'desc': desc,
@@ -236,13 +228,11 @@ def detailed_recipe_page(request, slug):
     return render(request, template_name, context)
 
 
+@login_required()
 def account_details(request):
-    if request.user.is_authenticated:
-        context = {'recipes': Recipe.objects.filter(user=request.user),
-                   'comments': Comment.objects.filter(user=request.user)}
-        return render(request, 'main/account_details.html', context)
-    else:
-        return redirect('main:login')
+    context = {'recipes': Recipe.objects.filter(user=request.user),
+               'comments': Comment.objects.filter(user=request.user)}
+    return render(request, 'main/account_details.html', context)
 
 
 def contact_page(request):

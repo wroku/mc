@@ -4,9 +4,13 @@
 {% load static %}
 
   <br>
+  {% if not product.accepted %}
+    <div class="col-sm-12">
+        <div class="alert alert-danger my-5">This ingredient has not been yet accepted by the admin, so it won't be displayed on a main page. However you can still add it to your recipe.</div>
+    </div>
+  {% endif %}
   <div class="card mx-auto" style="width: 50rem;">
     <div class="card-body">
-
       <div class="row">
         <div class="col-md-5">
           <img src="{{ product.image.url }}" class="img-fluid">

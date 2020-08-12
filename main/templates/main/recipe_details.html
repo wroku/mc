@@ -4,6 +4,11 @@
 {% load crispy_forms_tags %}
 
 <div class="row">
+    {% if not recipe.accepted %}
+    <div class="col-sm-12">
+        <div class="alert alert-danger my-5">This recipe has not been yet accepted by the admin, so it won't be displayed on a main page. However you can still share the link above or even make some <a href="edit">changes.</a></div>
+    </div>
+    {% endif %}
 <div class="col-4">
     <ul class="list-group">
         <li class="list-group-item text-center"><strong>Ingredients [for {{recipe.servings}} servings]</strong></li>
