@@ -21,7 +21,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'kkwqg4fxm7d+91fgo2if13wn84_+=*+l-0^oix+g(sidtbsa+l'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'kkwqg4fxm7d+91fgo2if13wn84_+=*+l-0^oix+g(sidtbsa+l')
+
+'''
+python -c 'from django.core.management.utils import get_random_secret_key; print (get_random_secret_key())'
+'''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -116,6 +120,20 @@ DATABASES = {
     }
 }
 
+import dj_database_url
+db_from_env = dj_database_url.config()
+DATABASES['default'].update(db_from_env)
+DATABASES['default']['CONN_MAX_AGE'] = 500
+
+CORS_REPLACE_HTTPS_REFERER      = True
+HOST_SCHEME                     = "https://"
+SECURE_PROXY_SSL_HEADER         = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT             = True
+SESSION_COOKIE_SECURE           = True
+CSRF_COOKIE_SECURE              = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS  = True
+SECURE_HSTS_SECONDS             = 1000000
+SECURE_FRAME_DENY               = True
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -164,6 +182,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'wrokuj@gmail.com'
-EMAIL_HOST_PASSWORD = 'bewareofspies'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD','bewareofspies')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
