@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 .idea/
+media_cdn
+db.sqlite3
