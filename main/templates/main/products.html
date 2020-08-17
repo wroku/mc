@@ -168,11 +168,11 @@
 {% endif %}
 
 {% if added %}
-<div style="position:fixed; bottom:10px; right:10px; width:370px; border: 3px solid #4e4e52; background-color: #bec4c3; z-index:100;">
-    <h1 class="text-center">Ingredient list</h1><br/>
+<div style="position:fixed; bottom:10px; right:10px; width:370px; border: 3px solid #4e4e52; border-radius: 20px; background-color: rgba(255, 255, 255, 0.8); z-index:100;">
+    <h1 class="text-center mt-1">Ingredient list</h1><br/>
     <ul>
       {% for ing in added %}
-        <li><strong>{{ing}}</strong></li></br>
+        <li>{{ing}}</li></br>
       {% endfor %}
     </ul>
     <div class="row no-gutters mb-2">

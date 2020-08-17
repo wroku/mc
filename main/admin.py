@@ -19,7 +19,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 class FoodCategoryAdmin(admin.ModelAdmin):
-    fields = ('name', 'slug', 'image', 'description')
+    fields = ('name', 'slug')
 
 
 class QuantityInline(admin.TabularInline):

@@ -14,14 +14,6 @@ User = settings.AUTH_USER_MODEL
 class FoodCategory(models.Model):
     name = models.CharField(max_length=255, primary_key=True)
     slug = models.SlugField(null=True, blank=True, unique=True)
-    description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='category_images',
-                              null=True,
-                              blank=True,
-                              width_field='width_field',
-                              height_field='height_field')
-    height_field = models.IntegerField(default=0)
-    width_field = models.IntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Categories'
