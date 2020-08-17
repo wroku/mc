@@ -12,7 +12,7 @@
 
     <img src="{% static 'main/recipee.jpg' %}" class="img-fluid mb-2">
     {% if title %}
-        <h1 style="position: absolute; top:0; right:0; left:0; margin:auto;"class="text-center mt-1">{{ title }}</h1>
+        <h1 style="position: absolute; top:0; right:0; left:0; margin:auto;" class="text-center mt-1">{{ title }}</h1>
     {% endif %}
 
     <br>
@@ -152,19 +152,14 @@
         <button type="submit" class="btn btn-primary my-3">Create</button>
        {% endif %}-->
     </form>
-        <p><b>Results:</b> <span id="results"></span></p>
-        <p><b>Serialized:</b> <span id="ser"></span></p>
+
     </div>
     <script>
       function updateSession() {
         var fields = $( ":input" ).serializeArray();
-        $( "#results" ).empty();
-        $( "#ser" ).empty();
-        $( "#ser" ).append(fields);
         let updateING = '';
         jQuery.each( fields, function( i, field ) {
             if(i>5 && i!=(fields.length-1) && field.value!='' && isNaN(field.value)){
-                $( "#results" ).append(field.value + " " );
                 updateING = updateING + "#" + field.value;
                 console.log(updateING);
             }
@@ -234,7 +229,6 @@
                                     },
             error: function(error_data){
                                         console.log(error_data)
-                                        console.log('WTF?')
                                         }
         })
       }
