@@ -28,7 +28,7 @@ python -c 'from django.core.management.utils import get_random_secret_key; print
 '''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [".herokuapp.com", ".herokuapps.com"]
 LOGIN_URL = "/login"
