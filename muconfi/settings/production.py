@@ -30,6 +30,35 @@ python -c 'from django.core.management.utils import get_random_secret_key; print
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    }
+}
+
 ALLOWED_HOSTS = [".herokuapp.com", ".herokuapps.com"]
 LOGIN_URL = "/login"
 
