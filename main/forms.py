@@ -123,7 +123,6 @@ class RecipeIngredient(forms.Form):
         # this shit has taken 1.5h of my life and still not resolved
         # TODO UNDERDSTAND WHY... it works when posting, but not when editing
         if not self.initial:
-            print('FUCK OFF')
             print(self.collect_ing)
             # self.fields['ingredient'].queryset = Ingredient.objects.all().exclude(name__in=self.collect_ing)
 

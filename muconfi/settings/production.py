@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from muconfi.aws.conf import *
 
 print("Production settings")
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -30,8 +31,7 @@ python -c 'from django.core.management.utils import get_random_secret_key; print
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-DEBUG_PROPAGATE_EXCEPTIONS = True
-
+DEBUG_PROPAGATE_EXCEPTIONS = False
 
 ALLOWED_HOSTS = [".herokuapp.com", ".herokuapps.com"]
 LOGIN_URL = "/login"
@@ -68,6 +68,7 @@ TINYMCE_DEFAULT_CONFIG = {
     }
 
 INSTALLED_APPS = [
+    'storages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -83,7 +84,6 @@ INSTALLED_APPS = [
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -175,18 +175,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+#STATIC_URL = '/static/'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media_cdn')
+#MEDIA_URL = '/media/'
+#MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media_cdn')
 
 # SMTP Configuration
 

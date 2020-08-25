@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from muconfi.aws.conf import *
 
 print("Dev settings")
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -44,7 +45,7 @@ DEBUG_PROPAGATE_EXCEPTIONS = False
     },
 }'''
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 LOGIN_URL = "/login"
 # Application definition
@@ -79,7 +80,7 @@ TINYMCE_DEFAULT_CONFIG = {
     }
 
 INSTALLED_APPS = [
-    'whitenoise.runserver_nostatic',
+    'storages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -95,7 +96,6 @@ INSTALLED_APPS = [
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -189,8 +189,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media_cdn')
