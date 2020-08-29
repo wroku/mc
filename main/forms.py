@@ -98,8 +98,8 @@ class RecipeForm(forms.Form):
 
     def clean_preparation_time(self, *args, **kwargs):
         preparation_time = self.cleaned_data.get('preparation_time')
-        if not 500 > preparation_time > 0:
-            raise forms.ValidationError('Enter valid preparation_time for this recipe expressed in minutes.')
+        if not 500 > preparation_time > 5:
+            raise forms.ValidationError('Enter valid preparation_time for this recipe expressed in minutes [5-500].')
         return preparation_time
 
     def clean_directions(self, *args, **kwargs):

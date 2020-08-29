@@ -133,13 +133,13 @@ def pre_save_recipe_receiver(sender, instance, *args, **kwargs):
     cps, pps = 0, 0
     for q in qs:
         ing = Ingredient.objects.get(name=q.ingredient)
-        cps += q.quantity/1000 * ing.calval
+        cps += q.quantity/100 * ing.calval
         pps += (q.quantity * ing.price)/1000
     instance.calories_per_serving = round(cps/int(instance.servings))
     instance.price_per_serving = round(pps/int(instance.servings), 2)
 
 
-pre_save.connect(pre_save_recipe_receiver, sender=Recipe)
+pre_save.connect(pre_save_recipe_receiver, sender=Recipe, weak=False)
 
 
 class Quantity(models.Model):

@@ -212,10 +212,9 @@ def detailed_recipe_page(request, slug):
     else:
         comment_form = CommentForm()
 
-    mnt_profile = [sum([qt.ingredient.total_carbs*qt.quantity for qt in obj.quantities.all()]),
-                   sum([qt.ingredient.total_fat*qt.quantity for qt in obj.quantities.all()]),
-                   sum([qt.ingredient.total_proteins*qt.quantity for qt in obj.quantities.all()])]
-    print(mnt_profile)
+    mnt_profile = [(sum([qt.ingredient.total_carbs*qt.quantity for qt in obj.quantities.all()]))/obj.servings,
+                   (sum([qt.ingredient.total_fat*qt.quantity for qt in obj.quantities.all()]))/obj.servings,
+                   (sum([qt.ingredient.total_proteins*qt.quantity for qt in obj.quantities.all()]))/obj.servings]
 
     template_name = 'main/recipe_details.html'
     context = {'recipe': obj,
