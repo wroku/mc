@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.urls import reverse
 
 # Create your models here.
-getcontext().prec = 2
+getcontext().prec = 5
 User = settings.AUTH_USER_MODEL
 
 
@@ -136,6 +136,7 @@ def pre_save_recipe_receiver(sender, instance, *args, **kwargs):
         cps += q.quantity/100 * ing.calval
         pps += (q.quantity * ing.price)/1000
     instance.calories_per_serving = round(cps/int(instance.servings))
+    print(round(pps/int(instance.servings), 2))
     instance.price_per_serving = round(pps/int(instance.servings), 2)
 
 
