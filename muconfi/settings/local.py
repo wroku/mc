@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-from muconfi.aws.conf import *
+# from muconfi.aws.conf import *
 
 print("Dev settings")
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 SECRET_KEY = 'kkwqg4fxm7d+91fgo2if13wn84_+=*+l-0^oix+g(sidtbsa+l'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 DEBUG_PROPAGATE_EXCEPTIONS = False
 
@@ -52,7 +52,7 @@ LOGIN_URL = "/login"
 
 TINYMCE_DEFAULT_CONFIG = {
     'height': 360,
-    'width': 730,
+    'width': '100%',
     'cleanup_on_startup': True,
     'custom_undo_redo_levels': 20,
     'selector': 'textarea',
@@ -80,7 +80,7 @@ TINYMCE_DEFAULT_CONFIG = {
     }
 
 INSTALLED_APPS = [
-    'storages',
+    #'storages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

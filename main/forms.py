@@ -103,10 +103,11 @@ class RecipeForm(forms.Form):
         return preparation_time
 
     def clean_directions(self, *args, **kwargs):
+        """Checks if all selected ingredients are mentioned in preparation method."""
         directions = self.cleaned_data.get('directions')
         missing = ''
         for ing in self.collect_ing:
-            if ing.lower()[:-1] not in directions.lower():
+            if ing.lower()[:-1] not in directions.lower() and ing.split()[-1][:-1].lower() not in directions.lower():
                 missing += ing + ', '
         if missing != '':
             raise forms.ValidationError(f'Please, provide preparation method for {missing[:-2]}.')

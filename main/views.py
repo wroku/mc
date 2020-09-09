@@ -266,8 +266,6 @@ def recipe_page(request):
                                form_kwargs={'collect_ing': request.session['collect_ing']},
                                initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
-        print('Here we GO:')
-        print(request.session['collect_ing'])
         if form.is_valid() and formset.is_valid():
             recipe = Recipe.objects.create(**form.cleaned_data)
             recipe.user = request.user
@@ -318,8 +316,6 @@ def edit_recipe(request, slug):
                                    form_kwargs={'collect_ing': request.session['collect_ing']},
                                    initial=formset_initial_data)
     if request.method == 'POST':
-        print('Here we GO:')
-        print(request.session['collect_ing'])
         if form.is_valid() and formset.is_valid():
             for key, value in form.cleaned_data.items():
                 setattr(instance, key, value)

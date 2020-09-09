@@ -1,0 +1,52 @@
+@media (max-width: 576px) {
+    .margin-group {
+        margin-bottom: 5px;
+    }
+
+}
+@media (min-width: 576px) {
+    .card-columns {
+        column-count: 1;
+        margin: auto;
+    }
+
+    .ing-btns {
+        position: absolute;
+        bottom: 10px;
+    }
+
+}
+
+@media (min-width: 768px) {
+    .card-columns {
+        column-count: 1;
+        margin: auto;
+    }
+    .ing-btns {
+        position: absolute;
+        bottom: 10px;
+    }
+
+}
+
+@media (min-width: 992px) {
+    .card-columns {
+        column-count: 2;
+    }
+    .ing-btns {
+        position: absolute;
+        bottom: 10px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .card-columns {
+        column-count: 2;
+    }
+    .ing-btns {
+        position: absolute;
+        bottom: 10px;
+    }
+
+}
+
