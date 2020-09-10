@@ -1,3 +1,11 @@
+<script>
+  $(document).ready(function() {
+  $('li.active').removeClass('active');
+  console.log(location.pathname.substr(0, location.pathname.length - 1))
+  $('a[href="' + location.pathname.substr(0, location.pathname.length - 1) + '"]').closest('li').addClass('active');
+  });
+</script>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
   <div class="container">
     <a class="navbar-brand" href="/">Meal Configurator</a>
@@ -7,7 +15,7 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
+        <li class="nav-item">
           <a class="nav-link" href="/recipes">Recipes <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
@@ -42,12 +50,14 @@
         {% endif %}
       </ul>
 
+      <!-- Attach tooltip explaining possibility to search for ingredients when user is on /products/-->
+
       {% if request.path|slice:"10" == '/products/' %}
       <form method='GET' class="form-inline my-2 my-lg-0" action="/products">
         <input class="form-control mr-sm-2" type="search" name="q" placeholder="Search" aria-label="Search">
         <button class="btn btn-outline-success my-2 my-sm-0" id="ING" type="submit" data-toggle="tooltip" data-placement="bottom" title="Search for ingredients!">Search</button>
       </form>
-      <script>
+      <script type="text/javascript">
         $('#ING').tooltip({offset:'0, 10px'})
         $('#ING').tooltip('show')
         setTimeout( function(){$('#ING').tooltip('hide');}, 4000);
@@ -62,3 +72,4 @@
     </div>
   </div>
 </nav>
+

@@ -2,7 +2,9 @@
     .margin-group {
         margin-bottom: 5px;
     }
-
+    #rc1 {
+        display: None;
+    }
 }
 @media (min-width: 576px) {
     .card-columns {
@@ -13,6 +15,9 @@
     .ing-btns {
         position: absolute;
         bottom: 10px;
+    }
+    #rc1 {
+        display: None;
     }
 
 }
@@ -26,7 +31,15 @@
         position: absolute;
         bottom: 10px;
     }
-
+    .flt {
+        float: right;
+    }
+    #rc1 {
+        display: flex;
+    }
+    #rc2 {
+        display: None;
+    }
 }
 
 @media (min-width: 992px) {
@@ -37,6 +50,7 @@
         position: absolute;
         bottom: 10px;
     }
+
 }
 
 @media (min-width: 1200px) {

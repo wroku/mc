@@ -3,7 +3,6 @@
 
 {% block content %}
 <br>
-{% load static %}
 
 {% if query %}
 
@@ -96,8 +95,8 @@
                         <h5 class="card-title">{{prod.name}}</h5>
                         <p class="card-text text-muted">Caloric value : <b>{{ prod.calval }}</b> cal/100g</p>
                         <p class="card-text text-muted mb-5">Price : <b>{{ prod.price }}</b> pln/kg</p>
-                        <div class="container">
-                          <div class="row mt-auto">
+                        <div class="container ing-btns">
+                          <div class="row">
                               {% if prod.name not in added %}
                               <form action="." method="post">{% csrf_token %}
                                   <button type="submit" class="btn btn-outline-success margin-group mr-2" name="add" value="added">Add to your recipe</button>

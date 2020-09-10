@@ -1,71 +1,105 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-{% load static %}
 
-  <br>
-  {% if not product.accepted %}
-    <div class="col-sm-12">
-        <div class="alert alert-danger my-5">This ingredient has not been yet accepted by the admin, so it won't be displayed on a main page. However, you can still add it to your recipe.</div>
-    </div>
-  {% endif %}
-  <div class="card mx-auto" style="width: 50rem;">
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-5">
-          <img src="{{ product.image.url }}" class="img-fluid">
-           <div class="collapse multi-collapse mt-1" id="multiCollapseExample1">
-            <div class="card card-body">
-              <strong>Recipes containing {{product.name}}</strong><br>
-              <ul>
-              {% for recipe in recipes_containing %}
-              <li><a href="/recipes/{{recipe.recipe_slug}}">{{recipe.recipe_name}}</a></li>
-              {% endfor %}
-              </ul>
-            </div>
-          </div>
+
+{% if not product.accepted %}
+  <div class="col-sm-12">
+      <div class="alert alert-danger my-5">This ingredient has not been yet accepted by the admin, so it won't be displayed on a main page. However, you can still add it to your recipe.</div>
+  </div>
+{% endif %}
+<div class="card mt-5 mx-auto" style="max-width: 60rem;">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-5">
+        <img src="{{ product.image.url }}" class="img-fluid mb-2">
+        <div id="rc1" class="card card-body mt-2" >
+          {% if recipes_containing %}
+            <strong class="mb-2">Recipes containing {{product.name}}</strong><br>
+            <ul>
+            {% for recipe in recipes_containing %}
+            <li><a href="/recipes/{{recipe.recipe_slug}}">{{recipe.recipe_name}}</a></li>
+            {% endfor %}
+            </ul>
+          {% else %}
+            <strong> We don't have any recipe containing this ingredient yet. Maybe you have something on your mind?</strong><br>
+          {% endif %}
         </div>
-        <div class="col-md-7">
+      </div>
 
-          <div class="row">
+      <div class="col-md-7">
 
-            <div class="col">
-              <h3 class="card-title">{{ product.name }}</h3>
-            </div>
-            <div class="col">
-              {% if product.name not in added %}
-                <form action="." method="post">{% csrf_token %}
-                  <button type="submit" class="btn btn-outline-success m-1" name="add" value="added">Add to your recipe</button>
-                </form>
-              {% else %}
-                <form action="." method="post">{% csrf_token %}
-                  <button type="submit" class="btn btn-outline-danger m-1" name="delete" value="deleted">Delete from recipe</button>
-                </form>
-                {% endif %}
-            </div>
+        <div class="row">
 
+          <div class="col-12 col-md">
+            <h1 class="card-title" style="word-wrap: normal;">{{ product.name }}</h1>
           </div>
-
-          <p class="card-text mb-2 text-muted">Price : <b>{{product.price}}</b> pln/kg</p>
-          <p class="card-text text-muted">Caloric value : <b>{{ product.calval }}</b> cal/100g<br></p>
-
-              <button class="btn btn-info mx-1 my-5" type="button" data-toggle="collapse" data-target="#multiCollapseExample1" aria-expanded="false" aria-controls="multiCollapseExample2">Browse recipies</button>
-
-              <button class="btn btn-info mx-3 my-5" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Nutrional value</button>
-
-          <div class="collapse multi-collapse" id="multiCollapseExample2">
-            <div class="card card-body">
-              <canvas id="myChart" width="10" height="10"></canvas>
-            </div>
+          <div class="col">
+            {% if product.name not in added %}
+              <form action="." method="post">{% csrf_token %}
+                <button type="submit" class="btn btn-outline-success flt mb-3 mb-md-5" name="add" value="added">Add to your recipe</button>
+              </form>
+            {% else %}
+              <form action="." method="post">{% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger flt " name="delete" value="deleted">Delete from recipe</button>
+              </form>
+              {% endif %}
           </div>
 
         </div>
+
+        <p class="card-text mb-2 text-muted">Price : <b>{{product.price}}</b> pln/kg</p>
+        <p class="card-text mb-3 text-muted">Caloric value : <b>{{ product.calval }}</b> cal/100g</p>
+        <p class="card-text mb-5 " style="display:inline; font-size:20px">Macronutrients profile [g/100g]:</p>
+
+        <div class="custom-control custom-switch" style="display:inline; float:right;">
+          <input type="checkbox" class="custom-control-input" id="chartSwitch" onclick="toggleState()" checked>
+          <label class="custom-control-label" for="chartSwitch">Chart</label>
+        </div>
+
+        <div id='chartCard' class="card card-body mt-2">
+          <canvas id="myChart" width="10" height="10"></canvas>
+        </div>
+        <ul class="mt-2" id="nList" style="font-size:18px; display:None;">
+          <li>Carbohydrates: <b>{{product.total_carbs}}</b></li>
+          <li>Proteins: <b>{{product.total_proteins}}</b></li>
+          <li>Fats: <b>{{product.total_fat}}</b></li>
+        </ul>
+        <div id="rc2" class="card card-body mt-2">
+          {% if recipes_containing %}
+            <strong class="mb-2">Recipes containing {{product.name}}</strong><br>
+            <ul>
+            {% for recipe in recipes_containing %}
+            <li><a href="/recipes/{{recipe.recipe_slug}}">{{recipe.recipe_name}}</a></li>
+            {% endfor %}
+            </ul>
+          {% else %}
+            <strong> We don't have any recipe containing this ingredient yet. Maybe you have something on your mind?</strong><br>
+          {% endif %}
+        </div>
+      </div>
+
       </div>
     </div>
   </div>
+</div>
 
 
-<script>
+<script type="text/javascript">
+function toggleState(){
+  let state = document.getElementById('chartSwitch').checked;
+  console.log(state);
+  if(state == false){
+    document.getElementById('chartCard').style.display = 'None';
+    document.getElementById('nList').style.display = 'block';
+  }
+  else{
+    document.getElementById('chartCard').style.display = 'block';
+    document.getElementById('nList').style.display = 'None';
+  }
+};
+
+
 var ctx = document.getElementById('myChart').getContext('2d');
 var myChart = new Chart(ctx, {
     type: 'doughnut',
