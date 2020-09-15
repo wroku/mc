@@ -1,0 +1,23 @@
+{% if added %}
+<div class="ing-list">
+    <h1 class="title text-center mt-1">Ingredient list</h1><br/>
+    <ul>
+      {% for ing in added %}
+        <li>{{ing}}</li>
+      {% endfor %}
+    </ul>
+    <div class="row no-gutters md-mb-2">
+        <div class="col text-center m-2">
+            <a href="/add-recipe"><button type="button" class="btn btn-success mx-auto"><span class="short_v">Create</span><span class="full_v">Create recipe</span></button></a>
+        </div>
+        <div class="col text-center m-2">
+            <a href="/search-by-ingredients/{{added|join:'&'}}"><button type="button" class="btn btn-info mx-auto"><span class="short_v">Search</span><span class="full_v">Search for recipe</span></button></a>
+        </div>
+        <div class="col text-center align-self-center m-2">
+            <form action="." method="post">{% csrf_token %}
+                <button type="submit" class="btn btn-danger mx-auto" name="clear" value="cleared">Clear all</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}

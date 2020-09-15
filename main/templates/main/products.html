@@ -57,6 +57,8 @@
             </div>
         </div>
         {% endfor %}
+
+    {% include 'main/ingredient_list.html' %}
 </div>
 
 
@@ -72,6 +74,7 @@
       </div>
     </nav>
   </div>
+
 </div>
 
 
@@ -121,17 +124,22 @@
             </div>
             {% endfor %}
         </div>
+
+        {% include 'main/ingredient_list.html' %}
+
+
     </div>
   </div>
 
   {% for category in foodcategories %}
   <div class="tab-pane fade" id="nav-{{category.slug}}" role="tabpanel" aria-labelledby="nav-{{category.slug}}-tab">
     <!-- maybe some category info here, but better dont mess with it now -->
+      <div class="row">
       <div class="card-columns">
           {% for prod in products %}
             {% if prod.category == category %}
             <div class="col-mb-5">
-                <div class="card mb-3" style="max-width: 540px;">
+                <div class="card mb-3" style="max-width: 40rem;">
                   <div class="row no-gutters">
                     <div class="col-4 my-auto">
                       <img src="{{ prod.image.url }}" class="card-img">
@@ -167,35 +175,14 @@
             {% endif %}
           {% endfor %}
       </div>
+
+          {% include 'main/ingredient_list.html' %}
+
+      </div>
   </div>
   {% endfor %}
 </div>
 
 {% endif %}
-
-{% if added %}
-<div style="position:fixed; bottom:10px; right:10px; width:370px; border: 3px solid #4e4e52; border-radius: 20px; background-color: rgba(255, 255, 255, 0.8); z-index:100;">
-    <h1 class="text-center mt-1">Ingredient list</h1><br/>
-    <ul>
-      {% for ing in added %}
-        <li>{{ing}}</li></br>
-      {% endfor %}
-    </ul>
-    <div class="row no-gutters mb-2">
-        <div class="col ml-3 m-2">
-            <a href="/add-recipe"><button type="button" class="btn btn-success">Create recipe</button></a>
-        </div>
-        <div class="col m-2">
-            <a href="/search-by-ingredients/{{added|join:'&'}}"><button type="button" class="btn btn-info">Search for recipe</button></a>
-        </div>
-        <div class="col align-self-center m-2">
-            <form action="." method="post">{% csrf_token %}
-                <button type="submit" class="btn btn-danger" name="clear" value="cleared">Clear all</button>
-            </form>
-        </div>
-    </div>
-</div>
-{% endif %}
-
 
 {% endblock %}

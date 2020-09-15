@@ -1,5 +1,7 @@
 {% extends 'main/base.html' %}
 
+
+{% load static %}
 {% block content %}
 {% load crispy_forms_tags %}
 
@@ -9,14 +11,20 @@
         <div class="alert alert-danger my-5">This recipe has not been yet accepted by the admin, so it won't be displayed on a main page. However you can still share the link above or even make some <a href="edit">changes.</a></div>
     </div>
     {% endif %}
-<div class="col-4">
+<div class="col-12 col-sm-4">
     <ul class="list-group">
-        <li class="list-group-item text-center"><strong>Ingredients [for {{recipe.servings}} servings]</strong></li>
+        <li class="list-group-item">
+            <span>
+                <button type="button" onclick="changeServingsNumber(-1)" class="btn btn-danger btn-sm">-</button>
+                <strong id="ing-title">Ingredients [for <span id="numberOfServings">{{recipe.servings}}</span> servings]</strong>
+                <button type="button" onclick="changeServingsNumber(1)" class="btn btn-success btn-sm">+</button>
+            </span>
+        </li>
         {% for ing in quantities %}
             <li class="list-group-item">
                 <div class="row">
-                    <div class="col-sm-7">{{ing.ingredient}}</div>
-                    <div class="col-sm-5">{{ing.quantity}} grams</div>
+                    <div class="col-7">{{ing.ingredient}}</div>
+                    <div class="col-5"><span class="quantity">{{ing.quantity}}</span> grams</div>
                 </div>
             </li>
         {% endfor %}
@@ -26,20 +34,20 @@
         <li class="list-group-item text-center"><strong>Additional Info</strong></li>
         <li class="list-group-item">
             <div class="row">
-                <div class="col-sm-7">Calories per serving:</div>
-                <div class="col-sm-5">{{recipe.calories_per_serving}} cal</div>
+                <div class="col-7">Calories per serving:</div>
+                <div class="col-5">{{recipe.calories_per_serving}} cal</div>
             </div>
         </li>
         <li class="list-group-item">
             <div class="row">
-                <div class="col-sm-7">Price per serving:</div>
-                <div class="col-sm-5">{{recipe.price_per_serving}} pln</div>
+                <div class="col-7">Price per serving:</div>
+                <div class="col-5">{{recipe.price_per_serving}} pln</div>
             </div>
         </li>
         <li class="list-group-item">
             <div class="row">
-                <div class="col-sm-7">Preparation time:</div>
-                <div class="col-sm-5">{{recipe.preparation_time}} minutes</div>
+                <div class="col-7">Preparation time:</div>
+                <div class="col-5">{{recipe.preparation_time}} minutes</div>
             </div>
         </li>
 
@@ -51,7 +59,7 @@
     </ul>
 </div>
 
-<div class="col-8 ">
+<div class="col-12 col-sm-8 ">
     <img src="{{recipe.recipe_image.url}}" class="img-fluid mx-auto d-block" >
     <h1>{{recipe.recipe_name}}</h1><small> {{recipe.recipe_posted}}</small>
 
@@ -93,7 +101,8 @@
 
 </div>
 
-<script type="text/javascript">
+<script src="{% static 'js/recipeDetails.js' %}"></script>
+    <script>
 var ctx = document.getElementById('myChart').getContext('2d');
 var myChart = new Chart(ctx, {
     type: 'doughnut',

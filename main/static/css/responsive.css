@@ -5,6 +5,25 @@
     #rc1 {
         display: None;
     }
+    .short_v{
+        display: inline-block;
+    }
+    .full_v{
+        display: None;
+    }
+    .ing-list{
+        position:sticky;
+        bottom:10px;
+        left: 2.5%;
+        width:95%;
+        border: 2px solid #4e4e52;
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index:100;
+    }
+    .title{
+        font-size:1.5rem;
+    }
 }
 @media (min-width: 576px) {
     .card-columns {
@@ -20,6 +39,23 @@
         display: None;
     }
 
+    .ing-list{
+        position:sticky;
+        bottom:10px;
+        margin:auto;
+        width:95%;
+        border: 2px solid #4e4e52;
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index:100;
+    }
+
+    .short_v{
+        display: None;
+    }
+    .title{
+        font-size:1.7rem;
+    }
 }
 
 @media (min-width: 768px) {
@@ -50,7 +86,19 @@
         position: absolute;
         bottom: 10px;
     }
-
+    .ing-list{
+        position:fixed;
+        bottom:10px;
+        right:10px;
+        width:370px;
+        border: 3px solid #4e4e52;
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index:100;
+    }
+    .list-item{
+    margin-bottom:1rem;
+    }
 }
 
 @media (min-width: 1200px) {
@@ -61,6 +109,10 @@
         position: absolute;
         bottom: 10px;
     }
+    .title{
+        font-size:2.5rem;
+    }
+
 
 }
 
