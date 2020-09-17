@@ -3,7 +3,6 @@
 
 {% load static %}
 {% block content %}
-{% load crispy_forms_tags %}
 
 <div class="row">
     {% if not recipe.accepted %}
@@ -11,27 +10,13 @@
         <div class="alert alert-danger my-5">This recipe has not been yet accepted by the admin, so it won't be displayed on a main page. However you can still share the link above or even make some <a href="edit">changes.</a></div>
     </div>
     {% endif %}
-<div class="col-12 col-sm-4">
-    <ul class="list-group">
-        <li class="list-group-item">
-            <span>
-                <button type="button" onclick="changeServingsNumber(-1)" class="btn btn-danger btn-sm">-</button>
-                <strong id="ing-title">Ingredients [for <span id="numberOfServings">{{recipe.servings}}</span> servings]</strong>
-                <button type="button" onclick="changeServingsNumber(1)" class="btn btn-success btn-sm">+</button>
-            </span>
-        </li>
-        {% for ing in quantities %}
-            <li class="list-group-item">
-                <div class="row">
-                    <div class="col-7">{{ing.ingredient}}</div>
-                    <div class="col-5"><span class="quantity">{{ing.quantity}}</span> grams</div>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
+<div class="col-12 col-sm-4 order-2 order-sm-2">
+    <div class="ingredient-section-standard">
+        {% include 'main/ingredient_section.html' %}
+    </div>
     <br>
     <ul class="list-group">
-        <li class="list-group-item text-center"><strong>Additional Info</strong></li>
+        <li class="list-group-item text-center" style="background-color: rgba(237, 237, 237, 0.8)"><strong>Additional Info</strong></li>
         <li class="list-group-item">
             <div class="row">
                 <div class="col-7">Calories per serving:</div>
@@ -53,51 +38,31 @@
 
     </ul>
     <br>
-    <ul class="list-group">
-        <li class="list-group-item text-center"><strong>Macronutrients profile [1 serving]</strong></li>
+    <ul class="list-group mb-3">
+        <li class="list-group-item text-center" style="background-color: rgba(237, 237, 237, 0.8)"><strong>Macronutrients profile [1 serving]</strong></li>
         <li class="list-group-item"><canvas id="myChart" width="10" height="10"></canvas></li>
     </ul>
+
+    <div class="comments-section-small">
+        {% include 'main/comments_section.html' %}
+    </div>
+
 </div>
 
-<div class="col-12 col-sm-8 ">
-    <img src="{{recipe.recipe_image.url}}" class="img-fluid mx-auto d-block" >
-    <h1>{{recipe.recipe_name}}</h1><small> {{recipe.recipe_posted}}</small>
+<div class="col-12 col-sm-8 order-1 order-sm-2">
+    <img src="{{recipe.recipe_image.url}}" class="img-fluid mx-auto mt-3 d-block" >
+    <h1>{{recipe.recipe_name}}</h1>
+    <div class="ingredient-section-small">
+        {% include 'main/ingredient_section.html' %}
+    </div>
+    <small> {{recipe.recipe_posted}}</small>
 
     {{recipe.directions|safe}}
     <br>
-    {% for comment in comments %}
-    <div class="comments" style="padding 10px;">
-        <p class="font-weight-bold">
-            {{comment.user}}
-            <span class="text-muted font-weight-normal">
-                {{comment.created_on}}
-            </span>
-        </p>
-        {{comment.content|linebreaks}}
-    </div>
-    {% endfor %}
-    <br>
 
-        {% if user.is_authenticated %}
-            {% if new_comment %}
-            <div class="alert alert-success" role="alert">
-                Your comment is awaiting moderation.
-            </div>
-            {% else %}
-            <h4>Leave a comment</h4>
-            Share your opinions, experience, advices or let others know about tasty variations of this recipe!
-            <form method="post">
-                {% csrf_token %}
-                {{ comment_form.content|as_crispy_field }}
-                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
-            </form>
-            {% endif %}
-        {% else %}
-            <h4>Leave a comment</h4>
-            <div class="alert alert-info" role="alert">
-                <strong>Comments are available for logged users only.</strong> <a href="/login?next={% firstof request.path '/' %}"><strong>Sign in</strong></a> to share your opinion or <a href="/register"><strong>register</strong></a> if you don't have an account yet.
-            </div>
-        {%  endif %}
+    <div class="comments-section-standard">
+        {% include 'main/comments_section.html' %}
+    </div>
 
 </div>
 

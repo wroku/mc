@@ -21,7 +21,11 @@
 
 <div class='row title-row my-5'>
     <div class='col-12 py-0 mx-auto'>
-        <h3 class='my-0 py-0'><strong>{{counter}}</strong> results for recipes containing
+        {% if counter == 1 %}
+        <h3 class='my-0 py-0'><strong>{{counter}}</strong> result for recipes containing
+            {% else %}
+            <h3 class='my-0 py-0'><strong>{{counter}}</strong> results for recipes containing
+                {% endif %}
         {% for ing in query %}
             {% if not forloop.last %}
                 <strong>{{ing}}, </strong>
@@ -68,7 +72,7 @@
                           {% if missing %}
                               <p style="font-size:1.5em;">This recipe contains also:</p>
                               {% for ingredient in missing %}
-                              <div class="alert alert-danger" role="alert">
+                              <div class="alert alert-secondary" role="alert">
                                   {{ ingredient}}
                               </div>
                               {% endfor %}

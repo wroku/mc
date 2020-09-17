@@ -68,12 +68,21 @@ def recipes_containing(request, query=[]):
     if query:
         query = [Ingredient.objects.get(name=name) for name in query.split('&')]
 
-    def search(subquery):
+    def search(subquery, excluded=None):
+        '''Return tuple with matches and additional data, ready to be displayed in a template.
+
+        -> (((recipe, [missing]),(...)), subquery, number o results)
+        [missing] - ingredients listed in particular recipe but not included in user's query
+        When excluded is provided, use queryset difference to subtract recipes possibly duplicated
+        in full and partial length query.
+        '''
         partial_matches = []
         for ing in subquery:
             partial_matches.append(Recipe.objects.search_by_ing(ing))
         if partial_matches:
             recipes_qs = partial_matches[0].intersection(*partial_matches[1:])
+            if excluded:
+                recipes_qs = recipes_qs.difference(Recipe.objects.search_by_ing(excluded))
         else:
             recipes_qs = Recipe.objects.none()
 
@@ -84,12 +93,15 @@ def recipes_containing(request, query=[]):
                 if quantity.ingredient not in subquery:
                     missing.append(quantity.ingredient)
             missING.append(missing)
-        return [list(zip(recipes_qs, missING)), subquery, len(recipes_qs)]
+        return (tuple(zip(recipes_qs, missING)), subquery, len(recipes_qs))
 
     results.append(search(query))
+
+    # If there is no more than five exact matches, perform additional searches,
+    # each excluding one of the ingredients.
     if results[0][2] < 5 and len(query) >= 2:
         for i in range(1, len(query)+1):
-            results.append(search(query[:len(query) - i] + query[len(query) + 1 - i:]))
+            results.append(search(query[:len(query) - i] + query[len(query) + 1 - i:], query[-i]))
 
     template_name = 'main/recipes_containing.html'
     context = {'ingredients': Ingredient.objects.all(),

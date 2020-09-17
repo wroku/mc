@@ -1,7 +1,5 @@
 {% extends 'main/base.html' %}
 
-
-
 {% block content %}
 <div class="container">
 <div class="row">
@@ -10,14 +8,7 @@
         <!-- <canvas id="myChart" width="400" height="400"></canvas> -->
         <canvas id="myCanvas" width="200px" height="200px" style="border:1px solid #000"></canvas>
         <canvas id="yourCanvas" width="400px" height="500px" style="border:1px solid #000"></canvas>
-
-
 <script>
-        
-
-
-
-
 
     var y = 50
     var displayArray = function(array, i, nextMin) {
@@ -38,76 +29,9 @@
         }
 
         y = y + 50
-
-        
-
     };
-  
-   
-
-    
-    function tickets(peopleInLine){
-        
-      var change = [];
-      for(bill of peopleInLine){
-        
-        var diff = bill - 25;
-        while(diff > 0){
-        console.log(diff);
-          if(diff >= 50){
-            if(change.indexOf(50) >= 0){
-              change.splice(change.indexOf(50), 1);
-              diff = diff - 50;
-              }
-            else if(change.indexOf(25) >= 0){
-              change.splice(change.indexOf(25), 1);
-              diff = diff - 25;
-              }
-            else{
-              return 'NO';
-            }
-          }
-          else{
-            if(change.indexOf(25) >= 0){
-              change.splice(change.indexOf(25), 1);
-              diff = diff - 25;
-              }
-            else{
-              return 'NO';
-            }
-          }
-        }
-        
-        change.push(bill);
-      }
-      return 'YES';
-    }
 
 
-    function longest(str) {
-
-        var maxStartIndex = 0;
-        var maxStopIndex = 0;
-
-        function updateLongest(start, stop){
-            if(stop - start > maxStopIndex - maxStartIndex){
-                maxStartIndex = start;
-                maxStopIndex = stop;
-            }
-        }
-        var startIndex = 0;
-        for (i = 0; i < str.length; i++){
-            if(str.charCodeAt(i)>str.charCodeAt(i+1)){
-                updateLongest(startIndex, i + 1);
-                startIndex = i + 1;
-            }
-        };
-        updateLongest(startIndex, i);
-        return str.substring(maxStartIndex,maxStopIndex);
-    }
-
-    console.log(longest('zyba'));
-    
 
     var swap = function(array, firstIndex, secondIndex) {
         var temp = array[firstIndex];

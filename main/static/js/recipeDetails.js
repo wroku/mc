@@ -10,5 +10,6 @@ function changeServingsNumber(factor){
             quantities[i].innerHTML = newQ;
             }
     }
+    setTimeout(function(){$(".btn").blur()}, 500);
 }
 

@@ -24,13 +24,18 @@
     .title{
         font-size:1.5rem;
     }
+    .comments-section-standard{
+        display: None;
+    }
+    .ingredient-section-standard{
+        display: None;
+    }
 }
 @media (min-width: 576px) {
     .card-columns {
         column-count: 1;
         margin: auto;
     }
-
     .ing-btns {
         position: absolute;
         bottom: 10px;
@@ -38,7 +43,6 @@
     #rc1 {
         display: None;
     }
-
     .ing-list{
         position:sticky;
         bottom:10px;
@@ -48,16 +52,24 @@
         border-radius: 20px;
         background-color: rgba(255, 255, 255, 0.8);
         z-index:100;
+        max-width:35rem;
     }
-
     .short_v{
         display: None;
     }
     .title{
         font-size:1.7rem;
     }
+    .comments-section-small{
+        display: None;
+    }
+    .ingredient-section-small{
+        display: None;
+    }
+    .search-box{
+        width: 190px !important;
+    }
 }
-
 @media (min-width: 768px) {
     .card-columns {
         column-count: 1;
@@ -77,7 +89,6 @@
         display: None;
     }
 }
-
 @media (min-width: 992px) {
     .card-columns {
         column-count: 2;
@@ -97,10 +108,9 @@
         z-index:100;
     }
     .list-item{
-    margin-bottom:1rem;
+        margin-bottom:1rem;
     }
 }
-
 @media (min-width: 1200px) {
     .card-columns {
         column-count: 2;
@@ -110,9 +120,7 @@
         bottom: 10px;
     }
     .title{
-        font-size:2.5rem;
+        font-size: 2.5rem;
     }
-
-
 }
 

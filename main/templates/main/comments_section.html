@@ -1,0 +1,34 @@
+{% load crispy_forms_tags %}
+{% for comment in comments %}
+    <div class="comments" style="padding 10px;">
+        <p class="font-weight-bold">
+            {{comment.user}}
+            <span class="text-muted font-weight-normal">
+                {{comment.created_on}}
+            </span>
+        </p>
+        {{comment.content|linebreaks}}
+    </div>
+{% endfor %}
+    <br>
+
+{% if user.is_authenticated %}
+    {% if new_comment %}
+    <div class="alert alert-success" role="alert">
+        Your comment is awaiting moderation.
+    </div>
+    {% else %}
+    <h4>Leave a comment</h4>
+    Share your opinions, experience, advices or let others know about tasty variations of this recipe!
+    <form method="post">
+        {% csrf_token %}
+        {{ comment_form.content|as_crispy_field }}
+        <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+    </form>
+    {% endif %}
+{% else %}
+    <h4>Leave a comment</h4>
+    <div class="alert alert-info" role="alert">
+        <strong>Comments are available for logged users only.</strong> <a href="/login?next={% firstof request.path '/' %}"><strong>Sign in</strong></a> to share your opinion or <a href="/register"><strong>register</strong></a> if you don't have an account yet.
+    </div>
+{%  endif %}
