@@ -2,26 +2,67 @@
 
 {% block content %}
 <!-- TODO add some screens to break this wall of text and turn them into hover-able buttons -->
+{% load static %}
 
-<div class="jumbotron mt-5">
+<div class="jumbotron mt-5" style="max-width:100%;">
   <h1 class="display-4 mb-5 text-center">Meal configurator</h1>
   <p class="lead">This site is designed to help you find an answer to the most important question of the day:
   </p>
     <h2 class="my-5 text-center">What's for dinner?</h2>
-  <hr class="my-4">
-  <p>You can look through recipes waiting for an inspiration to kick in or search for something specific. Order meals by caloric value, preparation time or price estimation.  </p>
-  <a class="btn btn-primary btn-lg" href="/recipes" role="button">Recipes</a>
-  <hr class="my-4">
-  <p>Got some food laying around and no idea how to combine it into tasty dinner? Add ingredients to a list and search for recipes fitting your needs.
+  <hr class="my-5">
+  <p style="font-size:1.3rem">You can look through recipes waiting for an inspiration to kick in or search for something specific. Order meals by caloric value, preparation time or price estimation.  </p>
+  <a class="btn btn-secondary btn-lg btn-block" href="/recipes" role="button">Recipes</a>
+  <hr class="my-5">
+  <p style="font-size:1.1rem">Got some food laying around and no idea how to combine it into tasty dinner? Add ingredients to a list and search for recipes fitting your needs.
     Results page will underline items which you still need to acquire. In unlikely case that records do not sufficiently cover combination you are looking for
     we will also show you some alternatives (partially matching your query).
     Don't forget to leave a comment with your review or suggestions afterwards!
   </p>
-    <a class="btn btn-primary btn-lg" href="/ingredients" role="button">Ingredients</a>
-  <hr class="my-4">
-  <p>If you didn't find satisfying match and got creative on your own, please don't hesitate to save others from similar trouble. </p>
-  Just take a quick photo of your delicious meal, enter quantities of already chosen ingredients and provide basic explanation of cooking process.
-  Good looking recipe with additional nutrition info is ready to share (or to remind yourself, whenever your culinary muse is out of reach)!
+
+
+  <div id="carouselIntervalScreenshots" class="carousel slide" data-ride="carousel">
+  <div class="carousel-inner">
+    <div class="carousel-item active" data-interval="10000">
+      <a href="/products">
+        <img src="{% static 'main/Capture1.JPG' %}" class="d-block w-100" alt="...">
+      </a>
+    </div>
+    <div class="carousel-item" data-interval="4000">
+      <a href="/products">
+        <img src="{% static 'main/Capture3.JPG' %}"  class="d-block w-75 mx-auto" alt="...">
+      </a>
+    </div>
+    <div class="carousel-item">
+      <a href="/products">
+        <img src="{% static 'main/Capture2.JPG' %}" style="width:59.5%" class="d-block mx-auto" alt="...">
+      </a>
+    </div>
+  </div>
+  <a class="carousel-control-prev" style="filter: invert(100%);" href="#carouselIntervalScreenshots" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next" style="filter: invert(100%);" href="#carouselIntervalScreenshots" role="button" data-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+  <hr class="my-5">
+  <p style="font-size:1.3rem">If you didn't find satisfying match and got creative on your own, please, don't hesitate to save others from similar trouble. </p>
+  <p style="font-size:1.1rem">Just take a quick photo of your delicious meal, enter quantities of already chosen ingredients and provide basic explanation of cooking process.
+    Good looking recipe with additional nutrition info is ready to share (or to remind yourself, whenever your culinary muse is out of reach)!</p>
+  <div class="row">
+    <div class="col-12 col-md-5">
+      <a href="/add-recipe">
+          <img src="{% static 'main/Capture4.JPG' %}" class="img-fluid mb-2" style="border-radius: 20px;">
+      </a>
+    </div>
+    <div class="col-12 col-md-7">
+      <a href="/recipes/pineapple-chicken-curry">
+          <img src="{% static 'main/Capture5.JPG' %}" class="img-fluid mb-2" style="border-radius: 20px;">
+      </a>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

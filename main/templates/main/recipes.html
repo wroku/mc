@@ -4,20 +4,31 @@
 {% block content %}
 {% load static %}
 
+{% if count == -1 %}
+<div class="jumbotron mt-5">
+    <h1 class="display-4 mb-5">Search page</h1>
+    <p class="lead">Please, enter keyword in search bar above.</p>
+    <hr class="my-4">
+    <p> All recipes containing searched word in title or description will be displayed. If you want to find particular ingredient, try using search bar bar from this <a href="/products">page</a>.</p>
+</div>
+
+{% else %}
+
 {% if query %}
 
     <div class='row title-row my-5'>
         <div class='col-12 py-0 mx-auto'>
             {% if counter == 1 %}
-                <h3 class='my-0 py-0'>{{ count }} results for <b>{{ query }}</b></h3>
+                <h2 class='my-0 py-0'>{{ count }} results for <b>{{ query }}</b></h2>
             {% else %}
-                <h3 class='my-0 py-0'>{{ count }} results for <b>{{ query }}</b></h3>
+                <h2 class='my-0 py-0'>{{ count }} results for <b>{{ query }}</b></h2>
             {% endif %}
         </div>
     </div>
 
 {% endif %}
 
+{% if count > 0 %}
 <form method="get" action="">
     <div class="form-row mb-3">
         <div class="col-1 mx-auto">
@@ -51,7 +62,11 @@
         <button type="submit" class="btn btn-outline-secondary mx-auto">Apply</button>
     </div>
 </form>
+{% else %}
 
+    <h3> Use other keywords or try searching recipes by ingrediends.</h3>
+
+{% endif %}
 <div class="row">
     <div class="card-columns">
     {% for recipe in recipes %}
@@ -97,4 +112,6 @@
     let currently_picked = '{{ordered_by}}';
     $('#filter').val(currently_picked);
 </script>
+
+{% endif %}
 {% endblock %}

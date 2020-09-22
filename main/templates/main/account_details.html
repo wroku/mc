@@ -1,10 +1,10 @@
 {% extends "main/base.html" %}
 {% load custom_tags %}
 {% block content %}
-<div class="col-8 mx-auto">
+<div class="col col-lg-8 mx-auto">
     <h1 class="text-center my-5">Summary of your activity</h1>
     <div class="row">
-        <div class="col">
+        <div class="col-12 col-sm">
             <div class="mb-3"><strong>Your recipes</strong></div>
                 {% if recipes %}
                     <ul>
@@ -18,7 +18,7 @@
                     </div>
                 {% endif %}
             </div>
-        <div class="col">
+        <div class="col-12 col-sm">
             <div class="mb-3"><strong>Your comments</strong></div>
                 {% if comments %}
                     <ul>

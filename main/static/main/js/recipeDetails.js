@@ -6,7 +6,7 @@ function changeServingsNumber(factor){
         document.getElementById('numberOfServings').innerHTML = servings+factor;
         let quantities =  document.getElementsByClassName("quantity");
         for(let i=0; i<quantities.length; i++){
-            let newQ = (parseInt(quantities[i].innerHTML)/servings)*(servings+factor);
+            let newQ = (parseFloat(quantities[i].innerHTML)/servings)*(servings+factor);
             quantities[i].innerHTML = newQ;
             }
     }

@@ -2,9 +2,11 @@
 
 {% block content %}
 
+{% if recipes %}
+
 {% for data, query, counter in recipes %}
 
-{% if query %}
+
 
 {% if forloop.counter0 == 0 %}
 <h5 class="my-5"> *You can also look for recipes with particular title lub keywords, for this purpose use search box above. </h5>
@@ -92,14 +94,16 @@
 </div>
 {% endif %}
 
+{% endfor %}
+
 {% else %}
-<div class="jumbotron">
-    <h1 class="display-4">Search page</h1>
+<div class="jumbotron mt-5">
+    <h1 class="display-4 mb-5">Search page</h1>
     <p class="lead">By using this feature you can find best available recipes to combine particular ingredients into one tasty meal!  </p>
     <hr class="my-4">
     <p>Pick foods you want to cook with and use search button below ingredients list.</p><br>
     <a class="btn btn-secondary btn-lg" href="/products" role="button">Choose ingredients</a>
 </div>
 {% endif %}
-{% endfor %}
+
 {% endblock %}

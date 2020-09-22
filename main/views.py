@@ -34,10 +34,15 @@ def search(request):
                     key=lambda instance: instance.recipe_posted,
                     reverse=True)
         count = len(qs)  # since qs is actually a list
-        recipes_qs = qs
+    else:
+        # count = -1 triggers displaying info how to use search feature
+        qs = recipes_qs
+        count = -1
+
 
     filter_by = request.GET.get('filter', 'recipe_posted')
     ord = request.GET.get('ord', 'desc')
+
     # ugly solution in 3, 2, 1...
     if ord == 'desc':
         recipes_qs = sorted(qs,
@@ -51,22 +56,25 @@ def search(request):
         desc = ''
         asc = 'checked'
 
+    # Hacking around nice-looking card columns screwing up my ordering.
+    # Works just fine with similar heights of recipe images.
+    recipes_qs = recipes_qs[::2] + recipes_qs[1::2]
+
     template_name = 'main/recipes.html'
+
+    # asc, desc and ordered_by variables used by js in template to preserve data beetween reloads
     context = {'desc': desc,
                'asc': asc,
                'ordered_by': filter_by,
-               'count': count or 0,
+               'count': count,
                'query': query,
                'recipes': recipes_qs}
 
     return render(request, template_name, context)
 
 
-def recipes_containing(request, query=[]):
+def recipes_containing(request, query=None):
     results = []
-
-    if query:
-        query = [Ingredient.objects.get(name=name) for name in query.split('&')]
 
     def search(subquery, excluded=None):
         '''Return tuple with matches and additional data, ready to be displayed in a template.
@@ -95,13 +103,16 @@ def recipes_containing(request, query=[]):
             missING.append(missing)
         return (tuple(zip(recipes_qs, missING)), subquery, len(recipes_qs))
 
-    results.append(search(query))
+    if query:
+        query = [Ingredient.objects.get(name=name) for name in query.split('&')]
 
-    # If there is no more than five exact matches, perform additional searches,
-    # each excluding one of the ingredients.
-    if results[0][2] < 5 and len(query) >= 2:
-        for i in range(1, len(query)+1):
-            results.append(search(query[:len(query) - i] + query[len(query) + 1 - i:], query[-i]))
+        results.append(search(query))
+
+        # If there is no more than five exact matches, perform additional searches,
+        # each excluding one of the ingredients.
+        if results[0][2] < 5 and len(query) >= 2:
+            for i in range(1, len(query)+1):
+                results.append(search(query[:len(query) - i] + query[len(query) + 1 - i:], query[-i]))
 
     template_name = 'main/recipes_containing.html'
     context = {'ingredients': Ingredient.objects.all(),
@@ -192,7 +203,7 @@ def recipes(request):
 
     qs = qs.filter(accepted=True)
     # Hacking around nice-looking card columns screwing up my ordering.
-    # Should work just fine with similar heights of recipe images, check it.
+    # Works just fine with similar heights of recipe images.
     qs = qs[::2] + qs[1::2]
 
     return render(request,
