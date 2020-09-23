@@ -1,3 +1,4 @@
+
 @media (max-width: 576px) {
     .margin-group {
         margin-bottom: 5px;
@@ -20,6 +21,8 @@
         border-radius: 20px;
         background-color: rgba(255, 255, 255, 0.8);
         z-index:100;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
     }
     .title{
         font-size:1.5rem;
@@ -53,6 +56,8 @@
         background-color: rgba(255, 255, 255, 0.8);
         z-index:100;
         max-width:35rem;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
     }
     .short_v{
         display: None;
@@ -106,6 +111,7 @@
         border-radius: 20px;
         background-color: rgba(255, 255, 255, 0.8);
         z-index:100;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
     .list-item{
         margin-bottom:1rem;
@@ -124,4 +130,94 @@
         font-size: 2.5rem;
     }
 }
+@media {
+    html {
+        height: 100%;
+        box-sizing: border-box;
+    }
+    body {
+        position: relative;
+        margin: 0;
+        padding-bottom: 11rem;
+        min-height: 100%;
+        }
+    *,
+    *:before,
+    *:after {
+        box-sizing: inherit;
+    }
 
+    .footer {
+        position: absolute;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #5ce6a3;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    @keyframes shadow {
+        from {opacity: 1;}
+        to {opacity: 0.6;}
+    }
+    .animated {
+        object-fit:cover;
+        border-radius: 10px;
+        opacity:1;
+        animation-duration: 3s;
+        animation-fill-mode: forwards;
+    }
+    @keyframes move{
+        from {top: 10%; opacity: 0;}
+        to {top: 50%; opacity: 1;}
+    }
+    .moving{
+        position:absolute;
+        top:10%;
+        left:50%;
+        transform: translate(-50%, -50%);
+        animation-duration: 3s;
+        animation-fill-mode: forwards;
+        opacity: 0;
+    }
+    .img-box{
+        position:relative;
+        background:black;
+        border-radius: 10px;
+    }
+
+    .title-img-box{
+        position:relative;
+        background: linear-gradient(#5ce6a3, #9198e5);
+    }
+
+    #explanation {
+        position:absolute;
+        top:65%;
+        padding-left:20px;
+        padding-right:20px;
+        font-size: 2rem;
+        font-family:Serif;
+
+    }
+    @keyframes moveQ{
+        from {left: 20%; opacity: 0;}
+        to {left: 50%; opacity: 1;}
+    }
+
+    #question{
+        position:absolute;
+        top:90%;
+        left:50%;
+        transform: translate(-50%, -50%);
+        overflow:hidden;
+        opacity:0;
+        font-size: 3rem;
+        font-family:Serif;
+        animation-duration: 3s;
+        animation-fill-mode: forwards;
+
+    }
+
+}

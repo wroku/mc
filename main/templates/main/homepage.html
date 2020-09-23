@@ -4,11 +4,13 @@
 <!-- TODO add some screens to break this wall of text and turn them into hover-able buttons -->
 {% load static %}
 
-<div class="jumbotron mt-5" style="max-width:100%;">
-  <h1 class="display-4 mb-5 text-center">Meal configurator</h1>
-  <p class="lead">This site is designed to help you find an answer to the most important question of the day:
+<div class="jumbotron mt-5" style="padding-top:25px; max-width:100%;">
+  <div class="title-img-box">
+    <img id="title-img" style="opacity:0.6;" src="{% static 'main/food.png' %}"  class="img-fluid">
+    <p id="explanation"  class="lead text-center">This site is designed to help you find an answer to the most important question of the day:
+    <h2 id="question" class="text-center">What's for dinner?</h2>
+  </div>
   </p>
-    <h2 class="my-5 text-center">What's for dinner?</h2>
   <hr class="my-5">
   <p style="font-size:1.3rem">You can look through recipes waiting for an inspiration to kick in or search for something specific. Order meals by caloric value, preparation time or price estimation.  </p>
   <a class="btn btn-secondary btn-lg btn-block" href="/recipes" role="button">Recipes</a>
@@ -24,17 +26,17 @@
   <div class="carousel-inner">
     <div class="carousel-item active" data-interval="10000">
       <a href="/products">
-        <img src="{% static 'main/Capture1.JPG' %}" class="d-block w-100" alt="...">
+        <img src="{% static 'main/Capture1.JPG' %}" class="d-block w-100" alt="Ingredients page with active list">
       </a>
     </div>
     <div class="carousel-item" data-interval="4000">
       <a href="/products">
-        <img src="{% static 'main/Capture3.JPG' %}"  class="d-block w-75 mx-auto" alt="...">
+        <img src="{% static 'main/Capture3.JPG' %}"  class="d-block w-75 mx-auto" alt="Detailed page of particular ingredient with nutrition info and related recipes">
       </a>
     </div>
     <div class="carousel-item">
       <a href="/products">
-        <img src="{% static 'main/Capture2.JPG' %}" style="width:59.5%" class="d-block mx-auto" alt="...">
+        <img src="{% static 'main/Capture2.JPG' %}" style="width:59.5%" class="d-block mx-auto" alt="Search page with 1 partial matching result">
       </a>
     </div>
   </div>
@@ -53,16 +55,24 @@
     Good looking recipe with additional nutrition info is ready to share (or to remind yourself, whenever your culinary muse is out of reach)!</p>
   <div class="row">
     <div class="col-12 col-md-5">
-      <a href="/add-recipe">
-          <img src="{% static 'main/Capture4.JPG' %}" class="img-fluid mb-2" style="border-radius: 20px;">
-      </a>
+      <div class="img-box" onmouseover="darken('ani1')" onmouseout="lighten('ani1')">
+        <img id='ani1' src="{% static 'main/Capture4.JPG' %}" class="img-fluid animated">
+        <a href="/add-recipe">
+          <button id="btn_ani1" type="button" class="btn btn-lg btn-success moving">Add recipe</button>
+        </a>
+      </div>
     </div>
     <div class="col-12 col-md-7">
+      <div class="img-box" onmouseover="darken('ani2')" onmouseout="lighten('ani2')">
+      <img id="ani2" src="{% static 'main/Capture5.JPG' %}" class="img-fluid animated">
       <a href="/recipes/pineapple-chicken-curry">
-          <img src="{% static 'main/Capture5.JPG' %}" class="img-fluid mb-2" style="border-radius: 20px;">
+        <button id="btn_ani2" type="button" class="btn btn-lg btn-success moving">See this recipe</button>
       </a>
+      </div>
     </div>
   </div>
 </div>
+<script src="{% static 'main/js/frontpage.js' %}"></script>
+
 
 {% endblock %}
