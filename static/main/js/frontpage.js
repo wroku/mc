@@ -2,14 +2,10 @@
 
 window.onscroll = function() {slideIn()};
 function slideIn(){
-    console.log('slidin')
+    console.log(document.documentElement.scrollTop)
     if (document.documentElement.scrollTop > 100){
     document.getElementById("question").style.animationName="moveQ";
     }
-    /*if (document.documentElement.scrollTop > 500){
-        console.log('we are here');
-        $('.carousel').carousel('next');
-    }*/
 }
 function darken(id){
     let image = document.getElementById(id);

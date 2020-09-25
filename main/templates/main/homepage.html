@@ -1,16 +1,15 @@
 {% extends "main/base.html" %}
 
 {% block content %}
-<!-- TODO add some screens to break this wall of text and turn them into hover-able buttons -->
 {% load static %}
 
 <div class="jumbotron mt-5" style="padding-top:25px; max-width:100%;">
   <div class="title-img-box">
     <img id="title-img" style="opacity:0.6;" src="{% static 'main/food.png' %}"  class="img-fluid">
-    <p id="explanation"  class="lead text-center">This site is designed to help you find an answer to the most important question of the day:
+    <p id="explanation" style="text-shadow: white 0px 0px 25px;" class="lead text-center">This site is designed to help you find an answer to the most important question of the day:</p>
     <h2 id="question" class="text-center">What's for dinner?</h2>
   </div>
-  </p>
+
   <hr class="my-5">
   <p style="font-size:1.3rem">You can look through recipes waiting for an inspiration to kick in or search for something specific. Order meals by caloric value, preparation time or price estimation.  </p>
   <a class="btn btn-secondary btn-lg btn-block" href="/recipes" role="button">Recipes</a>
