@@ -213,7 +213,6 @@ def recipes(request):
                    'ordered_by': filter_by,
                    'recipes': qs})
 
-
 def access_denied(request):
     return render(request,
                   'main/access_denied.html',
@@ -280,13 +279,12 @@ def contact_page(request):
 
 
 def recipe_page(request):
-    # TODO Change fs to BaseRecipeIngFormset with distinct ingredient validation and test the fuck out of it
     if 'collect_ing' not in request.session:
         request.session['collect_ing'] = []
     form = RecipeForm(request.POST or None, request.FILES or None,
                       collect_ing=request.session['collect_ing'])
     formset = RecipeIngFormset(request.POST or None,
-                               form_kwargs={'collect_ing': request.session['collect_ing']},
+                               #  form_kwargs={'collect_ing': request.session['collect_ing']},
                                initial=[{'ingredient': x} for x in request.session['collect_ing']])
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
@@ -321,6 +319,7 @@ def edit_recipe(request, slug):
     request.session['collect_ing'] = []
     form = RecipeForm(request.POST or None, request.FILES or None,
                       editing=instance.recipe_name,
+                      collect_ing=request.session['collect_ing'],
                       initial={'recipe_name': instance.recipe_name,
                                'recipe_image': instance.recipe_image,
                                'preparation_time': instance.preparation_time,
@@ -332,18 +331,18 @@ def edit_recipe(request, slug):
     for obj in qs[:len(qs)-1]:
         request.session['collect_ing'].append(str(obj.ingredient))
     # Somewhat hacky but I couldn't find how to pass extra kwarg to formset factory + and-or trick from diving in python
+    # TODO Maybe js clicking last +... why extra = 1 in edit results in 2 rows with add btn?
     RecipeEditIngFormset = formset_factory(RecipeIngredient,
                                            formset=BaseRecipeIngFormSet,
                                            extra=(formset_initial_data and [0] or [1])[0])
     formset = RecipeEditIngFormset(request.POST or None,
-                                   form_kwargs={'collect_ing': request.session['collect_ing']},
+                                   #  form_kwargs={'collect_ing': request.session['collect_ing']},
                                    initial=formset_initial_data)
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
             for key, value in form.cleaned_data.items():
                 setattr(instance, key, value)
 
-            # maybe clean {}s from cleaned data if you cant write custom formset validation?
             index = 0
             for fieldset, qt in zip(formset.cleaned_data, qs):
                 for key, value in fieldset.items():
@@ -364,8 +363,6 @@ def edit_recipe(request, slug):
             instance.save()
             request.session['collect_ing'] = []
             request.session.modified = True
-            form = RecipeForm(collect_ing=request.session['collect_ing'])
-            formset = RecipeIngFormset(form_kwargs={'collect_ing': request.session['collect_ing']})
             return redirect(f'/recipes/{instance.recipe_slug}')
 
         else:

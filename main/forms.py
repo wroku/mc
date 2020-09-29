@@ -66,7 +66,7 @@ class IngredientForm(ModelForm):
 
 class RecipeForm(forms.Form):
 
-    def __init__(self, *args, editing='', collect_ing=[], **kwargs):
+    def __init__(self, *args, editing='', collect_ing, **kwargs):
         super(RecipeForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
@@ -116,16 +116,10 @@ class RecipeForm(forms.Form):
 
 class RecipeIngredient(forms.Form):
 
-    def __init__(self, *args, collect_ing, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(RecipeIngredient, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
-        self.collect_ing = collect_ing
-        # this shit has taken 1.5h of my life and still not resolved
-        # TODO UNDERDSTAND WHY... it works when posting, but not when editing
-        if not self.initial:
-            print(self.collect_ing)
-            # self.fields['ingredient'].queryset = Ingredient.objects.all().exclude(name__in=self.collect_ing)
 
     ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
     quantity = forms.FloatField(label='How much of these?')
@@ -137,10 +131,7 @@ class RecipeIngredient(forms.Form):
         return quantity
 
 
-RecipeIngFormset = formset_factory(RecipeIngredient, extra=1)
-
-
-# For validating duplicate ingredients when editing (excluding from qs doesnt work yet)
+# For validating duplicate ingredients when editing
 class BaseRecipeIngFormSet(BaseFormSet):
     def clean(self):
         """Checks that no two recipe ingredients have the same name."""
