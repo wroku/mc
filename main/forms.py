@@ -56,8 +56,6 @@ class NewUserForm(UserCreationForm):
 
 
 class IngredientForm(ModelForm):
-    ''' Maybe web scraper here, using prepopulate in real time?
-    or ajax inserting stats and asking user to provide values'''
     class Meta:
         model = Ingredient
         fields = ['name', 'category', 'price', 'calval', 'image',
