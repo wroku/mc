@@ -77,13 +77,14 @@ def recipes_containing(request, query=None):
     results = []
 
     def search(subquery, excluded=None):
-        '''Return tuple with matches and additional data, ready to be displayed in a template.
+        """
+        Return tuple with matches and additional data, ready to be displayed in a template.
 
         -> (((recipe, [missing]),(...)), subquery, number o results)
         [missing] - ingredients listed in particular recipe but not included in user's query
         When excluded is provided, use queryset difference to subtract recipes possibly duplicated
         in full and partial length query.
-        '''
+        """
         partial_matches = []
         for ing in subquery:
             partial_matches.append(Recipe.objects.search_by_ing(ing))
@@ -212,6 +213,7 @@ def recipes(request):
                    'asc': asc,
                    'ordered_by': filter_by,
                    'recipes': qs})
+
 
 def access_denied(request):
     return render(request,

@@ -5,6 +5,8 @@ from django.utils.text import slugify
 from decimal import *
 from django.db.models import Q
 from django.urls import reverse
+from django.core.exceptions import ValidationError
+
 
 # Create your models here.
 getcontext().prec = 5
@@ -63,6 +65,10 @@ class Ingredient(models.Model):
 
     def get_absolute_url(self):
         return reverse('main:product-details', kwargs={'slug': self.slug})
+
+    def clean(self):
+        if self.total_fat + self.total_carbs + self.total_proteins > 100:
+            raise ValidationError("Macronutrient's quantities shouldn't exceed 100 grams in total")
 
 
 def upload_location(recipe, filename):
