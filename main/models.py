@@ -70,6 +70,11 @@ class Ingredient(models.Model):
         if self.total_fat + self.total_carbs + self.total_proteins > 100:
             raise ValidationError("Macronutrient's quantities shouldn't exceed 100 grams in total")
 
+    # Override save() to trigger custom clean()
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(Ingredient, self).save(*args, **kwargs)
+
 
 def upload_location(recipe, filename):
     return "%s/%s" % (recipe.user, filename)
@@ -160,7 +165,8 @@ class Quantity(models.Model):
 
 class Comment(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(max_length=2000)
     created_on = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=False)
+
