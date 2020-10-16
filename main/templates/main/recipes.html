@@ -28,7 +28,11 @@
 
 {% endif %}
 
-{% if count > 0 %}
+{% if count == 0 %}
+
+    <h3> Use other keywords or try searching recipes by ingrediends.</h3>
+
+{% elif not count or count > 1 %}
 <form method="get" action="">
     <div class="form-row mb-3">
         <div class="col-1 mx-auto">
@@ -62,11 +66,9 @@
         <button type="submit" class="btn btn-outline-secondary mx-auto">Apply</button>
     </div>
 </form>
-{% elif count == 0 %}
-
-    <h3> Use other keywords or try searching recipes by ingrediends.</h3>
 
 {% endif %}
+
 <div class="row">
     <div class="card-columns">
     {% for recipe in recipes %}

@@ -29,6 +29,7 @@ class QuantityInline(admin.TabularInline):
     extra = 2
 
 
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
 
     prepopulated_fields = {'recipe_slug': ('recipe_name',)}
@@ -42,7 +43,7 @@ class RecipeAdmin(admin.ModelAdmin):
         queryset.update(accepted=True)
 
 
-admin.site.register(Recipe, RecipeAdmin)
+
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(FoodCategory, FoodCategoryAdmin)
 

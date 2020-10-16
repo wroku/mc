@@ -30,7 +30,6 @@ class IngredientModelTest(TestCase):
                                      total_proteins=1)
         self.second_ing.save()
 
-
     def test_check_ingredient_slugifier(self):
         self.assertEqual(self.example_ing.slug, 'example-ing')
 
