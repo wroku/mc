@@ -8,19 +8,23 @@ from django.contrib import admin
 # python manage.py test main.tests.test_views
 
 
-class SimpleGetTests(TestCase):
-    def test_products(self):
-        response = self.client.get('/products/')
+class SimpleGetTest(TestCase):
+    def test_ingredients(self):
+        response = self.client.get(reverse('main:products'))
         self.assertEqual(response.status_code, 200)
 
     def test_homepage(self):
         response = self.client.get('')
         self.assertEqual(response.status_code, 200)
 
+    def test_recipes(self):
+        response = self.client.get(reverse('main:recipes'))
+        self.assertEqual(response.status_code, 200)
+
 
 class BaseViewTest(TestCase):
     """
-    Simple setup for test using objects.
+    Simple  setup for test using objects.
     """
 
     def setUp(self):
@@ -108,7 +112,7 @@ class RecipesViewTest(BaseViewTest):
         self.assertEqual(response.context['recipes'][0], self.recipe2)
 
 
-class AdminTests(BaseViewTest):
+class AdminActionsTest(BaseViewTest):
 
     def test_approve_recipes(self):
         """
@@ -143,5 +147,74 @@ class AdminTests(BaseViewTest):
         self.assertEqual(response.status_code, 200)
 
     def test_approve_comments(self):
-        pass
+        data = {'action': 'approve_comments',
+                '_selected_action': [self.comment.id, ]}
+        change_url = reverse('admin:main_comment_changelist')
 
+        self.assertFalse(self.comment.active)
+
+        response = self.client.post(change_url, data, follow=True)
+        self.assertEqual(Comment.objects.filter(active=False, id__in=data['_selected_action']).count(), 0)
+
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.active)
+        self.assertEqual(response.status_code, 200)
+
+
+class UserRelatedTest(BaseViewTest):
+
+    # TODO test register
+
+    def test_users_details(self):
+        """
+        /account page should list current user's recipes and comments. Empty querysets are handled
+        in template with suitable message.
+        """
+
+        response = self.client.get('/account', follow=True)
+
+        self.assertEqual(set(response.context['recipes']), set(Recipe.objects.filter(user=self.user)))
+        self.assertEqual(set(response.context['comments']), set(Comment.objects.filter(user=self.user)))
+        self.client.logout()
+
+        self.user2 = User.objects.create_user(username='second', email='test@tst.com', password='simpl3P55wd40')
+        self.client.login(username='second', password='simpl3P55wd40')
+        response = self.client.get('/account', follow=True)
+        self.assertEqual(set(response.context['recipes']), set(Recipe.objects.filter(user=self.user2)))
+        self.assertEqual(set(response.context['comments']), set(Comment.objects.filter(user=self.user2)))
+
+    def test_access_denied(self):
+        """
+        Attempt to edit recipe posted by another user should result in redirect to "acces denied" page.
+        """
+
+        self.user2 = User.objects.create_user(username='second', email='test@tst.com', password='simpl3P55wd40')
+        self.client.logout()
+        self.client.login(username='second', password='simpl3P55wd40')
+        get_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
+        response = self.client.get(get_url, follow=True)
+        self.assertRedirects(response, '/access_denied/')
+
+    def test_logout_next_fallback(self):
+        """
+        Plain '/logout' request should redirect to homepage. Real usage deals with next parameter.
+        """
+        response = self.client.get('/logout', follow=True)
+        self.assertRedirects(response, '/', status_code=301)
+
+
+class IngredientTest(BaseViewTest):
+
+    # TODO test new ingredient and validation method
+    def test_recipes_containing(self):
+        """
+        Supply self.ingredient with example image and check if details page is correctly listing
+        recipes with this ingredient
+        """
+        self.ingredient.image = 'tree.JPG'
+        self.ingredient.save()
+        get_url = reverse('main:product-details', kwargs={'slug': self.ingredient.slug})
+        response = self.client.get(get_url)
+        rc_set = {qt.recipe for qt in Quantity.objects.filter(ingredient=self.ingredient)}
+
+        self.assertEqual(set(response.context['recipes_containing']), rc_set)

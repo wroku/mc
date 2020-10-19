@@ -261,7 +261,6 @@ def account_details(request):
 def contact_page(request):
     form = ContactForm(request.POST or None)
     if form.is_valid():
-        print(form.cleaned_data)
         email = EmailMessage(
             'Message from {}, user {}, importance {}/100'.format(form.cleaned_data['full_name'],
                                                                  request.user,
@@ -304,7 +303,6 @@ def recipe_page(request):
             return redirect(f'/recipes/{recipe.recipe_slug}')
         else:
             messages.error(request, f"Invalid data!")
-            print(formset.errors)
     context = {
         'title': 'Recipe',
         'form': form,
