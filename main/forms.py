@@ -1,15 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.forms import ModelForm, Textarea
+from django.forms import ModelForm, Textarea, BaseFormSet, formset_factory
 from .models import Recipe, Ingredient, Comment
 from tinymce.widgets import TinyMCE
-from django.forms import formset_factory
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field
 from crispy_forms.bootstrap import PrependedText
-from django.forms import BaseFormSet
-from PIL import Image
 
 
 class ContactForm(forms.Form):

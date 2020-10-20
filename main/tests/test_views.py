@@ -4,6 +4,8 @@ from main.models import Ingredient, FoodCategory, Recipe, Quantity, Comment
 from django.contrib.auth.models import User
 from django.test import Client
 from django.contrib import admin
+from main.forms import IngredientForm
+from django.core.exceptions import ObjectDoesNotExist
 
 # python manage.py test main.tests.test_views
 
@@ -163,7 +165,20 @@ class AdminActionsTest(BaseViewTest):
 
 class UserRelatedTest(BaseViewTest):
 
-    # TODO test register
+    def test_register(self):
+        """
+        Create new user with self.client and check if instance retrieved from database is identical with User created
+        by create_user() method.
+        """
+
+        new_user = User.objects.create_user(username='new_user', email='brand@new.com', password='Fr3sh&sh1ny')
+        change_url = reverse('main:register')
+        data = {'username': 'new_user',
+                'email': 'brand@new.com',
+                'password1': 'Fr3sh&sh1ny',
+                'password2': 'Fr3sh&sh1ny'}
+        self.client.post(change_url, data)
+        self.assertEqual(User.objects.get(username='new_user'), new_user)
 
     def test_users_details(self):
         """
@@ -199,18 +214,19 @@ class UserRelatedTest(BaseViewTest):
         """
         Plain '/logout' request should redirect to homepage. Real usage deals with next parameter.
         """
+
         response = self.client.get('/logout', follow=True)
         self.assertRedirects(response, '/', status_code=301)
 
 
 class IngredientTest(BaseViewTest):
 
-    # TODO test new ingredient and validation method
     def test_recipes_containing(self):
         """
         Supply self.ingredient with example image and check if details page is correctly listing
         recipes with this ingredient
         """
+
         self.ingredient.image = 'tree.JPG'
         self.ingredient.save()
         get_url = reverse('main:product-details', kwargs={'slug': self.ingredient.slug})
@@ -218,3 +234,44 @@ class IngredientTest(BaseViewTest):
         rc_set = {qt.recipe for qt in Quantity.objects.filter(ingredient=self.ingredient)}
 
         self.assertEqual(set(response.context['recipes_containing']), rc_set)
+
+    def test_add_new_ingredient(self):
+        """
+        Use form to create new ingredient and check if object fetched from database is identical to
+        directly constructed instance.
+        """
+
+        change_url = reverse('main:add-ingredient')
+        data = {'name': 'new_ing',
+                'category': self.category,
+                'price': 10,
+                'calval': 10,
+                'image': 'tree.JPG',
+                'total_proteins': 20,
+                'total_carbs': 20,
+                'total_fat': 20}
+        new_ing = Ingredient(**data)
+        response = self.client.post(change_url, data)
+        self.assertEqual(new_ing, Ingredient.objects.get(name='new_ing'))
+
+    def test_total_macronutrients_validator(self):
+        """
+        Attempt to create ingredient with total macronutrients weight exceeding 100g should be
+        unsuccessful due to form validators.
+        """
+
+        change_url = reverse('main:add-ingredient')
+        data = {'name': 'new_ing',
+                'category': self.category,
+                'price': 10,
+                'calval': 10,
+                'image': 'tree.JPG',
+                'total_proteins': 35,
+                'total_carbs': 35,
+                'total_fat': 35 }
+        response = self.client.post(change_url, data)
+        with self.assertRaises(ObjectDoesNotExist):
+            Ingredient.objects.get(name='new_ing')
+
+
+
