@@ -8,7 +8,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.views.generic import View
 from django.forms import formset_factory
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import EmailMessage
 from django.views.generic.edit import CreateView
 
 # Create your views here.
@@ -264,7 +264,7 @@ def contact_page(request):
         email = EmailMessage(
             'Message from {}, user {}, importance {}/100'.format(form.cleaned_data['full_name'],
                                                                  request.user,
-                                                                 form.cleaned_data['level_of_importance'] ),
+                                                                 form.cleaned_data['level_of_importance']),
             form.cleaned_data['content'],
             form.cleaned_data['email'],
             ['wrokuj@gmail.com'],

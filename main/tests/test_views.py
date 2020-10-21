@@ -2,18 +2,15 @@ from django.test import TestCase
 from django.urls import reverse
 from main.models import Ingredient, FoodCategory, Recipe, Quantity, Comment
 from django.contrib.auth.models import User
-from django.test import Client
 from django.contrib import admin
-from main.forms import IngredientForm
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core import mail
 
 # python manage.py test main.tests.test_views
 
 
 class SimpleGetTest(TestCase):
-    def test_ingredients(self):
-        response = self.client.get(reverse('main:products'))
-        self.assertEqual(response.status_code, 200)
 
     def test_homepage(self):
         response = self.client.get('')
@@ -43,6 +40,7 @@ class BaseViewTest(TestCase):
         self.category.save()
         self.ingredient = Ingredient(name='Example Ing',
                                      category=self.category,
+                                     image='tree.JPG',
                                      price=100,
                                      calval=100,
                                      total_carbs=1,
@@ -71,6 +69,14 @@ class BaseViewTest(TestCase):
 
 
 class RecipesViewTest(BaseViewTest):
+
+    def test_get_recipes(self):
+        response = self.client.get(reverse('main:recipes'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_recipe_details(self):
+        response = self.client.get(reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
+        self.assertEqual(response.status_code, 200)
 
     def test_recipe_visibility(self):
         """
@@ -115,6 +121,9 @@ class RecipesViewTest(BaseViewTest):
 
 
 class AdminActionsTest(BaseViewTest):
+    """
+    Test custom admin actions.
+    """
 
     def test_approve_recipes(self):
         """
@@ -221,6 +230,14 @@ class UserRelatedTest(BaseViewTest):
 
 class IngredientTest(BaseViewTest):
 
+    def test_get_ingredients(self):
+        response = self.client.get(reverse('main:products'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_ingredient_details(self):
+        response = self.client.get(reverse('main:product-details', kwargs={'slug': self.ingredient.slug}))
+        self.assertEqual(response.status_code, 200)
+
     def test_recipes_containing(self):
         """
         Supply self.ingredient with example image and check if details page is correctly listing
@@ -246,18 +263,17 @@ class IngredientTest(BaseViewTest):
                 'category': self.category,
                 'price': 10,
                 'calval': 10,
-                'image': 'tree.JPG',
                 'total_proteins': 20,
                 'total_carbs': 20,
                 'total_fat': 20}
         new_ing = Ingredient(**data)
-        response = self.client.post(change_url, data)
+        self.client.post(change_url, data)
         self.assertEqual(new_ing, Ingredient.objects.get(name='new_ing'))
 
     def test_total_macronutrients_validator(self):
         """
         Attempt to create ingredient with total macronutrients weight exceeding 100g should be
-        unsuccessful due to form validators.
+        unsuccessful due to form validator.
         """
 
         change_url = reverse('main:add-ingredient')
@@ -268,10 +284,51 @@ class IngredientTest(BaseViewTest):
                 'image': 'tree.JPG',
                 'total_proteins': 35,
                 'total_carbs': 35,
-                'total_fat': 35 }
-        response = self.client.post(change_url, data)
+                'total_fat': 35}
+        self.client.post(change_url, data)
         with self.assertRaises(ObjectDoesNotExist):
             Ingredient.objects.get(name='new_ing')
 
+    def test_redirect_to_details(self):
+        """
+        Create ingredient via post method (real image needed) and check if redirect chain leads to this ingredient's
+        details page.
+        """
 
+        change_url = reverse('main:add-ingredient')
+        img = SimpleUploadedFile('example.jpg',
+                                 content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                 content_type='image/jpeg')
+        data = {'name': 'new_ing',
+                'category': self.category,
+                'price': 10,
+                'calval': 10,
+                'image': img,
+                'total_proteins': 20,
+                'total_carbs': 20,
+                'total_fat': 20}
+
+        response = self.client.post(change_url, data, follow=True)
+
+        self.assertRedirects(response,
+                             reverse('main:product-details', kwargs={'slug': Ingredient.objects.get(name=data['name']).slug}))
+
+
+class ContactUsTest(TestCase):
+
+    def test_send_email(self):
+        data = {'full_name': 'example user',
+                'email': 'test@test.com',
+                'content': 'very important message',
+                'level_of_importance': 34}
+
+        post_url = reverse('main:contact-page')
+        self.client.post(post_url, data)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(data['full_name'], mail.outbox[0].subject)
+        self.assertIn('AnonymousUser', mail.outbox[0].subject)
+        self.assertIn(str(data['level_of_importance']), mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].body, data['content'])
+        self.assertEqual(mail.outbox[0].from_email, data['email'])
 

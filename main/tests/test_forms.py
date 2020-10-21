@@ -1,5 +1,5 @@
 from django.test import TestCase
-from main.forms import IngredientForm
+from main.forms import IngredientForm, ContactForm
 from main.models import Ingredient, FoodCategory, Recipe, Quantity, Comment
 
 
@@ -23,4 +23,22 @@ class IngredientFormTest(TestCase):
                 'total_fat': 35}
 
         form = IngredientForm(data=data)
+        self.assertFalse(form.is_valid())
+
+
+class ContactPageFormTest(TestCase):
+
+    def setUp(self):
+        self.data = {'full_name': 'example user',
+                     'email': 'test@test.com',
+                     'content': 'very important message',
+                     'level_of_importance': 34}
+
+    def test_valid_message(self):
+        form = ContactForm(data=self.data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_email(self):
+        self.data['email'] = 'invalid_email'
+        form = ContactForm(data=self.data)
         self.assertFalse(form.is_valid())
