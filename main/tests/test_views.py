@@ -9,6 +9,8 @@ from django.core import mail
 
 # python manage.py test main.tests.test_views
 
+# TODO composition over inheritance... use setUpTestData and put all wet code in functions
+
 
 class SimpleGetTest(TestCase):
 
@@ -462,3 +464,52 @@ class IngredientListTest(BaseViewTest):
         self.assertEqual(len(response.context['added']), 1)
         self.assertEqual(self.client.session['collect_ing'], response.context['added'])
 
+
+class RecipeAddTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_superuser('Necessary Evil', 'test@example.com', 'SomeP5WD-40')
+        cls.category = FoodCategory(name='Example Cat')
+        cls.category.save()
+        defaults = {'name': 'Ing',
+                    'category': cls.category,
+                    'price': 10,
+                    'calval': 100,
+                    'total_carbs': 10,
+                    'total_fat': 10,
+                    'total_proteins': 10}
+
+        cls.NUMBER_OF_INGREDIENTS = 5
+        for i in range(1, cls.NUMBER_OF_INGREDIENTS + 1):
+            defaults['name'] = defaults['name'][:3] + str(i)
+            ingredient = Ingredient(**defaults)
+            ingredient.save()
+
+        cls.img = SimpleUploadedFile('example.jpg',
+                                     content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                     content_type='image/jpeg')
+
+    def test_get_add_recipe_page(self):
+        response = self.client.get(reverse('main:add-recipe'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('main/addrecipe.html', [tmp.name for tmp in response.templates])
+
+    def test_add_recipe(self):
+        self.client.force_login(self.user)
+        data = {'recipe_name': 'Example Recipe',
+                'recipe_image': self.img,
+                'preparation_time': 55,
+                'servings': 5,
+                'form-TOTAL_FORMS': 2,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient': Ingredient.objects.all()[0].name,
+                'form-0-quantity': 100,
+                'directions': Ingredient.objects.all()[0].name
+                }
+        response = self.client.post(reverse('main:add-recipe'), data, follow=True)
+        self.assertEqual(response.context['recipe'], Recipe.objects.get(recipe_name='Example Recipe'))
+        self.assertRedirects(response, reverse('main:recipe-details',
+                                               kwargs={'slug': Recipe.objects.get(recipe_name='Example Recipe').recipe_slug}))
