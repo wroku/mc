@@ -315,6 +315,9 @@ class IngredientTest(BaseViewTest):
 
 
 class ContactUsTest(TestCase):
+    """
+    Test sending email via contact page and check if message's subject contains intended data.
+    """
 
     def test_send_email(self):
         data = {'full_name': 'example user',
@@ -332,3 +335,63 @@ class ContactUsTest(TestCase):
         self.assertEqual(mail.outbox[0].body, data['content'])
         self.assertEqual(mail.outbox[0].from_email, data['email'])
 
+
+class IngredientListTest(BaseViewTest):
+
+    def setUp(self):
+        """
+        Create few new ingredients in addition to base class setup.
+        """
+
+        super().setUp()
+
+        defaults = {'name': 'Ing',
+                    'category': self.category,
+                    'price': 10,
+                    'calval': 100,
+                    'total_carbs': 10,
+                    'total_fat': 10,
+                    'total_proteins': 10}
+
+        for i in range(1, 6):
+            defaults['name'] = defaults['name'][:3] + str(i)
+            ingredient = Ingredient(**defaults)
+            ingredient.save()
+
+    def test_list_add(self):
+        """
+        Add one ingredient to the list and check if it's passed to the template in response's context.
+        """
+
+        response = self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
+        self.assertEqual(len(response.context['added']), 1)
+        self.assertIn(self.ingredient.name, response.context['added'])
+
+    def test_list_delete(self):
+        """
+        Add two ingredients to the list and delete one of them. Check if change is correctly reflected in response's context.
+        """
+
+        self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
+        response = self.client.post(reverse('main:products'),
+                                    {'add': 'added', 'ingredient': Ingredient.objects.get(name="Ing1").name})
+        self.assertEqual(len(response.context['added']), 2)
+
+        response = self.client.post(reverse('main:products'),
+                                    {'delete': 'deleted', 'ingredient': self.ingredient.name})
+        self.assertEqual(len(response.context['added']), 1)
+        self.assertIn(Ingredient.objects.get(name="Ing1").name, response.context['added'])
+        self.assertNotIn(self.ingredient.name, response.context['added'])
+
+    def test_list_clear(self):
+        """
+        Add two ingredients remove all from the list with "clear all" option.
+        """
+
+        self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
+        response = self.client.post(reverse('main:products'),
+                                    {'add': 'added', 'ingredient': Ingredient.objects.get(name="Ing1").name})
+        self.assertEqual(len(response.context['added']), 2)
+
+        response = self.client.post(reverse('main:products'), {'clear': 'cleared'})
+        self.assertEqual(len(response.context['added']), 0)

@@ -133,7 +133,6 @@ def products(request):
     if query is not None:
         ingredients_qs = Ingredient.objects.search(query)
         count = len(ingredients_qs)
-        print(ingredients_qs)
     if request.method == 'POST':
         current_ing = request.POST.get('ingredient')
         if request.POST.get('add') == 'added':
