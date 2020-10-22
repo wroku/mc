@@ -15,10 +15,7 @@ class SimpleGetTest(TestCase):
     def test_homepage(self):
         response = self.client.get('')
         self.assertEqual(response.status_code, 200)
-
-    def test_recipes(self):
-        response = self.client.get(reverse('main:recipes'))
-        self.assertEqual(response.status_code, 200)
+        self.assertIn('main/homepage.html', [tmp.name for tmp in response.templates])
 
 
 class BaseViewTest(TestCase):
@@ -73,10 +70,12 @@ class RecipesViewTest(BaseViewTest):
     def test_get_recipes(self):
         response = self.client.get(reverse('main:recipes'))
         self.assertEqual(response.status_code, 200)
+        self.assertIn('main/recipes.html', [tmp.name for tmp in response.templates])
 
     def test_get_recipe_details(self):
         response = self.client.get(reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
         self.assertEqual(response.status_code, 200)
+        self.assertIn('main/recipe_details.html', [tmp.name for tmp in response.templates])
 
     def test_recipe_visibility(self):
         """
@@ -174,6 +173,11 @@ class AdminActionsTest(BaseViewTest):
 
 class UserRelatedTest(BaseViewTest):
 
+    def test_get_register(self):
+        response = self.client.get(reverse('main:register'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('main/register.html', [tmp.name for tmp in response.templates])
+
     def test_register(self):
         """
         Create new user with self.client and check if instance retrieved from database is identical with User created
@@ -189,6 +193,11 @@ class UserRelatedTest(BaseViewTest):
         self.client.post(change_url, data)
         self.assertEqual(User.objects.get(username='new_user'), new_user)
 
+    def test_get_user_details(self):
+        response = self.client.get('/account', follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('main/account_details.html', [tmp.name for tmp in response.templates])
+
     def test_users_details(self):
         """
         /account page should list current user's recipes and comments. Empty querysets are handled
@@ -203,6 +212,7 @@ class UserRelatedTest(BaseViewTest):
 
         self.user2 = User.objects.create_user(username='second', email='test@tst.com', password='simpl3P55wd40')
         self.client.login(username='second', password='simpl3P55wd40')
+
         response = self.client.get('/account', follow=True)
         self.assertEqual(set(response.context['recipes']), set(Recipe.objects.filter(user=self.user2)))
         self.assertEqual(set(response.context['comments']), set(Comment.objects.filter(user=self.user2)))
@@ -218,6 +228,7 @@ class UserRelatedTest(BaseViewTest):
         get_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
         response = self.client.get(get_url, follow=True)
         self.assertRedirects(response, '/access_denied/')
+        self.assertIn('main/access_denied.html', [tmp.name for tmp in response.templates])
 
     def test_logout_next_fallback(self):
         """
@@ -233,10 +244,12 @@ class IngredientTest(BaseViewTest):
     def test_get_ingredients(self):
         response = self.client.get(reverse('main:products'))
         self.assertEqual(response.status_code, 200)
+        self.assertIn('main/products.html', [tmp.name for tmp in response.templates])
 
     def test_get_ingredient_details(self):
         response = self.client.get(reverse('main:product-details', kwargs={'slug': self.ingredient.slug}))
         self.assertEqual(response.status_code, 200)
+        self.assertIn('main/product_details.html', [tmp.name for tmp in response.templates])
 
     def test_recipes_containing(self):
         """
@@ -249,7 +262,6 @@ class IngredientTest(BaseViewTest):
         get_url = reverse('main:product-details', kwargs={'slug': self.ingredient.slug})
         response = self.client.get(get_url)
         rc_set = {qt.recipe for qt in Quantity.objects.filter(ingredient=self.ingredient)}
-
         self.assertEqual(set(response.context['recipes_containing']), rc_set)
 
     def test_add_new_ingredient(self):
@@ -319,6 +331,11 @@ class ContactUsTest(TestCase):
     Test sending email via contact page and check if message's subject contains intended data.
     """
 
+    def test_get_contact_page(self):
+        response = self.client.get(reverse('main:contact-page'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('main/contact_form.html', [tmp.name for tmp in response.templates])
+
     def test_send_email(self):
         data = {'full_name': 'example user',
                 'email': 'test@test.com',
@@ -337,6 +354,9 @@ class ContactUsTest(TestCase):
 
 
 class IngredientListTest(BaseViewTest):
+    """
+    Test add, delete and clear - actions of ingredients list which can be tested by django client()
+    """
 
     def setUp(self):
         """
@@ -353,45 +373,92 @@ class IngredientListTest(BaseViewTest):
                     'total_fat': 10,
                     'total_proteins': 10}
 
-        for i in range(1, 6):
+        self.NUMBER_OF_INGREDIENTS = 5
+        for i in range(1, self.NUMBER_OF_INGREDIENTS + 1):
             defaults['name'] = defaults['name'][:3] + str(i)
             ingredient = Ingredient(**defaults)
             ingredient.save()
 
+    def test_ingredient_list_template_render(self):
+        """
+        'ingredient_list.html' template shouldn't be rendered before adding ingredient.
+        """
+
+        response = self.client.get(reverse('main:products'))
+        self.assertNotIn('main/ingredient_list.html', [tmp.name for tmp in response.templates])
+        response = self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
+        self.assertIn('main/ingredient_list.html', [tmp.name for tmp in response.templates])
+
     def test_list_add(self):
         """
-        Add one ingredient to the list and check if it's passed to the template in response's context.
+        Add one ingredient to the list and check if it exists in session data and it's passed to the template in response's context.
         """
 
         response = self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
+        session = self.client.session
+        self.assertEqual(session['collect_ing'][0], self.ingredient.name)
         self.assertEqual(len(response.context['added']), 1)
         self.assertIn(self.ingredient.name, response.context['added'])
 
+    def test_multiple_add(self):
+        """
+        Add multiple ingredients.
+        """
+
+        for name in ['Ing' + str(i) for i in range(1, self.NUMBER_OF_INGREDIENTS + 1)]:
+            response = self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': name})
+
+        session = self.client.session
+        self.assertEqual(len(response.context['added']), self.NUMBER_OF_INGREDIENTS)
+        self.assertEqual(len(session['collect_ing']), self.NUMBER_OF_INGREDIENTS)
+
     def test_list_delete(self):
         """
-        Add two ingredients to the list and delete one of them. Check if change is correctly reflected in response's context.
+        Add two ingredients to the list and delete one of them. Check if change is correctly reflected in
+        response's context and session data.
         """
 
         self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
         response = self.client.post(reverse('main:products'),
                                     {'add': 'added', 'ingredient': Ingredient.objects.get(name="Ing1").name})
+        session = self.client.session
         self.assertEqual(len(response.context['added']), 2)
+        self.assertEqual(len(session['collect_ing']), 2)
 
         response = self.client.post(reverse('main:products'),
                                     {'delete': 'deleted', 'ingredient': self.ingredient.name})
         self.assertEqual(len(response.context['added']), 1)
+        session = self.client.session
+        self.assertEqual(len(session['collect_ing']), 1)
         self.assertIn(Ingredient.objects.get(name="Ing1").name, response.context['added'])
         self.assertNotIn(self.ingredient.name, response.context['added'])
+        self.assertEqual(response.context['added'], session['collect_ing'])
 
     def test_list_clear(self):
         """
         Add two ingredients remove all from the list with "clear all" option.
         """
 
-        self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
-        response = self.client.post(reverse('main:products'),
-                                    {'add': 'added', 'ingredient': Ingredient.objects.get(name="Ing1").name})
-        self.assertEqual(len(response.context['added']), 2)
+        for name in ['Ing' + str(i) for i in range(1, self.NUMBER_OF_INGREDIENTS + 1)]:
+            response = self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': name})
+
+        self.assertEqual(len(response.context['added']), self.NUMBER_OF_INGREDIENTS)
+        self.assertEqual(self.client.session['collect_ing'], response.context['added'])
 
         response = self.client.post(reverse('main:products'), {'clear': 'cleared'})
         self.assertEqual(len(response.context['added']), 0)
+        self.assertEqual(self.client.session['collect_ing'], response.context['added'])
+
+    def test_list_persistence(self):
+        """
+        Check if ingredients list remain unchanged after visiting another url.
+        """
+
+        self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
+        self.client.get(reverse('main:homepage'))
+        response = self.client.get(reverse('main:products'))
+
+        self.assertIn(self.ingredient.name, response.context['added'])
+        self.assertEqual(len(response.context['added']), 1)
+        self.assertEqual(self.client.session['collect_ing'], response.context['added'])
+

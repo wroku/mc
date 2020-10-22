@@ -125,8 +125,9 @@
             {% endfor %}
         </div>
 
-        {% include 'main/ingredient_list.html' %}
-
+        {% if added %}
+            {% include 'main/ingredient_list.html' %}
+        {% endif %}
 
     </div>
   </div>
@@ -176,8 +177,9 @@
           {% endfor %}
       </div>
 
-          {% include 'main/ingredient_list.html' %}
-
+          {% if added %}
+            {% include 'main/ingredient_list.html' %}
+          {% endif %}
       </div>
   </div>
   {% endfor %}
