@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.forms import ModelForm, Textarea, BaseFormSet, formset_factory
+from django.forms import ModelForm, BaseFormSet, formset_factory
 from .models import Recipe, Ingredient, Comment
 from tinymce.widgets import TinyMCE
 from crispy_forms.helper import FormHelper

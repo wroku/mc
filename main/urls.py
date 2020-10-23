@@ -36,7 +36,6 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('search-by-ingredients/<str:query>/', views.recipes_containing, name='search-by-ingredients'),
     path('search-by-ingredients/', views.recipes_containing, name='search-by-ingredients'),
-    path('api/data/', views.get_data, name='api-data'),
     path('updateSS/', views.update_session, name='updateSS'),
     path('updateOP/', views.update_options, name='updateOP'),
     path('chartpage/', views.ChartView.as_view(), name='chart-page'),

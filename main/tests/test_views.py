@@ -20,6 +20,31 @@ class SimpleGetTest(TestCase):
         self.assertIn('main/homepage.html', [tmp.name for tmp in response.templates])
 
 
+def basic_setup(self):
+    # Create auth user for views using api request factory
+    self.username = 'test_user'
+    self.password = 'herewego'
+    self.user = User.objects.create_superuser(self.username, 'test@example.com', self.password)
+
+    # Recipe has to have mock recipe_image attribute which really exists.
+    self.recipe = Recipe(recipe_name='Example Recipe', recipe_image='tree.JPG')
+    self.recipe.save()
+
+    self.category = FoodCategory(name='Example Cat')
+    self.category.save()
+    self.ingredient = Ingredient(name='Example Ing',
+                                 category=self.category,
+                                 image='tree.JPG',
+                                 price=100,
+                                 calval=100,
+                                 total_carbs=1,
+                                 total_fat=1,
+                                 total_proteins=1)
+    self.ingredient.save()
+    self.comment = Comment(recipe=self.recipe, user=User.objects.get(pk=1))
+    self.comment.save()
+
+
 class BaseViewTest(TestCase):
     """
     Simple  setup for test using objects.
@@ -145,6 +170,7 @@ class AdminActionsTest(BaseViewTest):
         self.assertEqual(response.status_code, 200)
 
     def test_approve_ingredient(self):
+
         data = {'action': 'approve_ingredients',
                 '_selected_action': [self.ingredient.name, ]}
         change_url = reverse('admin:main_ingredient_changelist')
@@ -159,15 +185,13 @@ class AdminActionsTest(BaseViewTest):
         self.assertEqual(response.status_code, 200)
 
     def test_approve_comments(self):
+
         data = {'action': 'approve_comments',
                 '_selected_action': [self.comment.id, ]}
         change_url = reverse('admin:main_comment_changelist')
-
         self.assertFalse(self.comment.active)
-
         response = self.client.post(change_url, data, follow=True)
         self.assertEqual(Comment.objects.filter(active=False, id__in=data['_selected_action']).count(), 0)
-
         self.comment.refresh_from_db()
         self.assertTrue(self.comment.active)
         self.assertEqual(response.status_code, 200)
@@ -178,7 +202,7 @@ class UserRelatedTest(BaseViewTest):
     def test_get_register(self):
         response = self.client.get(reverse('main:register'))
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/register.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/register.html')
 
     def test_register(self):
         """
@@ -198,7 +222,7 @@ class UserRelatedTest(BaseViewTest):
     def test_get_user_details(self):
         response = self.client.get('/account', follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/account_details.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/account_details.html')
 
     def test_users_details(self):
         """
@@ -230,7 +254,7 @@ class UserRelatedTest(BaseViewTest):
         get_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
         response = self.client.get(get_url, follow=True)
         self.assertRedirects(response, '/access_denied/')
-        self.assertIn('main/access_denied.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/access_denied.html')
 
     def test_logout_next_fallback(self):
         """
@@ -355,31 +379,34 @@ class ContactUsTest(TestCase):
         self.assertEqual(mail.outbox[0].from_email, data['email'])
 
 
-class IngredientListTest(BaseViewTest):
+class IngredientListTest(TestCase):
     """
     Test add, delete and clear - actions of ingredients list which can be tested by django client()
     """
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """
         Create few new ingredients in addition to base class setup.
         """
 
-        super().setUp()
-
+        cls.category = FoodCategory(name='Example Cat')
+        cls.category.save()
         defaults = {'name': 'Ing',
-                    'category': self.category,
+                    'category': cls.category,
                     'price': 10,
                     'calval': 100,
                     'total_carbs': 10,
                     'total_fat': 10,
                     'total_proteins': 10}
 
-        self.NUMBER_OF_INGREDIENTS = 5
-        for i in range(1, self.NUMBER_OF_INGREDIENTS + 1):
+        cls.NUMBER_OF_INGREDIENTS = 5
+        for i in range(1, cls.NUMBER_OF_INGREDIENTS + 1):
             defaults['name'] = defaults['name'][:3] + str(i)
             ingredient = Ingredient(**defaults)
             ingredient.save()
+
+        cls.ingredient = Ingredient.objects.get(name='Ing1')
 
     def test_ingredient_list_template_render(self):
         """
@@ -387,9 +414,9 @@ class IngredientListTest(BaseViewTest):
         """
 
         response = self.client.get(reverse('main:products'))
-        self.assertNotIn('main/ingredient_list.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateNotUsed(response, 'main/ingredient_list.html')
         response = self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
-        self.assertIn('main/ingredient_list.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/ingredient_list.html')
 
     def test_list_add(self):
         """
@@ -422,7 +449,7 @@ class IngredientListTest(BaseViewTest):
 
         self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': self.ingredient.name})
         response = self.client.post(reverse('main:products'),
-                                    {'add': 'added', 'ingredient': Ingredient.objects.get(name="Ing1").name})
+                                    {'add': 'added', 'ingredient': Ingredient.objects.get(name="Ing2").name})
         session = self.client.session
         self.assertEqual(len(response.context['added']), 2)
         self.assertEqual(len(session['collect_ing']), 2)
@@ -432,7 +459,7 @@ class IngredientListTest(BaseViewTest):
         self.assertEqual(len(response.context['added']), 1)
         session = self.client.session
         self.assertEqual(len(session['collect_ing']), 1)
-        self.assertIn(Ingredient.objects.get(name="Ing1").name, response.context['added'])
+        self.assertIn(Ingredient.objects.get(name="Ing2").name, response.context['added'])
         self.assertNotIn(self.ingredient.name, response.context['added'])
         self.assertEqual(response.context['added'], session['collect_ing'])
 
@@ -451,6 +478,15 @@ class IngredientListTest(BaseViewTest):
         self.assertEqual(len(response.context['added']), 0)
         self.assertEqual(self.client.session['collect_ing'], response.context['added'])
 
+    def test_invalid_ingredient(self):
+        """
+        Attempt to add or delete ingredient which does not exist should be unsuccessful.
+        """
+
+        response = self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': 'INVALID'})
+        self.assertEqual(len(response.context['added']), 0)
+        self.assertEqual(len(self.client.session['collect_ing']), 0)
+
     def test_list_persistence(self):
         """
         Check if ingredients list remain unchanged after visiting another url.
@@ -465,7 +501,10 @@ class IngredientListTest(BaseViewTest):
         self.assertEqual(self.client.session['collect_ing'], response.context['added'])
 
 
-class RecipeAddTest(TestCase):
+class BaseRecipeTest(TestCase):
+    """
+    Basic setup for tests dealing with adding and editing recipes.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -490,26 +529,118 @@ class RecipeAddTest(TestCase):
                                      content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
                                      content_type='image/jpeg')
 
+        cls.default_data = {'recipe_name': 'Example Recipe',
+                            'recipe_image': cls.img,
+                            'preparation_time': 55,
+                            'servings': 5,
+                            'form-TOTAL_FORMS': 2,
+                            'form-INITIAL_FORMS': 0,
+                            'form-MIN_NUM_FORMS': 0,
+                            'form-MAX_NUM_FORMS': 1000,
+                            'form-0-ingredient': Ingredient.objects.all()[0].name,
+                            'form-0-quantity': 100,
+                            'directions': Ingredient.objects.all()[0].name}
+
+
+class RecipeAddTest(BaseRecipeTest):
+
     def test_get_add_recipe_page(self):
         response = self.client.get(reverse('main:add-recipe'))
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/addrecipe.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/addrecipe.html')
 
-    def test_add_recipe(self):
+    def test_add_valid_recipe(self):
+        """
+        Check if POSTing new recipe with valid data creates instance in database.
+        """
+
         self.client.force_login(self.user)
-        data = {'recipe_name': 'Example Recipe',
-                'recipe_image': self.img,
-                'preparation_time': 55,
-                'servings': 5,
-                'form-TOTAL_FORMS': 2,
-                'form-INITIAL_FORMS': 0,
-                'form-MIN_NUM_FORMS': 0,
-                'form-MAX_NUM_FORMS': 1000,
-                'form-0-ingredient': Ingredient.objects.all()[0].name,
-                'form-0-quantity': 100,
-                'directions': Ingredient.objects.all()[0].name
-                }
-        response = self.client.post(reverse('main:add-recipe'), data, follow=True)
+        response = self.client.post(reverse('main:add-recipe'), self.default_data, follow=True)
         self.assertEqual(response.context['recipe'], Recipe.objects.get(recipe_name='Example Recipe'))
         self.assertRedirects(response, reverse('main:recipe-details',
                                                kwargs={'slug': Recipe.objects.get(recipe_name='Example Recipe').recipe_slug}))
+
+    def test_duplicate_ingredient_validator(self):
+        """
+        Update default_data with second identical ingredient and try to POST. Recipe should not be created.
+        """
+
+        data = dict(self.default_data)
+        data.update({'form-1-ingredient': Ingredient.objects.all()[0].name,
+                     'form-1-quantity': 100})
+        self.client.force_login(self.user)
+        self.client.post(reverse('main:add-recipe'), data, follow=True)
+        with self.assertRaises(ObjectDoesNotExist):
+            Recipe.objects.get(recipe_name='Example Recipe')
+
+    def test_missing_directions_validator(self):
+        """
+        Modify directions with text which does not contain chosen ingredient's name. Assert that POST with such data is
+        unsuccessful.
+        """
+
+        data = dict(self.default_data)
+        data['directions'] = 'Unrelated text which does not mention chosen ingredients'
+        self.client.force_login(self.user)
+        self.client.post(reverse('main:add-recipe'), data, follow=True)
+        with self.assertRaises(ObjectDoesNotExist):
+            Recipe.objects.get(recipe_name='Example Recipe')
+
+    def test_preparation_time_validator(self):
+        """
+        Modify directions with text which does not contain chosen ingredient's name. Assert that POST with such data is
+        unsuccessful.
+        """
+
+        data = dict(self.default_data)
+        data['preparation_time'] = 999
+        self.client.force_login(self.user)
+        self.client.post(reverse('main:add-recipe'), data, follow=True)
+        with self.assertRaises(ObjectDoesNotExist):
+            Recipe.objects.get(recipe_name='Example Recipe')
+
+
+class RecipeEditTest(BaseRecipeTest):
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.recipe = Recipe(recipe_name='Example Recipe', accepted=True, preparation_time=50,
+                            recipe_image='tree.JPG', directions='Ing1')
+        for i in range(1, cls.NUMBER_OF_INGREDIENTS + 1):
+            Quantity(recipe=cls.recipe,
+                     ingredient=Ingredient.objects.get(name=f'Ing{i}'),
+                     quantity=100).save()
+        cls.recipe.save()
+
+    def test_get_edit_recipe(self):
+        """
+        Check status code and template used logged in as user which posted recipe.
+        """
+
+        self.client.force_login(self.user)
+        get_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
+        response = self.client.get(get_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'main/addrecipe.html')
+
+    def test_edit_invalid_recipe_404(self):
+        get_url = reverse('main:recipe-edit', kwargs={'slug': 'invalid'})
+        response = self.client.get(get_url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_recipe(self):
+        self.client.force_login(self.user)
+        change_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
+        data = dict(self.default_data)
+        change_data = {'form-INITIAL_FORMS': 1,
+                       'form-1-ingredient': Ingredient.objects.all()[1].name,
+                       'form-1-quantity': 100,
+                       'directions': 'Ing1 & ing2'}
+        data.update(change_data)
+        response = self.client.post(change_url, data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
+        self.recipe.refresh_from_db()
+        self.assertEqual(self.recipe.directions, change_data['directions'])
+        self.assertTemplateUsed(response, 'main/recipe_details.html')

@@ -248,7 +248,7 @@ class QuantityModelTest(BaseRecipeRelatedTest):
 
     def test_cascade_on_delete(self):
         self.recipe.delete()
-        with self.assertRaises(ObjectDoesNotExist) as raised:
+        with self.assertRaises(ObjectDoesNotExist):
             Quantity.objects.get(pk=1)
 
 

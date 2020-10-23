@@ -1,6 +1,4 @@
 from django import template
-from main.models import Ingredient, Recipe
-from django.shortcuts import get_object_or_404
 register = template.Library()
 
 

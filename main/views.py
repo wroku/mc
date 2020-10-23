@@ -10,6 +10,7 @@ from django.views.generic import View
 from django.forms import formset_factory
 from django.core.mail import EmailMessage
 from django.views.generic.edit import CreateView
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 
@@ -134,20 +135,24 @@ def products(request):
         ingredients_qs = Ingredient.objects.search(query)
         count = len(ingredients_qs)
     if request.method == 'POST':
-        current_ing = request.POST.get('ingredient')
-        if request.POST.get('add') == 'added':
-            if current_ing not in request.session['collect_ing']:
-                request.session['collect_ing'].append(current_ing)
-                request.session.modified = True
-            else:
-                messages.info(request, f'{current_ing} is already on ingredient list.')
-        elif request.POST.get('delete') == 'deleted':
-            if current_ing in request.session['collect_ing']:
-                request.session['collect_ing'].remove(current_ing)
-                request.session.modified = True
-            else:
-                messages.info(request, f'{current_ing} is not on ingredient list.')
-        elif request.POST.get('clear') == 'cleared':
+        try:
+            Ingredient.objects.get(name=request.POST.get('ingredient'))
+            current_ing = request.POST.get('ingredient')
+            if request.POST.get('add') == 'added':
+                if current_ing not in request.session['collect_ing']:
+                    request.session['collect_ing'].append(current_ing)
+                    request.session.modified = True
+                else:
+                    messages.info(request, f'{current_ing} is already on ingredient list.')
+            elif request.POST.get('delete') == 'deleted':
+                if current_ing in request.session['collect_ing']:
+                    request.session['collect_ing'].remove(current_ing)
+                    request.session.modified = True
+                else:
+                    messages.info(request, f'{current_ing} is not on ingredient list.')
+        except ObjectDoesNotExist:
+            messages.info(request, 'Such ingredient does not even exist. Stop messing with my site.')
+        if request.POST.get('clear') == 'cleared':
             request.session['collect_ing'] = []
             request.session.modified = True
     return render(request, 'main/products.html', {'products': Ingredient.objects.filter(accepted=True),
@@ -329,11 +334,9 @@ def edit_recipe(request, slug):
     formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
     for obj in qs[:len(qs)-1]:
         request.session['collect_ing'].append(str(obj.ingredient))
-    # Somewhat hacky but I couldn't find how to pass extra kwarg to formset factory + and-or trick from diving in python
-    # TODO Maybe js clicking last +... why extra = 1 in edit results in 2 rows with add btn?
-    RecipeEditIngFormset = formset_factory(RecipeIngredient,
-                                           formset=BaseRecipeIngFormSet,
-                                           extra=(formset_initial_data and [0] or [1])[0])
+        RecipeEditIngFormset = formset_factory(RecipeIngredient,
+                                               formset=BaseRecipeIngFormSet,
+                                               extra=(formset_initial_data and [0] or [1])[0])
     formset = RecipeEditIngFormset(request.POST or None,
                                    #  form_kwargs={'collect_ing': request.session['collect_ing']},
                                    initial=formset_initial_data)
@@ -366,15 +369,13 @@ def edit_recipe(request, slug):
 
         else:
             messages.error(request, f"Invalid data!")
-            print(formset.errors)
 
-    context = {
-        'recipe': instance,
-        'title': 'Edit Recipe',
-        'form': form,
-        'formset': formset,
-        'added': request.session['collect_ing']
-    }
+    context = {'recipe': instance,
+               'title': 'Edit Recipe',
+               'form': form,
+               'formset': formset,
+               'added': request.session['collect_ing']}
+
     return render(request, 'main/addrecipe.html', context)
 
 
@@ -460,14 +461,5 @@ class ChartView(View):
         return render(request, 'main/chart.html', {})
 
 
-def get_data(request, *args, **kwargs):
-    qs = Ingredient.objects
-    labels = ['pushups', 'pullups', 'squats']
-    default_items = [150, 66, 48]
-    data = {
-        'labels': labels,
-        'default': default_items,
-    }
-    return JsonResponse(data)
 
 
