@@ -40,7 +40,6 @@ def search(request):
         qs = recipes_qs
         count = -1
 
-
     filter_by = request.GET.get('filter', 'recipe_posted')
     ord = request.GET.get('ord', 'desc')
 
@@ -81,7 +80,7 @@ def recipes_containing(request, query=None):
         """
         Return tuple with matches and additional data, ready to be displayed in a template.
 
-        -> (((recipe, [missing]),(...)), subquery, number o results)
+        -> (((recipe, [missing]),(...)), subquery, number of results)
         [missing] - ingredients listed in particular recipe but not included in user's query
         When excluded is provided, use queryset difference to subtract recipes possibly duplicated
         in full and partial length query.

@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.urls import reverse
 from main.models import Ingredient, FoodCategory, Recipe, Quantity, Comment
 from django.contrib.auth.models import User
-from django.contrib import admin
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core import mail
@@ -12,37 +11,12 @@ from django.core import mail
 # TODO composition over inheritance... use setUpTestData and put all wet code in functions
 
 
-class SimpleGetTest(TestCase):
+class HomepageTest(TestCase):
 
-    def test_homepage(self):
+    def test_get_homepage(self):
         response = self.client.get('')
         self.assertEqual(response.status_code, 200)
         self.assertIn('main/homepage.html', [tmp.name for tmp in response.templates])
-
-
-def basic_setup(self):
-    # Create auth user for views using api request factory
-    self.username = 'test_user'
-    self.password = 'herewego'
-    self.user = User.objects.create_superuser(self.username, 'test@example.com', self.password)
-
-    # Recipe has to have mock recipe_image attribute which really exists.
-    self.recipe = Recipe(recipe_name='Example Recipe', recipe_image='tree.JPG')
-    self.recipe.save()
-
-    self.category = FoodCategory(name='Example Cat')
-    self.category.save()
-    self.ingredient = Ingredient(name='Example Ing',
-                                 category=self.category,
-                                 image='tree.JPG',
-                                 price=100,
-                                 calval=100,
-                                 total_carbs=1,
-                                 total_fat=1,
-                                 total_proteins=1)
-    self.ingredient.save()
-    self.comment = Comment(recipe=self.recipe, user=User.objects.get(pk=1))
-    self.comment.save()
 
 
 class BaseViewTest(TestCase):
@@ -511,8 +485,12 @@ class BaseRecipeTest(TestCase):
         cls.user = User.objects.create_superuser('Necessary Evil', 'test@example.com', 'SomeP5WD-40')
         cls.category = FoodCategory(name='Example Cat')
         cls.category.save()
+        cls.img = SimpleUploadedFile('example.jpg',
+                                     content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                     content_type='image/jpeg')
         defaults = {'name': 'Ing',
                     'category': cls.category,
+                    'image': cls.img,
                     'price': 10,
                     'calval': 100,
                     'total_carbs': 10,
@@ -525,12 +503,14 @@ class BaseRecipeTest(TestCase):
             ingredient = Ingredient(**defaults)
             ingredient.save()
 
-        cls.img = SimpleUploadedFile('example.jpg',
-                                     content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
-                                     content_type='image/jpeg')
+        # TODO Understand whats the problem with ing and recipe using the same example image
+        
+        cls.imgr = SimpleUploadedFile('example.jpg',
+                                      content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                      content_type='image/jpeg')
 
         cls.default_data = {'recipe_name': 'Example Recipe',
-                            'recipe_image': cls.img,
+                            'recipe_image': cls.imgr,
                             'preparation_time': 55,
                             'servings': 5,
                             'form-TOTAL_FORMS': 2,
@@ -644,3 +624,105 @@ class RecipeEditTest(BaseRecipeTest):
         self.recipe.refresh_from_db()
         self.assertEqual(self.recipe.directions, change_data['directions'])
         self.assertTemplateUsed(response, 'main/recipe_details.html')
+
+
+class SearchRecipesTest(BaseRecipeTest):
+    """
+    Using search bar from urls different than '/products/' results in search mode targeting recipes.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Create few distinct recipes in addition to superclass setup for purpose of testing search method.
+        """
+
+        super().setUpTestData()
+        for counter in enumerate(('First', 'Second', 'Third'), 1):
+            recipe = Recipe(recipe_name=f'{counter[1]} Recipe', accepted=True, preparation_time=50,
+                            recipe_image='tree.JPG', directions='Bypassing form validation')
+            for i in range(1, counter[0] + 1):
+                Quantity(recipe=recipe,
+                         ingredient=Ingredient.objects.get(name=f'Ing{i}'),
+                         quantity=100).save()
+            recipe.save()
+
+    def test_get_search(self):
+        """
+        Check status code and template used.
+        """
+        response = self.client.get(reverse('main:search'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'main/recipes.html')
+
+    def test_search_tip(self):
+        """
+        Attempt to directly access plain '/search' url should result in count value -1 which triggers displaying search
+        feature tip in template.
+        """
+
+        response = self.client.get(reverse('main:search'))
+        self.assertEqual(response.context['count'], -1)
+
+    def test_empty_query_search(self):
+        """
+        Clicking search button without entering search query should result in all active recipes displayed.
+        """
+
+        response = self.client.get(reverse('main:search'), {'q': ''})
+        self.assertEqual(len(response.context['recipes']), 3)
+
+    def test_search(self):
+        """
+        Check if full tittle search yields expected result. 'count' and 'query' in context data should also
+        appropriately reflect data to render summarizing message in template.
+        """
+
+        query = {'q': 'First Recipe'}
+        response = self.client.get(reverse('main:search'), query)
+        self.assertEqual(len(response.context['recipes']), 1)
+        self.assertIn(Recipe.objects.get(recipe_name='First Recipe'), response.context['recipes'])
+        self.assertEqual(response.context['count'], len(response.context['recipes']))
+        self.assertEqual(response.context['query'], query['q'])
+
+    def test_search_title_contains(self):
+        """
+        Search feature should return all recipes containing query string in title (or directions).
+        'First' and 'Third' both contain 'ir' string.
+        """
+
+        query = {'q': 'ir'}
+        response = self.client.get(reverse('main:search'), query)
+        self.assertEqual(len(response.context['recipes']), 2)
+        self.assertIn(Recipe.objects.get(recipe_name='First Recipe'), response.context['recipes'])
+        self.assertIn(Recipe.objects.get(recipe_name='Third Recipe'), response.context['recipes'])
+
+    def test_search_directions_contains(self):
+        query = {'q': 'bypassing'}
+        response = self.client.get(reverse('main:search'), query)
+        self.assertEqual(len(response.context['recipes']), 3)
+
+
+class SearchIngredientsTest(BaseRecipeTest):
+    """
+    Using search bar from '/products/' urls results in search feature mode targeting ingredients.
+    """
+
+    def test_get_search_ingredients(self):
+        """
+        Check that empty query search yields full ingredients queryset.
+        Status_code and template used should match expectations too.
+        """
+
+        response = self.client.get(reverse('main:products'), {'q': ''})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'main/products.html')
+        self.assertEqual(len(response.context['ingredients']), self.NUMBER_OF_INGREDIENTS)
+
+    def test_search_ingredient(self):
+        query = {'q': 'Ing1'}
+        response = self.client.get(reverse('main:products'), query)
+        self.assertEqual(len(response.context['ingredients']), 1)
+        self.assertIn(Ingredient.objects.get(name='Ing1'), response.context['ingredients'])
+        self.assertEqual(response.context['count'], 1)
+        self.assertEqual(response.context['query'], query['q'])

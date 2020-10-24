@@ -58,7 +58,9 @@
         </div>
         {% endfor %}
 
-    {% include 'main/ingredient_list.html' %}
+    {% if added %}
+        {% include 'main/ingredient_list.html' %}
+    {% endif %}
 </div>
 
 
