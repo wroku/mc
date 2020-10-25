@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core import mail
+from django.contrib import auth
 
 # python manage.py test main.tests.test_views
 
@@ -192,6 +193,19 @@ class UserRelatedTest(BaseViewTest):
                 'password2': 'Fr3sh&sh1ny'}
         self.client.post(change_url, data)
         self.assertEqual(User.objects.get(username='new_user'), new_user)
+
+    def test_get_login(self):
+        response = self.client.get(reverse('main:login'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'main/login.html')
+
+    def test_login(self):
+        data = {'username': self.username,
+                'password': self.password}
+        response = self.client.post(reverse('main:login'), data)
+        user = auth.get_user(self.client)
+        self.assertRedirects(response, '/')
+        self.assertTrue(user.is_authenticated)
 
     def test_get_user_details(self):
         response = self.client.get('/account', follow=True)
@@ -504,7 +518,7 @@ class BaseRecipeTest(TestCase):
             ingredient.save()
 
         # TODO Understand whats the problem with ing and recipe using the same example image
-        
+
         cls.imgr = SimpleUploadedFile('example.jpg',
                                       content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
                                       content_type='image/jpeg')
@@ -726,3 +740,64 @@ class SearchIngredientsTest(BaseRecipeTest):
         self.assertIn(Ingredient.objects.get(name='Ing1'), response.context['ingredients'])
         self.assertEqual(response.context['count'], 1)
         self.assertEqual(response.context['query'], query['q'])
+
+
+class SearchByIngredient(BaseRecipeTest):
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Create few distinct recipes in addition to superclass setup for purpose of testing search method.
+        """
+
+        super().setUpTestData()
+        for counter in enumerate(('First', 'Second', 'Third'), 1):
+            recipe = Recipe(recipe_name=f'{counter[1]} Recipe', accepted=True, preparation_time=50,
+                            recipe_image='tree.JPG', directions='Bypassing form validation')
+            for i in range(1, counter[0] + 1):
+                Quantity(recipe=recipe,
+                         ingredient=Ingredient.objects.get(name=f'Ing{i}'),
+                         quantity=100).save()
+            recipe.save()
+
+    def test_get_search_by_ing(self):
+        get_url = reverse('main:search-by-ingredients')
+        response = self.client.get(get_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'main/recipes_containing.html')
+
+    def test_search_by_ing_exact_match(self):
+        get_url = reverse('main:search-by-ingredients', kwargs={'query': 'Ing1&Ing2&Ing3'})
+        response = self.client.get(get_url)
+        self.assertEqual(response.context['recipes'][0][2], 1)
+        self.assertEqual(response.context['recipes'][0][0][0][0], Recipe.objects.get(recipe_name='Third Recipe'))
+
+    def test_search_by_ing_partial_match(self):
+        get_url = reverse('main:search-by-ingredients', kwargs={'query': 'Ing1&Ing2&Ing3'})
+        response = self.client.get(get_url)
+        self.assertEqual(response.context['recipes'][1][2], 1)
+        self.assertEqual(response.context['recipes'][1][0][0][0], Recipe.objects.get(recipe_name='Second Recipe'))
+
+    def test_search_by_ing_subqueries(self):
+        """
+        There should be 4 distinct queries, one full (Ing1, Ing2, Ing3) and 3 shorter combinations.
+        """
+
+        get_url = reverse('main:search-by-ingredients', kwargs={'query': 'Ing1&Ing2&Ing3'})
+        response = self.client.get(get_url)
+        self.assertEqual(len(response.context['recipes']), 4)
+
+    def test_search_by_ing_missing(self):
+        """
+        Search results should list additional ingredients needed for recipe (which wasn't mentioned in query)
+        Second recipe matches query and does not have additional ingredients while third recipe uses also Ing3.
+        """
+
+        get_url = reverse('main:search-by-ingredients', kwargs={'query': 'Ing1&Ing2'})
+        response = self.client.get(get_url)
+
+        self.assertEqual(response.context['recipes'][0][0][0][0], Recipe.objects.get(recipe_name='Second Recipe'))
+        self.assertEqual(response.context['recipes'][0][0][0][1], [])
+
+        self.assertEqual(response.context['recipes'][0][0][1][0], Recipe.objects.get(recipe_name='Third Recipe'))
+        self.assertEqual(response.context['recipes'][0][0][1][1][0], Ingredient.objects.get(name='Ing3'))
