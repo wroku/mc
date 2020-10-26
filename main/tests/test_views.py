@@ -8,7 +8,7 @@ from django.core import mail
 from django.contrib import auth
 
 # python manage.py test main.tests.test_views
-
+# coverage run --source='.' manage.py test main
 # TODO composition over inheritance... use setUpTestData and put all wet code in functions
 
 
@@ -17,7 +17,9 @@ class HomepageTest(TestCase):
     def test_get_homepage(self):
         response = self.client.get('')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/homepage.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/homepage.html')
+        # Temporarily accessing chartpage to check coverage
+        self.client.get(reverse('main:chart-page'))
 
 
 class BaseViewTest(TestCase):
@@ -72,12 +74,12 @@ class RecipesViewTest(BaseViewTest):
     def test_get_recipes(self):
         response = self.client.get(reverse('main:recipes'))
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/recipes.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/recipes.html')
 
     def test_get_recipe_details(self):
         response = self.client.get(reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/recipe_details.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/recipe_details.html')
 
     def test_recipe_visibility(self):
         """
@@ -258,12 +260,12 @@ class IngredientTest(BaseViewTest):
     def test_get_ingredients(self):
         response = self.client.get(reverse('main:products'))
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/products.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/products.html')
 
     def test_get_ingredient_details(self):
         response = self.client.get(reverse('main:product-details', kwargs={'slug': self.ingredient.slug}))
         self.assertEqual(response.status_code, 200)
-        self.assertIn('main/product_details.html', [tmp.name for tmp in response.templates])
+        self.assertTemplateUsed(response, 'main/product_details.html')
 
     def test_recipes_containing(self):
         """
@@ -375,13 +377,17 @@ class IngredientListTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         """
-        Create few new ingredients in addition to base class setup.
+        Create few new ingredients. Real image file needed for tests entering product details.
         """
 
         cls.category = FoodCategory(name='Example Cat')
         cls.category.save()
+        img = SimpleUploadedFile('example.jpg',
+                                 content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                 content_type='image/jpeg')
         defaults = {'name': 'Ing',
                     'category': cls.category,
+                    'image': img,
                     'price': 10,
                     'calval': 100,
                     'total_carbs': 10,
@@ -488,6 +494,19 @@ class IngredientListTest(TestCase):
         self.assertEqual(len(response.context['added']), 1)
         self.assertEqual(self.client.session['collect_ing'], response.context['added'])
 
+    def test_add_delete_from_details(self):
+        response = self.client.post(reverse('main:product-details', kwargs={'slug': self.ingredient.slug}),
+                                    {'add': 'added'})
+        self.assertIn(self.ingredient.name, response.context['added'])
+        self.assertEqual(len(response.context['added']), 1)
+        self.assertEqual(self.client.session['collect_ing'], response.context['added'])
+
+        response = self.client.post(reverse('main:product-details', kwargs={'slug': self.ingredient.slug}),
+                                    {'delete': 'deleted'})
+        self.assertNotIn(self.ingredient.name, response.context['added'])
+        self.assertEqual(len(response.context['added']), 0)
+        self.assertEqual(self.client.session['collect_ing'], response.context['added'])
+
 
 class BaseRecipeTest(TestCase):
     """
@@ -534,6 +553,33 @@ class BaseRecipeTest(TestCase):
                             'form-0-ingredient': Ingredient.objects.all()[0].name,
                             'form-0-quantity': 100,
                             'directions': Ingredient.objects.all()[0].name}
+
+
+class RecipeDetailsPageTest(BaseRecipeTest):
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.recipe = Recipe(recipe_name='Example Recipe', accepted=True, preparation_time=50,
+                            recipe_image='tree.JPG', directions='Ing1')
+        for i in range(1, cls.NUMBER_OF_INGREDIENTS + 1):
+            Quantity(recipe=cls.recipe,
+                     ingredient=Ingredient.objects.get(name=f'Ing{i}'),
+                     quantity=100).save()
+        cls.recipe.save()
+
+    def test_get_recipe_details(self):
+        response = self.client.get(reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'main/recipe_details.html')
+
+    def test_post_comment(self):
+        self.client.force_login(self.user)
+        post_url = reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug})
+        data = {'content': 'Mniam mniam'}
+        self.client.post(post_url, data)
+        self.assertEqual(len(Comment.objects.all()), 1)
+        self.assertEqual(Comment.objects.all()[0].content, data['content'])
 
 
 class RecipeAddTest(BaseRecipeTest):
@@ -780,7 +826,7 @@ class SearchByIngredient(BaseRecipeTest):
 
     def test_search_by_ing_subqueries(self):
         """
-        There should be 4 distinct queries, one full (Ing1, Ing2, Ing3) and 3 shorter combinations.
+        There should be 4 distinct queries, one full (Ing1, Ing2, Ing3) and 3 shorter combinations (with 2 elements).
         """
 
         get_url = reverse('main:search-by-ingredients', kwargs={'query': 'Ing1&Ing2&Ing3'})

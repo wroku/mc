@@ -384,7 +384,6 @@ def update_session(request):
     # TODO Maybe if editing in request.session...
     if request.method == 'POST':
         updateING = request.POST.get('ingredients', [])
-        print(updateING)
         if updateING:
             updateING = updateING.strip('#').split('#')
             updateING = list(dict.fromkeys(updateING))
