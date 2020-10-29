@@ -183,18 +183,30 @@ class UserRelatedTest(BaseViewTest):
 
     def test_register(self):
         """
-        Create new user with self.client and check if instance retrieved from database is identical with User created
-        by create_user() method.
+        Create new user with self.client and check if its instance can be retrieved from database. Check if newly
+        created user is logged in and client is redirected to homepage.
         """
 
-        new_user = User.objects.create_user(username='new_user', email='brand@new.com', password='Fr3sh&sh1ny')
         change_url = reverse('main:register')
         data = {'username': 'new_user',
                 'email': 'brand@new.com',
                 'password1': 'Fr3sh&sh1ny',
                 'password2': 'Fr3sh&sh1ny'}
-        self.client.post(change_url, data)
-        self.assertEqual(User.objects.get(username='new_user'), new_user)
+        response = self.client.post(change_url, data, follow=True)
+        user = auth.get_user(self.client)
+        self.assertRedirects(response, '/')
+        self.assertTrue(user.is_authenticated)
+        self.assertEqual(User.objects.get(username=data['username']).username, data['username'])
+
+    def test_invalid_register(self):
+        change_url = reverse('main:register')
+        data = {'username': 'new_user',
+                'email': 'brand@new.com',
+                'password1': 'Fr3sh&sh1ny',
+                'password2': 'GrosslyMisspelled'}
+        self.client.post(change_url, data, follow=True)
+        with self.assertRaises(ObjectDoesNotExist):
+            User.objects.get(username=data['username'])
 
     def test_get_login(self):
         response = self.client.get(reverse('main:login'))
@@ -536,7 +548,6 @@ class BaseRecipeTest(TestCase):
             ingredient = Ingredient(**defaults)
             ingredient.save()
 
-        # TODO Understand whats the problem with ing and recipe using the same example image
 
         cls.imgr = SimpleUploadedFile('example.jpg',
                                       content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
@@ -553,6 +564,16 @@ class BaseRecipeTest(TestCase):
                             'form-0-ingredient': Ingredient.objects.all()[0].name,
                             'form-0-quantity': 100,
                             'directions': Ingredient.objects.all()[0].name}
+
+    def setUp(self):
+        """
+        Simple uploaded file is one time only...
+        """
+
+        img = SimpleUploadedFile('example.jpg',
+                                 content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                 content_type='image/jpeg')
+        self.default_data['recipe_image'] = img
 
 
 class RecipeDetailsPageTest(BaseRecipeTest):
@@ -596,6 +617,7 @@ class RecipeAddTest(BaseRecipeTest):
 
         self.client.force_login(self.user)
         response = self.client.post(reverse('main:add-recipe'), self.default_data, follow=True)
+        Recipe.objects.get(recipe_name='Example Recipe')
         self.assertEqual(response.context['recipe'], Recipe.objects.get(recipe_name='Example Recipe'))
         self.assertRedirects(response, reverse('main:recipe-details',
                                                kwargs={'slug': Recipe.objects.get(recipe_name='Example Recipe').recipe_slug}))
@@ -620,8 +642,10 @@ class RecipeAddTest(BaseRecipeTest):
         """
 
         data = dict(self.default_data)
-        data['directions'] = 'Unrelated text which does not mention chosen ingredients'
+        data['directions'] = 'Unrelated text which does not mention chosen elements'
         self.client.force_login(self.user)
+        # Add ing to session to trigger validator
+        self.client.post(reverse('main:products'), {'add': 'added', 'ingredient': Ingredient.objects.get(name='Ing1')})
         self.client.post(reverse('main:add-recipe'), data, follow=True)
         with self.assertRaises(ObjectDoesNotExist):
             Recipe.objects.get(recipe_name='Example Recipe')
@@ -647,7 +671,7 @@ class RecipeEditTest(BaseRecipeTest):
         super().setUpTestData()
         cls.recipe = Recipe(recipe_name='Example Recipe', accepted=True, preparation_time=50,
                             recipe_image='tree.JPG', directions='Ing1')
-        for i in range(1, cls.NUMBER_OF_INGREDIENTS + 1):
+        for i in range(1, 3):
             Quantity(recipe=cls.recipe,
                      ingredient=Ingredient.objects.get(name=f'Ing{i}'),
                      quantity=100).save()
@@ -669,20 +693,68 @@ class RecipeEditTest(BaseRecipeTest):
         response = self.client.get(get_url)
         self.assertEqual(response.status_code, 404)
 
-    def test_edit_recipe(self):
+    def test_edit_recipe_add_qt(self):
+        """
+        Testing edit view creating new quantity objects.
+        """
+
         self.client.force_login(self.user)
         change_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
         data = dict(self.default_data)
-        change_data = {'form-INITIAL_FORMS': 1,
+        change_data = {'form-INITIAL_FORMS': 2,
+                       'form-TOTAL_FORMS': 3,
                        'form-1-ingredient': Ingredient.objects.all()[1].name,
                        'form-1-quantity': 100,
-                       'directions': 'Ing1 & ing2'}
+                       'form-2-ingredient': Ingredient.objects.all()[2].name,
+                       'form-2-quantity': 100,
+                       'directions': 'Ing1 & ing2 & ing3'}
         data.update(change_data)
         response = self.client.post(change_url, data, follow=True)
+        self.assertEqual(len(Quantity.objects.filter(recipe=self.recipe)), 3)
         self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
         self.recipe.refresh_from_db()
         self.assertEqual(self.recipe.directions, change_data['directions'])
+        self.assertTemplateUsed(response, 'main/recipe_details.html')
+
+    def test_edit_recipe_delete_qt(self):
+        """
+        Testing edit view deleting existing quantity objects.
+        """
+
+        self.client.force_login(self.user)
+        change_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
+        data = dict(self.default_data)
+        change_data = {'form-INITIAL_FORMS': 2,
+                       'form-TOTAL_FORMS': 1}
+        data.update(change_data)
+        response = self.client.post(change_url, data, follow=True)
+        self.assertEqual(len(Quantity.objects.filter(recipe=self.recipe)), 1)
+        self.assertRedirects(response, reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
+        self.assertTemplateUsed(response, 'main/recipe_details.html')
+
+    def test_edit_recipe_modify_qts(self):
+        """
+        Testing edit view modifying existing quantity objects.
+        """
+
+        self.client.force_login(self.user)
+        change_url = reverse('main:recipe-edit', kwargs={'slug': self.recipe.recipe_slug})
+        data = dict(self.default_data)
+        change_data = {'form-INITIAL_FORMS': 2,
+                       'form-TOTAL_FORMS': 2,
+                       'form-0-ingredient': Ingredient.objects.all()[1].name,
+                       'form-0-quantity': 40,
+                       'form-1-ingredient': Ingredient.objects.all()[2].name,
+                       'form-1-quantity': 300,
+                       'directions': 'Ing2 & Ing3'}
+        data.update(change_data)
+        response = self.client.post(change_url, data, follow=True)
+        self.assertEqual(len(Quantity.objects.filter(recipe=self.recipe)), 2)
+        self.assertEqual(Quantity.objects.filter(recipe=self.recipe)[0].ingredient,
+                         Ingredient.objects.get(name=change_data['form-0-ingredient']))
+        self.assertEqual(Quantity.objects.filter(recipe=self.recipe)[1].quantity, change_data['form-1-quantity'])
+        self.assertRedirects(response, reverse('main:recipe-details', kwargs={'slug': self.recipe.recipe_slug}))
         self.assertTemplateUsed(response, 'main/recipe_details.html')
 
 
@@ -847,3 +919,5 @@ class SearchByIngredient(BaseRecipeTest):
 
         self.assertEqual(response.context['recipes'][0][0][1][0], Recipe.objects.get(recipe_name='Third Recipe'))
         self.assertEqual(response.context['recipes'][0][0][1][1][0], Ingredient.objects.get(name='Ing3'))
+
+# TODO 354-356 edit deletion quantities

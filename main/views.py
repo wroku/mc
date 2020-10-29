@@ -328,16 +328,16 @@ def edit_recipe(request, slug):
                                'preparation_time': instance.preparation_time,
                                'directions': instance.directions})
 
-    # qs = Quantity.objects.filter(recipe=instance.recipe_name)
     qs = instance.quantities.all()
     formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
     for obj in qs[:len(qs)-1]:
+        '''Avoid adding last ing to session in order to retain "+" icon in last row'''
         request.session['collect_ing'].append(str(obj.ingredient))
-        RecipeEditIngFormset = formset_factory(RecipeIngredient,
-                                               formset=BaseRecipeIngFormSet,
-                                               extra=(formset_initial_data and [0] or [1])[0])
+    RecipeEditIngFormset = formset_factory(RecipeIngredient,
+                                           formset=BaseRecipeIngFormSet,
+                                           extra=(formset_initial_data and [0] or [1])[0])
     formset = RecipeEditIngFormset(request.POST or None,
-                                   #  form_kwargs={'collect_ing': request.session['collect_ing']},
+                                   # form_kwargs={'collect_ing': request.session['collect_ing']},
                                    initial=formset_initial_data)
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
@@ -353,9 +353,9 @@ def edit_recipe(request, slug):
             if len(formset.cleaned_data) > len(qs):
                 for fieldset in formset.cleaned_data[index:]:
                     if fieldset != {}:
-                        nq = Quantity.objects.create(recipe=instance,
-                                                     ingredient=fieldset['ingredient'],
-                                                     quantity=fieldset['quantity'])
+                        Quantity.objects.create(recipe=instance,
+                                                ingredient=fieldset['ingredient'],
+                                                quantity=fieldset['quantity'])
 
             elif len(qs) > len(formset.cleaned_data):
                 for qt in qs[index:]:
