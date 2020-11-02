@@ -4,54 +4,13 @@ from django.contrib.auth.models import User
 from main.models import Ingredient, FoodCategory, Recipe, Quantity
 from django.core.files.uploadedfile import SimpleUploadedFile
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 import time
 
 # TODO check prepopulate, check redirect when logging out while not logged in,
-
-
-class UserTest(StaticLiveServerTestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.selenium = WebDriver()
-        cls.selenium.implicitly_wait(10)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.selenium.quit()
-        super().tearDownClass()
-
-    def setUp(self):
-        self.username = 'test_user'
-        self.password = 'herewego'
-        self.user = User.objects.create_superuser(self.username, 'test@example.com', self.password)
-
-    def test_login(self):
-        self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
-        username_input = self.selenium.find_element_by_name("username")
-        username_input.send_keys(self.username)
-        password_input = self.selenium.find_element_by_name("password")
-        password_input.send_keys(self.password)
-        self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
-        self.selenium.implicitly_wait(10)
-        self.assertEqual(self.selenium.current_url, f'{self.live_server_url}/')
-
-    def test_login_redirect(self):
-        """
-        Check if login page accessed from entry_point successfully redirect back after authorization.
-        """
-
-        entry_point = '/recipes/'
-        self.selenium.get('%s%s' % (self.live_server_url, entry_point))
-        self.selenium.find_element_by_xpath('//a[text()="Login"]').click()
-        self.selenium.find_element_by_name("username").send_keys(self.username)
-        self.selenium.find_element_by_name("password").send_keys(self.password)
-        self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
-        self.assertEqual(self.selenium.current_url, f'{self.live_server_url}{entry_point}')
 
 
 class RecipeRelatedTest(StaticLiveServerTestCase):
@@ -103,6 +62,50 @@ class RecipeRelatedTest(StaticLiveServerTestCase):
                      ingredient=Ingredient.objects.get(name=f'Ing{i}'),
                      quantity=100 + i).save()
 
+class UserTest(StaticLiveServerTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.selenium = WebDriver()
+        cls.selenium.implicitly_wait(10)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        super().tearDownClass()
+
+    def setUp(self):
+        self.username = 'test_user'
+        self.password = 'herewego'
+        self.user = User.objects.create_superuser(self.username, 'test@example.com', self.password)
+
+    def test_login(self):
+        self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys(self.username)
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys(self.password)
+        self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
+        self.selenium.implicitly_wait(10)
+        self.assertEqual(self.selenium.current_url, f'{self.live_server_url}/')
+
+    def test_login_redirect(self):
+        """
+        Check if login page accessed from entry_point successfully redirect back after authorization.
+        """
+
+        entry_point = '/recipes/'
+        self.selenium.get('%s%s' % (self.live_server_url, entry_point))
+        self.selenium.find_element_by_xpath('//a[text()="Login"]').click()
+        self.selenium.find_element_by_name("username").send_keys(self.username)
+        self.selenium.find_element_by_name("password").send_keys(self.password)
+        self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
+        self.assertEqual(self.selenium.current_url, f'{self.live_server_url}{entry_point}')
+
+
+
+
 
 class RecipeAddTest(RecipeRelatedTest):
 
@@ -126,6 +129,9 @@ class RecipeAddTest(RecipeRelatedTest):
         self.selenium.find_element_by_xpath('//button[text()="Create"]').click()
         self.assertEqual(self.selenium.current_url,
                          f'{self.live_server_url}/recipes/{"-".join(recipe_title.lower().split())}/')
+
+
+class RecipeDetailsPageTest(RecipeRelatedTest):
 
     def test_servings_js_add(self):
         """
@@ -186,3 +192,47 @@ class RecipeAddTest(RecipeRelatedTest):
             decrease_btn.click()
 
         self.assertEqual(int(number_of_servings.text), 1)
+
+    def test_anonymous_comment(self):
+        self.selenium.get(f'{self.live_server_url}/recipes/{self.recipe.recipe_slug}')
+
+        comment_section = self.selenium.find_element_by_xpath('//div[@class="comments-section-standard"]/div')
+        self.assertEqual(comment_section.text,
+                         "Comments are available for logged users only. Sign in to share your opinion or "
+                         "register if you don't have an account yet.")
+
+    def test_logged_in_user_comment(self):
+        self.selenium.get(f'{self.live_server_url}/recipes/{self.recipe.recipe_slug}')
+        self.selenium.find_element_by_xpath('//a[text()="Login"]').click()
+        self.selenium.find_element_by_name("username").send_keys(self.username)
+        self.selenium.find_element_by_name("password").send_keys(self.password)
+        self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
+        comment_section = self.selenium.find_element_by_xpath('//div[@class="comments-section-standard"]')
+        self.assertEqual(comment_section.text,
+                         'Leave a comment\nShare your opinions, experience, advices or let '
+                         'others know about tasty variations of this recipe!')
+
+    def test_add_comment(self):
+        self.selenium.get(f'{self.live_server_url}/recipes/{self.recipe.recipe_slug}')
+        self.selenium.find_element_by_xpath('//a[text()="Login"]').click()
+        self.selenium.find_element_by_name("username").send_keys(self.username)
+        self.selenium.find_element_by_name("password").send_keys(self.password)
+        self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
+
+        self.selenium.execute_script("window.scrollTo(0, 1000);")
+        comment_input = self.selenium.find_element_by_xpath('//textarea')
+        comment_input.clear()
+        comment_input.send_keys('lololo')
+        wait = WebDriverWait(self.selenium, 10)
+        wait.until(EC.visibility_of(comment_input))
+        comment_input.click()
+
+        actions = ActionChains(self.selenium)
+        actions.move_to_element(comment_input)
+        actions.click()
+        actions.send_keys('Example comment')
+        actions.perform()
+        time.sleep(10)
+        self.selenium.find_element_by_xpath('//button[text()="Submit"]').click()
+        comment_section = self.selenium.find_element_by_xpath('//div[@class="comments-section-standard"]/div')
+        self.assertEqual(comment_section.text, 'Your comment is awaiting moderation.')

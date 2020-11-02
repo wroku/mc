@@ -1,3 +1,4 @@
+# Remember about git rm -r --cached and nano .git/config
 __pycache__/
 *.pyc
 .idea/
