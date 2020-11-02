@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 import time
 
-# TODO check prepopulate, calculating servings
+# TODO check prepopulate, check redirect when logging out while not logged in,
 
 
 class UserTest(StaticLiveServerTestCase):
@@ -186,4 +186,3 @@ class RecipeAddTest(RecipeRelatedTest):
             decrease_btn.click()
 
         self.assertEqual(int(number_of_servings.text), 1)
-    

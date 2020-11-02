@@ -4,3 +4,5 @@ __pycache__/
 media_cdn
 db.sqlite3
 codewarsplayground.py
+geckodriver.log
+chart.html

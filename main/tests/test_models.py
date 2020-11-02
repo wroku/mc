@@ -196,7 +196,8 @@ class RecipeModelTest(BaseRecipeRelatedTest):
         self.assertEqual(self.recipe.price_per_serving, Decimal('2.17'))
 
     def test_recipe_posted(self):
-        self.assertEqual(self.recipe.recipe_posted.replace(microsecond=0), timezone.now().replace(microsecond=0))
+        self.assertEqual(self.recipe.recipe_posted.replace(second=0, microsecond=0),
+                         timezone.now().replace(second=0, microsecond=0))
 
     def test_recipe_blank_search(self):
         qs = Recipe.objects.search()
@@ -271,7 +272,8 @@ class CommentModelTest(BaseRecipeRelatedTest):
         comment = Comment(recipe=self.recipe, user=User.objects.get(pk=1))
         comment.save()
 
-        self.assertEqual(comment.created_on.replace(microsecond=0), timezone.now().replace(microsecond=0))
+        self.assertEqual(comment.created_on.replace(second=0, microsecond=0),
+                         timezone.now().replace(second=0, microsecond=0))
 
 
 
