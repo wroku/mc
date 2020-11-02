@@ -34,7 +34,8 @@ class BaseViewTest(TestCase):
         self.user = User.objects.create_superuser(self.username, 'test@example.com', self.password)
         self.client.login(username=self.username, password=self.password)
         # Recipe has to have mock recipe_image attribute which really exists.
-        self.recipe = Recipe(recipe_name='Example Recipe', recipe_image='tree.JPG')
+        self.recipe = Recipe(recipe_name='Example Recipe', user=self.user,
+                             recipe_image='tree.JPG')
         self.recipe.save()
 
         self.category = FoodCategory(name='Example Cat')
@@ -48,18 +49,19 @@ class BaseViewTest(TestCase):
                                      total_fat=1,
                                      total_proteins=1)
         self.ingredient.save()
-
         """
         Create two different instances of Recipe to test ordering. This time with assigned quantities to populate 
         (price/calories)_per_serving
         """
-        self.recipe2 = Recipe(recipe_name='Example Recipe 2', accepted=True, preparation_time=50, recipe_image='tree.JPG')
+        self.recipe2 = Recipe(recipe_name='Example Recipe 2', accepted=True, preparation_time=50,
+                              user=self.user, recipe_image='tree.JPG')
         Quantity(recipe=self.recipe2,
                  ingredient=self.ingredient,
                  quantity=100).save()
         self.recipe2.save()
 
-        self.recipe3 = Recipe(recipe_name='Example Recipe 3', accepted=True, preparation_time=40, recipe_image='tree.JPG')
+        self.recipe3 = Recipe(recipe_name='Example Recipe 3', accepted=True, preparation_time=40,
+                              user=self.user, recipe_image='tree.JPG')
         Quantity(recipe=self.recipe3,
                  ingredient=self.ingredient,
                  quantity=150).save()
@@ -493,6 +495,28 @@ class IngredientListTest(TestCase):
         self.assertEqual(len(response.context['added']), 0)
         self.assertEqual(len(self.client.session['collect_ing']), 0)
 
+    def test_invalid_operations(self):
+        """
+        Attempt to add ingredient which already is on the list or delete one which is not should not yield any change.
+        Message to user should be displayed instead. Check from products and product-details pages.
+        """
+
+        urls = (reverse('main:products'),
+                reverse('main:product-details', kwargs={'slug': self.ingredient.slug}))
+        for url in urls:
+            self.client.session['collect_ing'] = ['whatever']
+            session_before = self.client.session
+            self.client.post(url, {'delete': 'deleted', 'ingredient': self.ingredient.name})
+            session_after = self.client.session
+            self.assertEqual(session_before['collect_ing'], session_after['collect_ing'])
+
+            self.client.post(url, {'add': 'added', 'ingredient': self.ingredient.name})
+            session_before = self.client.session
+            self.client.post(url, {'add': 'added', 'ingredient': self.ingredient.name})
+            session_after = self.client.session
+            self.assertEqual(session_before['collect_ing'], session_after['collect_ing'])
+            self.client.post(reverse('main:products'), {'clear': 'cleared'})
+
     def test_list_persistence(self):
         """
         Check if ingredients list remain unchanged after visiting another url.
@@ -547,7 +571,6 @@ class BaseRecipeTest(TestCase):
             defaults['name'] = defaults['name'][:3] + str(i)
             ingredient = Ingredient(**defaults)
             ingredient.save()
-
 
         cls.imgr = SimpleUploadedFile('example.jpg',
                                       content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
@@ -658,6 +681,15 @@ class RecipeAddTest(BaseRecipeTest):
 
         data = dict(self.default_data)
         data['preparation_time'] = 999
+        self.client.force_login(self.user)
+        self.client.post(reverse('main:add-recipe'), data, follow=True)
+        with self.assertRaises(ObjectDoesNotExist):
+            Recipe.objects.get(recipe_name='Example Recipe')
+
+    def test_invalid_form_in_formset(self):
+        data = dict(self.default_data)
+        data.update({'form-1-ingredient': Ingredient.objects.all()[0].name,
+                     'form-1-quantity': -100})
         self.client.force_login(self.user)
         self.client.post(reverse('main:add-recipe'), data, follow=True)
         with self.assertRaises(ObjectDoesNotExist):
@@ -823,7 +855,7 @@ class SearchRecipesTest(BaseRecipeTest):
         'First' and 'Third' both contain 'ir' string.
         """
 
-        query = {'q': 'ir'}
+        query = {'q': 'ir', 'ord': 'asc'}
         response = self.client.get(reverse('main:search'), query)
         self.assertEqual(len(response.context['recipes']), 2)
         self.assertIn(Recipe.objects.get(recipe_name='First Recipe'), response.context['recipes'])
@@ -896,6 +928,11 @@ class SearchByIngredient(BaseRecipeTest):
         self.assertEqual(response.context['recipes'][1][2], 1)
         self.assertEqual(response.context['recipes'][1][0][0][0], Recipe.objects.get(recipe_name='Second Recipe'))
 
+    def test_search_by_ing_partial_match_miss(self):
+        get_url = reverse('main:search-by-ingredients', kwargs={'query': 'Ing4&Ing5'})
+        response = self.client.get(get_url)
+        self.assertEqual(response.context['recipes'][1][2], 0)
+
     def test_search_by_ing_subqueries(self):
         """
         There should be 4 distinct queries, one full (Ing1, Ing2, Ing3) and 3 shorter combinations (with 2 elements).
@@ -920,4 +957,4 @@ class SearchByIngredient(BaseRecipeTest):
         self.assertEqual(response.context['recipes'][0][0][1][0], Recipe.objects.get(recipe_name='Third Recipe'))
         self.assertEqual(response.context['recipes'][0][0][1][1][0], Ingredient.objects.get(name='Ing3'))
 
-# TODO 354-356 edit deletion quantities
+

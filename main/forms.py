@@ -135,8 +135,8 @@ class BaseRecipeIngFormSet(BaseFormSet):
             return
         ings = []
         for form in self.forms:
-            if self.can_delete and self._should_delete_form(form):
-                continue
+            #if self.can_delete and self._should_delete_form(form):
+            #    continue
             ing = form.cleaned_data.get('ingredient')
             if ing in ings:
                 raise forms.ValidationError("Ingredients in a set must have distinct names.")

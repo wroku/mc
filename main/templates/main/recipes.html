@@ -98,7 +98,7 @@
                   </div>
                   {% else %}
                       <a href="/recipes/{{recipe.recipe_slug}}"><button type="button" class="btn btn-outline-info">See details</button></a>
-                      {% if currentuser == recipe.user %}
+                      {% if currentuser == recipe.user or not recipe.user %}
                       <a href="{{recipe.recipe_slug}}/edit"><button type="button" class="btn btn-outline-info">Edit</button></a>
                       {% endif %}
                   {% endif %}

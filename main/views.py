@@ -293,7 +293,8 @@ def recipe_page(request):
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
             recipe = Recipe.objects.create(**form.cleaned_data)
-            recipe.user = request.user
+            if request.user.is_authenticated:
+                recipe.user = request.user
             for fieldset in formset.cleaned_data:
                 if fieldset != {}:
                     f1 = Quantity.objects.create(recipe=recipe,
@@ -317,7 +318,7 @@ def recipe_page(request):
 
 def edit_recipe(request, slug):
     instance = get_object_or_404(Recipe, recipe_slug=slug)
-    if request.user != instance.user:
+    if instance.user and request.user != instance.user:
         return redirect('/access_denied')
     request.session['collect_ing'] = []
     form = RecipeForm(request.POST or None, request.FILES or None,

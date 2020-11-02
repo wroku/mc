@@ -108,7 +108,7 @@ class RecipeManager(models.Manager):
 
 
 class Recipe(models.Model):
-    user = models.ForeignKey(User, default=1, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
     recipe_posted = models.DateTimeField('date published', auto_now_add=True)
     recipe_name = models.CharField(primary_key=True, unique=True, max_length=255)
     recipe_slug = models.SlugField(null=True, blank=True, unique=True)
