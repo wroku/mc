@@ -8,9 +8,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import time
 
-# TODO check prepopulate, check redirect when logging out while not logged in,
+# TODO check prepopulate, check for excluding, check redirect when logging out while not logged in,
 
 
 class RecipeRelatedTest(StaticLiveServerTestCase):
@@ -54,13 +55,14 @@ class RecipeRelatedTest(StaticLiveServerTestCase):
             ingredient = Ingredient(**defaults)
             ingredient.save()
 
-        self.recipe = Recipe(recipe_name='Model recipe', user=self.user, accepted=True, preparation_time=50,
+        self.recipe = Recipe(recipe_name='Model recipe', accepted=True, preparation_time=50,
                              recipe_image='tree.JPG', directions='Ing')
         self.recipe.save()
         for i in range(1, self.NUMBER_OF_INGREDIENTS + 1):
             Quantity(recipe=self.recipe,
                      ingredient=Ingredient.objects.get(name=f'Ing{i}'),
                      quantity=100 + i).save()
+
 
 class UserTest(StaticLiveServerTestCase):
 
@@ -104,12 +106,9 @@ class UserTest(StaticLiveServerTestCase):
         self.assertEqual(self.selenium.current_url, f'{self.live_server_url}{entry_point}')
 
 
-
-
-
 class RecipeAddTest(RecipeRelatedTest):
 
-    def test_add_recipe(self):
+    def test_add_valid_recipe(self):
         recipe_title = 'Example Recipe'
         self.selenium.get(f'{self.live_server_url}/add-recipe')
         self.selenium.find_element_by_id('id_recipe_name').send_keys('Example recipe')
@@ -210,7 +209,7 @@ class RecipeDetailsPageTest(RecipeRelatedTest):
         comment_section = self.selenium.find_element_by_xpath('//div[@class="comments-section-standard"]')
         self.assertEqual(comment_section.text,
                          'Leave a comment\nShare your opinions, experience, advices or let '
-                         'others know about tasty variations of this recipe!')
+                         'others know about tasty variations of this recipe!\nSubmit')
 
     def test_add_comment(self):
         self.selenium.get(f'{self.live_server_url}/recipes/{self.recipe.recipe_slug}')
@@ -218,21 +217,48 @@ class RecipeDetailsPageTest(RecipeRelatedTest):
         self.selenium.find_element_by_name("username").send_keys(self.username)
         self.selenium.find_element_by_name("password").send_keys(self.password)
         self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
-
-        self.selenium.execute_script("window.scrollTo(0, 1000);")
-        comment_input = self.selenium.find_element_by_xpath('//textarea')
-        comment_input.clear()
-        comment_input.send_keys('lololo')
-        wait = WebDriverWait(self.selenium, 10)
-        wait.until(EC.visibility_of(comment_input))
+        comment_input = self.selenium.find_elements_by_xpath('//textarea')[1]
         comment_input.click()
-
         actions = ActionChains(self.selenium)
-        actions.move_to_element(comment_input)
-        actions.click()
-        actions.send_keys('Example comment')
+        actions.send_keys('Example content')
         actions.perform()
-        time.sleep(10)
-        self.selenium.find_element_by_xpath('//button[text()="Submit"]').click()
+        self.selenium.find_elements_by_xpath('//button[text()="Submit"]')[1].click()
         comment_section = self.selenium.find_element_by_xpath('//div[@class="comments-section-standard"]/div')
         self.assertEqual(comment_section.text, 'Your comment is awaiting moderation.')
+
+
+class RecipeEditTest(RecipeRelatedTest):
+
+    def test_prepopulated_fields(self):
+        """
+        Check correctness of prepopulated fields on edit page.
+        """
+
+        self.selenium.get(f'{self.live_server_url}/recipes/{self.recipe.recipe_slug}/edit')
+        title = self.selenium.find_element_by_id('id_recipe_name').get_attribute('value')
+        preparation_time = self.selenium.find_element_by_id('id_preparation_time').get_attribute('value')
+        servings = Select(self.selenium.find_element_by_id('id_servings'))
+
+        self.assertEqual(title, self.recipe.recipe_name)
+        self.assertEqual(int(preparation_time), self.recipe.preparation_time)
+        self.assertEqual(int(servings.first_selected_option.text), self.recipe.servings)
+
+
+
+
+
+
+        #print(self.selenium.find_element_by_xpath('//div[@id=div_id_recipe_image]').text)
+
+
+
+
+
+
+
+
+
+
+
+
+
