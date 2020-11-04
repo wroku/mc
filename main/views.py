@@ -11,7 +11,7 @@ from django.forms import formset_factory
 from django.core.mail import EmailMessage
 from django.views.generic.edit import CreateView
 from django.core.exceptions import ObjectDoesNotExist
-
+import os
 # Create your views here.
 
 
@@ -273,6 +273,7 @@ def contact_page(request):
             ['wrokuj@gmail.com'],
             reply_to=[form.cleaned_data['email']]
         )
+        print(os.environ.get('EMAIL_HOST_PASSWORD'))
         email.send()
         form = ContactForm()
     context = {
@@ -327,13 +328,15 @@ def edit_recipe(request, slug):
                       initial={'recipe_name': instance.recipe_name,
                                'recipe_image': instance.recipe_image,
                                'preparation_time': instance.preparation_time,
+                               'servings': instance.servings,
                                'directions': instance.directions})
 
     qs = instance.quantities.all()
     formset_initial_data = [{'ingredient': obj.ingredient, 'quantity': obj.quantity} for obj in qs]
-    for obj in qs[:len(qs)-1]:
-        '''Avoid adding last ing to session in order to retain "+" icon in last row'''
-        request.session['collect_ing'].append(str(obj.ingredient))
+    if qs:
+        for obj in qs[:len(qs)-1]:
+            '''Avoid adding last ing to session in order to retain "+" icon in last row'''
+            request.session['collect_ing'].append(str(obj.ingredient))
     RecipeEditIngFormset = formset_factory(RecipeIngredient,
                                            formset=BaseRecipeIngFormSet,
                                            extra=(formset_initial_data and [0] or [1])[0])

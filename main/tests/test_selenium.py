@@ -165,14 +165,11 @@ class RecipeDetailsPageTest(RecipeRelatedTest):
         number_of_servings = self.selenium.find_element_by_id('numberOfServings')
         qt1_initial = self.selenium.find_element_by_xpath('(//span[@class="quantity"])[1]').text
         qt2_initial = self.selenium.find_element_by_xpath('(//span[@class="quantity"])[2]').text
-
         self.assertEqual(int(number_of_servings.text), self.recipe.servings)
         self.selenium.find_element_by_xpath('//button[text()="-"]').click()
         self.assertEqual(int(number_of_servings.text), self.recipe.servings - 1)
-
         qt1 = self.selenium.find_element_by_xpath('(//span[@class="quantity"])[1]').text
         qt2 = self.selenium.find_element_by_xpath('(//span[@class="quantity"])[2]').text
-
         self.assertEqual(float(qt1_initial) / (int(number_of_servings.text) + 1),
                          float(qt1) / int(number_of_servings.text))
         self.assertEqual(float(qt2_initial) / (int(number_of_servings.text) + 1),
@@ -189,12 +186,10 @@ class RecipeDetailsPageTest(RecipeRelatedTest):
         decrease_btn = self.selenium.find_element_by_xpath('//button[text()="-"]')
         for _ in range(self.recipe.servings + 3):
             decrease_btn.click()
-
         self.assertEqual(int(number_of_servings.text), 1)
 
     def test_anonymous_comment(self):
         self.selenium.get(f'{self.live_server_url}/recipes/{self.recipe.recipe_slug}')
-
         comment_section = self.selenium.find_element_by_xpath('//div[@class="comments-section-standard"]/div')
         self.assertEqual(comment_section.text,
                          "Comments are available for logged users only. Sign in to share your opinion or "
@@ -238,17 +233,22 @@ class RecipeEditTest(RecipeRelatedTest):
         title = self.selenium.find_element_by_id('id_recipe_name').get_attribute('value')
         preparation_time = self.selenium.find_element_by_id('id_preparation_time').get_attribute('value')
         servings = Select(self.selenium.find_element_by_id('id_servings'))
-
         self.assertEqual(title, self.recipe.recipe_name)
         self.assertEqual(int(preparation_time), self.recipe.preparation_time)
         self.assertEqual(int(servings.first_selected_option.text), self.recipe.servings)
 
+        number_of_initial_ings = int(self.selenium.find_element_by_id('id_form-INITIAL_FORMS').get_attribute('value'))
+        qts = self.recipe.quantities.all()
+        for i in range(number_of_initial_ings):
+            ingredient = Select(self.selenium.find_element_by_id(f'id_form-{i}-ingredient')).first_selected_option.text
+            qt = float(self.selenium.find_element_by_id(f'id_form-{i}-quantity').get_attribute('value'))
+            self.assertEqual(ingredient, qts[i].ingredient.name)
+            self.assertEqual(qt, qts[i].quantity)
 
+        self.selenium.switch_to.frame(self.selenium.find_element_by_id('id_directions_ifr'))
+        editor_initial_content = self.selenium.find_element_by_id('tinymce').text
+        self.assertEqual(editor_initial_content, self.recipe.directions)
 
-
-
-
-        #print(self.selenium.find_element_by_xpath('//div[@id=div_id_recipe_image]').text)
 
 
 
