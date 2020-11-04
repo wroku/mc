@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from .models import Ingredient, Recipe, Quantity, Comment
 from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm, RecipeIngredient, BaseRecipeIngFormSet
 from django.contrib.auth.forms import AuthenticationForm
@@ -11,7 +11,7 @@ from django.forms import formset_factory
 from django.core.mail import EmailMessage
 from django.views.generic.edit import CreateView
 from django.core.exceptions import ObjectDoesNotExist
-import os
+
 # Create your views here.
 
 
@@ -134,26 +134,28 @@ def products(request):
         ingredients_qs = Ingredient.objects.search(query)
         count = len(ingredients_qs)
     if request.method == 'POST':
-        try:
-            Ingredient.objects.get(name=request.POST.get('ingredient'))
-            current_ing = request.POST.get('ingredient')
-            if request.POST.get('add') == 'added':
-                if current_ing not in request.session['collect_ing']:
-                    request.session['collect_ing'].append(current_ing)
-                    request.session.modified = True
-                else:
-                    messages.info(request, f'{current_ing} is already on ingredient list.')
-            elif request.POST.get('delete') == 'deleted':
-                if current_ing in request.session['collect_ing']:
-                    request.session['collect_ing'].remove(current_ing)
-                    request.session.modified = True
-                else:
-                    messages.info(request, f'{current_ing} is not on ingredient list.')
-        except ObjectDoesNotExist:
-            messages.info(request, 'Such ingredient does not even exist. Stop messing with my site.')
         if request.POST.get('clear') == 'cleared':
             request.session['collect_ing'] = []
             request.session.modified = True
+        else:
+            try:
+                Ingredient.objects.get(name=request.POST.get('ingredient'))
+                current_ing = request.POST.get('ingredient')
+                if request.POST.get('add') == 'added':
+                    if current_ing not in request.session['collect_ing']:
+                        request.session['collect_ing'].append(current_ing)
+                        request.session.modified = True
+                    else:
+                        messages.info(request, f'{current_ing} is already on ingredient list.')
+                elif request.POST.get('delete') == 'deleted':
+                    if current_ing in request.session['collect_ing']:
+                        request.session['collect_ing'].remove(current_ing)
+                        request.session.modified = True
+                    else:
+                        messages.info(request, f'{current_ing} is not on ingredient list.')
+            except ObjectDoesNotExist:
+                messages.info(request, 'Such ingredient does not even exist. Stop messing with my site.')
+
     return render(request, 'main/products.html', {'products': Ingredient.objects.filter(accepted=True),
                                                   'added': request.session['collect_ing'],
                                                   'count': count,
@@ -273,7 +275,6 @@ def contact_page(request):
             ['wrokuj@gmail.com'],
             reply_to=[form.cleaned_data['email']]
         )
-        print(os.environ.get('EMAIL_HOST_PASSWORD'))
         email.send()
         form = ContactForm()
     context = {

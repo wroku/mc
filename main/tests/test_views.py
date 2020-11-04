@@ -9,7 +9,6 @@ from django.contrib import auth
 
 # python manage.py test main.tests.test_views
 # coverage run --source='.' manage.py test main
-# TODO composition over inheritance... use setUpTestData and put all wet code in functions
 
 
 class HomepageTest(TestCase):

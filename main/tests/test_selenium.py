@@ -11,8 +11,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 
-# TODO check prepopulate, check for excluding, check redirect when logging out while not logged in,
-
 
 class RecipeRelatedTest(StaticLiveServerTestCase):
     """
@@ -47,7 +45,8 @@ class RecipeRelatedTest(StaticLiveServerTestCase):
                     'calval': 100,
                     'total_carbs': 10,
                     'total_fat': 10,
-                    'total_proteins': 10}
+                    'total_proteins': 10,
+                    'accepted': True}
 
         self.NUMBER_OF_INGREDIENTS = 5
         for i in range(1, self.NUMBER_OF_INGREDIENTS + 1):
@@ -105,6 +104,14 @@ class UserTest(StaticLiveServerTestCase):
         self.selenium.find_element_by_xpath('//button[text()="Login"]').click()
         self.assertEqual(self.selenium.current_url, f'{self.live_server_url}{entry_point}')
 
+    def test_logout_redirect(self):
+        """
+        Check if logout page accessed directly while user is not logged in redirects to frontpage.
+        """
+
+        self.selenium.get(f'{self.live_server_url}/logout')
+        self.assertEqual(self.selenium.current_url, f'{self.live_server_url}/')
+
 
 class RecipeAddTest(RecipeRelatedTest):
 
@@ -128,6 +135,22 @@ class RecipeAddTest(RecipeRelatedTest):
         self.selenium.find_element_by_xpath('//button[text()="Create"]').click()
         self.assertEqual(self.selenium.current_url,
                          f'{self.live_server_url}/recipes/{"-".join(recipe_title.lower().split())}/')
+
+    def test_excluding_from_options(self):
+        """
+        After entering ingredient in formset row next row should not contain this particular option in select menu.
+        """
+
+        self.selenium.get(f'{self.live_server_url}/add-recipe')
+        ingredient = Select(self.selenium.find_element_by_id(f'id_form-0-ingredient'))
+        chosen_ing = ingredient.options[1].text
+        ingredient.select_by_index(1)
+        self.selenium.find_element_by_id(f'id_form-0-quantity').send_keys(100)
+        self.selenium.find_element_by_xpath('//button[text()="+"]').click()
+
+        ingredient2 = Select(self.selenium.find_element_by_id(f'id_form-1-ingredient'))
+        select2_options = [option.text for option in ingredient2.options]
+        self.assertNotIn(chosen_ing, select2_options)
 
 
 class RecipeDetailsPageTest(RecipeRelatedTest):
@@ -249,13 +272,49 @@ class RecipeEditTest(RecipeRelatedTest):
         editor_initial_content = self.selenium.find_element_by_id('tinymce').text
         self.assertEqual(editor_initial_content, self.recipe.directions)
 
+    def test_simple_edit_recipe(self):
+        """
+        Enter new preparation time and save instance, checking if changes are reflected in database.
+        """
+
+        new_pt_value = 33
+        self.selenium.get(f'{self.live_server_url}/recipes/{self.recipe.recipe_slug}/edit')
+        self.selenium.find_element_by_id('id_preparation_time').clear()
+        self.selenium.find_element_by_id('id_preparation_time').send_keys(new_pt_value)
+        self.selenium.find_element_by_xpath('//button[text()="Save"]').click()
+
+        self.assertEqual(new_pt_value, Recipe.objects.get(recipe_name=self.recipe.recipe_name).preparation_time)
 
 
+class SearchByIngredientsTest(RecipeRelatedTest):
 
+    def test_recipe_containing_search(self):
+        """
+        Add all possible ingredients to list and use button to initialize search. Check if final url is correct and
+        ends with properly formulated query. Search should return 'Model recipe' instance.
+        """
 
+        self.selenium.get(f'{self.live_server_url}/products')
+        for i in range(self.NUMBER_OF_INGREDIENTS):
+            add_btn = self.selenium.find_element_by_xpath('//button[@name="add"]')
+            add_btn.click()
+        self.selenium.find_element_by_xpath('//span[text()="Search for recipe"]').click()
+        ings = [ing.name for ing in Ingredient.objects.all()]
+        self.assertEqual(self.selenium.current_url, f'{self.live_server_url}/search-by-ingredients/{"&".join(ings)}/')
+        result_title = self.selenium.find_element_by_xpath('//h3[@class="card-title"]').text
+        self.assertEqual(result_title, self.recipe.recipe_name)
 
+    def test_buy_list(self):
+        number_of_excluded = 2
+        self.selenium.get(f'{self.live_server_url}/products')
+        for i in range(self.NUMBER_OF_INGREDIENTS - number_of_excluded):
+            add_btn = self.selenium.find_element_by_xpath('//button[@name="add"]')
+            add_btn.click()
+        self.selenium.find_element_by_xpath('//span[text()="Search for recipe"]').click()
 
-
+        not_included = [ing.name for ing in Ingredient.objects.all()][-number_of_excluded:]
+        to_buy_list = [ing.text for ing in self.selenium.find_elements_by_class_name('alert-secondary')]
+        self.assertEqual(not_included, to_buy_list)
 
 
 
