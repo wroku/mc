@@ -169,3 +169,9 @@ class Comment(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=False)
 
+
+class Message(models.Model):
+    title = models.TextField(max_length=1000)
+    created_on = models.DateTimeField(auto_now_add=True)
+    content = models.TextField(max_length=3000)
+    reply_to = models.CharField(max_length=255)

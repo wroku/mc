@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseRedirect
-from .models import Ingredient, Recipe, Quantity, Comment
+from .models import Ingredient, Recipe, Quantity, Comment, Message
 from .forms import ContactForm, RecipeForm, NewUserForm, RecipeIngFormset, CommentForm, RecipeIngredient, BaseRecipeIngFormSet
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -266,6 +266,10 @@ def account_details(request):
 def contact_page(request):
     form = ContactForm(request.POST or None)
     if form.is_valid():
+        '''
+        No way to stop gmail from switching to "safe" settings and heroku server is only granted access one time after
+        manually completing captcha. Smtp authentication error does not occur on development server  
+        so messages in production will be saved in db for now. Use sendgrid or mailgun next time.
         email = EmailMessage(
             'Message from {}, user {}, importance {}/100'.format(form.cleaned_data['full_name'],
                                                                  request.user,
@@ -276,6 +280,12 @@ def contact_page(request):
             reply_to=[form.cleaned_data['email']]
         )
         email.send()
+        '''
+        title = f"Message from {form.cleaned_data['full_name']}, user {request.user}, " \
+                f"importance {form.cleaned_data['level_of_importance']}/100"
+        reply_to = form.cleaned_data['email']
+        content = form.cleaned_data['content']
+        Message.objects.create(title=title, reply_to=reply_to, content=content)
         form = ContactForm()
     context = {
         'title': 'Contact us',

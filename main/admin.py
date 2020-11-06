@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Ingredient, Recipe, Quantity, FoodCategory, Comment
+from .models import Ingredient, Recipe, Quantity, FoodCategory, Comment, Message
 from django.db import models
 from django.urls import reverse
 
@@ -56,3 +56,8 @@ class CommentAdmin(admin.ModelAdmin):
 
     def approve_comments(self, request, queryset):
         queryset.update(active=True)
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    fields = ('title', 'reply_to', 'content')
