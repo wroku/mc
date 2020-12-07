@@ -38,7 +38,9 @@
     }
     #question {
         font-size: 4vw;
+        animation-name: moveQ;
     }
+
 }
 @media (min-width: 576px) {
     .card-columns {
@@ -192,7 +194,7 @@
         to {opacity: 0.6;}
     }
     .animated {
-        object-fit:cover;
+        object-fit: cover;
         border-radius: 10px;
         opacity:1;
         animation-duration: 3s;
@@ -230,6 +232,7 @@
         font-family:Serif;
         text-shadow: white 0px 0px 20px;
     }
+
     @keyframes moveQ{
         from {left: 20%; opacity: 0;}
         to {left: 50%; opacity: 1;}
