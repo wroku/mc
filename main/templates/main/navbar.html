@@ -60,8 +60,10 @@
       </form>
       <script type="text/javascript">
         $('#ING').tooltip({offset:'0, 10px'})
-        $('#ING').tooltip('show')
-        setTimeout( function(){$('#ING').tooltip('hide');}, 4000);
+        if($(window).width() > 990){
+          $('#ING').tooltip('show')
+          setTimeout( function(){$('#ING').tooltip('hide');}, 4000);
+        }
       </script>
       {% else %}
       <form method='GET' class="form-inline my-2 my-lg-0" action="/search">
