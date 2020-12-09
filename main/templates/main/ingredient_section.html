@@ -1,7 +1,7 @@
 <ul class="list-group my-3">
         <li class="list-group-item text-center" style="background-color: rgba(237, 237, 237, 0.8)">
             <button style="float:left;" type="button" onclick="changeServingsNumber(-1)" class="btn btn-danger btn-sm">-</button>
-            <span ><strong>Ingredients [for <span id="numberOfServings">{{recipe.servings}}</span> servings]</strong></span>
+            <span ><strong>Ingredients [for <span class="numberOfServings">{{recipe.servings}}</span> servings]</strong></span>
             <button type="button" onclick="changeServingsNumber(1)" class="btn btn-success btn-sm" style="float:right;">+</button>
         </li>
         {% for ing in quantities %}
