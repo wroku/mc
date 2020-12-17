@@ -181,12 +181,22 @@
 
     .footer {
         position: absolute;
+        font-size: 1rem;
         right: 0;
         left: 0;
         bottom: 0;
         background-color: #5ce6a3;
         padding: 1rem;
         text-align: center;
+    }
+    
+    .copyright{
+        font-size: 1.2rem;
+        color:dimgray;
+    }
+      
+    .icon {
+       margin: 0 2rem 0 2rem;
     }
 
     @keyframes shadow {
