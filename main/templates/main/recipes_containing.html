@@ -10,7 +10,7 @@
 <h5 class="my-5"> *You can also look for recipes with particular title or keywords, for this purpose use search box above. </h5>
 {% endif %}
 
-{% if forloop.counter0 == 1 %}
+{% if counter != 0 and forloop.counter0 == 1 %}
 <div class="alert alert-danger text-center mt-5" role="alert">
     <h3><strong>Recipes below do not contain one of desired ingredients.</strong></h3>
 </div>
