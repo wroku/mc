@@ -32,7 +32,7 @@ class IngredientManager(models.Manager):
             if not result:
                 for word in query.split():
                     result = result.union(qs.filter(name__icontains=word.rstrip('s')))
-                qs = result.distinct()
+                qs = result
             else:
                 qs = result
         return qs
@@ -139,6 +139,7 @@ class Recipe(models.Model):
 def pre_save_recipe_receiver(sender, instance, *args, **kwargs):
     slug = slugify(instance.recipe_name)
     # Don't have to check if slug exists because recipe_name is unique
+    # Not true -> 
     instance.recipe_slug = slug
     qs = instance.quantities.all()
     cps, pps = 0, 0

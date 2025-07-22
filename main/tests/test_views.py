@@ -7,6 +7,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core import mail
 from django.contrib import auth
 
+from muconfi.settings.local import MEDIA_ROOT
+
 # python manage.py test main.tests.test_views
 # coverage run --source='.' manage.py test main
 
@@ -17,8 +19,6 @@ class HomepageTest(TestCase):
         response = self.client.get('')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'main/homepage.html')
-        # Temporarily accessing chartpage to check coverage
-        self.client.get(reverse('main:chart-page'))
 
 
 class BaseViewTest(TestCase):
@@ -338,7 +338,7 @@ class IngredientTest(BaseViewTest):
 
         change_url = reverse('main:add-ingredient')
         img = SimpleUploadedFile('example.jpg',
-                                 content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                 content=open(f'{MEDIA_ROOT}/tree.JPG', 'rb').read(),
                                  content_type='image/jpeg')
         data = {'name': 'new_ing',
                 'category': self.category,
@@ -396,7 +396,7 @@ class IngredientListTest(TestCase):
         cls.category = FoodCategory(name='Example Cat')
         cls.category.save()
         img = SimpleUploadedFile('example.jpg',
-                                 content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                 content=open(f'{MEDIA_ROOT}/tree.JPG', 'rb').read(),
                                  content_type='image/jpeg')
         defaults = {'name': 'Ing',
                     'category': cls.category,
@@ -554,7 +554,7 @@ class BaseRecipeTest(TestCase):
         cls.category = FoodCategory(name='Example Cat')
         cls.category.save()
         cls.img = SimpleUploadedFile('example.jpg',
-                                     content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                     content=open(f'{MEDIA_ROOT}/tree.JPG', 'rb').read(),
                                      content_type='image/jpeg')
         defaults = {'name': 'Ing',
                     'category': cls.category,
@@ -572,7 +572,7 @@ class BaseRecipeTest(TestCase):
             ingredient.save()
 
         cls.imgr = SimpleUploadedFile('example.jpg',
-                                      content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                      content=open(f'{MEDIA_ROOT}/tree.JPG', 'rb').read(),
                                       content_type='image/jpeg')
 
         cls.default_data = {'recipe_name': 'Example Recipe',
@@ -593,7 +593,7 @@ class BaseRecipeTest(TestCase):
         """
 
         img = SimpleUploadedFile('example.jpg',
-                                 content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                 content=open(f'{MEDIA_ROOT}/tree.JPG', 'rb').read(),
                                  content_type='image/jpeg')
         self.default_data['recipe_image'] = img
 
@@ -955,5 +955,3 @@ class SearchByIngredient(BaseRecipeTest):
 
         self.assertEqual(response.context['recipes'][0][0][1][0], Recipe.objects.get(recipe_name='Third Recipe'))
         self.assertEqual(response.context['recipes'][0][0][1][1][0], Ingredient.objects.get(name='Ing3'))
-
-

@@ -41,5 +41,3 @@ urlpatterns = [
     path('chartpage/', views.ChartView.as_view(), name='chart-page'),
     path('access_denied/', views.access_denied, name='access_denied'),
 ]
-
-

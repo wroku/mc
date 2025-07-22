@@ -1,3 +1,4 @@
+from urllib.request import Request
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from .models import Ingredient, Recipe, Quantity, Comment, Message
@@ -393,8 +394,12 @@ def edit_recipe(request, slug):
     return render(request, 'main/addrecipe.html', context)
 
 
-def update_session(request):
-    if not request.is_ajax() or not request.method == 'POST':
+def is_ajax(request: Request) -> bool:
+     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+
+def update_session(request: Request):
+    if not is_ajax(request) or not request.method == 'POST':
         return HttpResponseNotAllowed(['POST'])
     # TODO Maybe if editing in request.session...
     if request.method == 'POST':
@@ -409,7 +414,7 @@ def update_session(request):
 
 
 def update_options(request):
-    if not request.is_ajax() or not request.method == 'GET':
+    if not is_ajax(request) or not request.method == 'GET':
         return HttpResponseNotAllowed(['GET'])
     if request.method == 'GET':
         ings = Ingredient.objects.exclude(name__in=request.session['collect_ing'])
@@ -472,7 +477,3 @@ def logout_request(request):
 class ChartView(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'main/chart.html', {})
-
-
-
-

@@ -3,7 +3,7 @@ from main.forms import IngredientForm, ContactForm, NewUserForm, RecipeForm, Rec
 from main.models import Ingredient, FoodCategory, Recipe, Quantity, Comment
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-
+from muconfi.settings.local import MEDIA_ROOT
 
 class IngredientFormTest(TestCase):
 
@@ -86,7 +86,7 @@ class RecipeAddFormTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.img = SimpleUploadedFile('example.jpg',
-                                     content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                     content=open(f'{MEDIA_ROOT}/tree.JPG', 'rb').read(),
                                      content_type='image/jpeg')
 
         cls.default_data = {'recipe_name': 'Example Recipe',
@@ -102,7 +102,7 @@ class RecipeAddFormTest(TestCase):
 
     def setUp(self):
         img = SimpleUploadedFile('example.jpg',
-                                 content=open('/home/wroku/Dev/muconfi/mc/media_cdn/tree.JPG', 'rb').read(),
+                                 content=open(f'{MEDIA_ROOT}/tree.JPG', 'rb').read(),
                                  content_type='image/jpeg')
         self.files = {'recipe_image': img}
 
