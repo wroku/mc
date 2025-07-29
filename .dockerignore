@@ -1,0 +1,13 @@
+db.sqlite3
+static/
+#media_cdn/
+geckodriver.log
+__pycache__/
+*.pyc
+.idea/
+.coverage
+# current venv
+mc
+# Local dev needs this
+# gcpCredentials.json
+#.env

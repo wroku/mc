@@ -45,9 +45,8 @@ LOGGING = {
         },
     },
 }
-
-ALLOWED_HOSTS = ["*"]
 """
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
 
 LOGIN_URL = "/login"
 # Application definition
