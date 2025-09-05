@@ -29,7 +29,8 @@ DEBUG = True
 
 DEBUG_PROPAGATE_EXCEPTIONS = False
 
-'''LOGGING = {
+"""
+LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
@@ -43,9 +44,9 @@ DEBUG_PROPAGATE_EXCEPTIONS = False
              'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
     },
-}'''
-
-ALLOWED_HOSTS = ["*"]
+}
+"""
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
 
 LOGIN_URL = "/login"
 # Application definition
@@ -91,9 +92,14 @@ INSTALLED_APPS = [
     'tinymce',
     'widget_tweaks',
     'crispy_forms',
+    'crispy_bootstrap4',
     'main.templatetags',
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -191,7 +197,7 @@ STATICFILES_DIRS = (
 )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media_cdn')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media_cdn')
 
 # SMTP Configuration
 
